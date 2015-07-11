@@ -1,74 +1,43 @@
 #!/usr/local/bin/python3
+# -*- coding: utf-8 -*-
 
-import errors
+import re
 import json
 import argparse
 import requests
 
+import errors
+from errors import Error, HTTPError, APIError
+
 def handle(args):
 
-	bitly = Bitly()
+	if "stats" in args:
+		stats = Stats()
+		return stats.parse(args)
 
-	return bitly.parse(args)
-
-class Bitly:
-
-	def __init__(self):
-
-		config = { }
+	elif "info" in args:
+		info = Info()
+		return info.parse(args)
+	else:
+		link = Link()
+		return link.parse(args)
+ 
+class Command:
+	def __init__(self, name):
 
 		with open("config.json") as file:
-			config = json.loads(file.read())["services"]["bitly"]
+			config = json.loads(file.read())["bitly"]
+
+
 
 		self.api = config["api"] + "v{}".format(config["version"])
 
 		self.key = config["key"]
 
-		self.commands = config["commands"]
+		self.config = config["commands"][name]
 
-
-		self.parser = argparse.ArgumentParser()
-
-		subparsers = self.parser.add_subparsers()
-
-
-		link = subparsers.add_parser("link")
-
-		link.set_defaults(handle=self.link)
-
-		link.add_argument("-e",
-						  "--expand",
-						  action="store_true")
-
-		link.add_argument("url")
-
-
-		stats = subparsers.add_parser("stats")
-
-		#stats.set_defaults(handle=self.stats)
-
-		stats.add_argument("-o",
-						   "--only",
-						   choices=config["commands"]["stats"]["sets"])
-
-		stats.add_argument("-u",
-						   "--unit",
-						   choices=config["commands"]["stats"]["units"])
-
-		stats.add_argument("-r",
-						   "--restrict",
-						   type=int)
-
-		stats.add_argument("url")
-
-	def parse(self, args):
-
-		if args[0] not in self.commands:
-			args.insert(0, "link")
-
-		command = self.parser.parse_args(args)
-
-		return command.handle(command)
+	def parse(self):
+		pass
 
 	def request(self, endpoint, parameters):
 
@@ -77,17 +46,42 @@ class Bitly:
 		response = requests.get("{}/{}".format(self.api, endpoint),
 							    params=parameters)
 
-		# Decode the UTF-8 bytearray
 		return response.json()
 
-	def check(self, response, what=""):
+	def check(self, response, what, sub=None):
 
 		if not str(response["status_code"]).startswith('2'):
-			raise errors.APIError("Sorry, could not {}".format(what),
-								  response["status_code"],
-								  response["status_txt"])
+			raise HTTPError("Sorry, could not {}.".format(what),
+						    response["status_code"],
+				            response["status_txt"])
 
-	def link(self, args):
+		data = response["data"]
+
+		if sub:
+			data = data[sub][0]
+
+		if "error" in data:
+			raise APIError("Sorry, could not {}.".format(what),
+			                data["error"])
+
+class Link(Command):
+	def __init__(self):
+
+		super().__init__("link")
+
+		self.parser = argparse.ArgumentParser()
+
+		self.parser.add_argument("-e",
+						  "--expand",
+						  action="store_true")
+
+		self.parser.add_argument("url")
+
+		self.http = re.compile(r"http(s?)://")
+
+	def parse(self, args):
+
+		args = self.parser.parse_args(args)
 
 		if args.expand:
 			return self.expand(args.url)
@@ -97,8 +91,14 @@ class Bitly:
 
 	def shorten(self, url):
 
-		response = self.request(self.commands["link"]["endpoints"]["shorten"],
-					     		{"longUrl": url})
+		if not self.http.match(url):
+			errors.warn("Prepending http://")
+			url = "http://" + url
+
+		response = self.request(self.config["endpoints"]["shorten"],
+					     		{
+					     			"longUrl": url
+					     		})
 
 		self.check(response, "shorten url")
 
@@ -106,9 +106,82 @@ class Bitly:
 
 	def expand(self, url):
 
-		response = self.request(self.commands["link"]["endpoints"]["expand"],
-							    {"shortUrl": url})
+		response = self.request(self.config["endpoints"]["expand"],
+							    {
+							    	"shortUrl": url
+							    })
 
-		self.check(response, "expand url")
+		self.check(response, "expand url", "expand")
 
-		return response['data']['url']
+		return response['data']['expand'][0]['long_url']
+
+"""
+
+		config = self.commands["stats"]
+
+		stats = subparsers.add_parser("stats")
+
+		stats.set_defaults(handle=self.stats)
+
+		stats.add_argument("-o",
+						   "--only",
+						   choices=config["sets"])
+
+		stats.add_argument("-u",
+						   "--unit",
+						   choices=config["unit"],
+						   default=config["defaults"]["unit"])
+
+		stats.add_argument("-t",
+						   "--time",
+						   type=int)
+
+		stats.add_argument("-l",
+						   "--limit",
+						   type=int,
+						   default=config["defaults"]["limit"])
+
+		stats.add_argument("url")
+
+	def stats(self, args):
+
+		parameters = {
+						"link": args.url,
+						"limit": args.limit
+					 }
+
+		endpoints = self.commands["stats"]["endpoints"]
+
+		# Restrict the data retrieved
+		if args.only:
+			endpoints = [endpoints[args.only]]
+
+		if args.unit != "infinity":
+			parameters["unit"] = args.unit
+
+			if args.time:
+				parameters["unit"] = args.time
+
+		# short stats -o clicks -u all -u month 4 
+
+		#response = line = chr(0x2500) * 10 + "\n"
+
+		stats = [ ]
+
+		for name, endpoint in endpoints.items():
+
+			response = self.request(endpoint, parameters)
+
+			self.check(resposnse, "retreive " + name)
+
+			lines = [ ]
+
+			if name == "clicks":
+				lines.append((name, response['data']['link_clicksclicks']))
+
+
+
+		return response
+
+
+"""

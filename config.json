@@ -1,56 +1,58 @@
 {
     "default": "bitly",
-    "services": {
-        "bitly": {
-            "api": "https://api-ssl.bitly.com/",
-            "version": 3,
-            "key": "5513e7f7be612347354bfbbcb9fc584f27da9243",
-            "commands": {
-                "link": {
-                    "endpoints": {
-                        "shorten": "shorten",
-                        "expand": "expand",
-                        "info": "info"
-                    }
+    "bitly": {
+        "api": "https://api-ssl.bitly.com/",
+        "version": 3,
+        "key": "5513e7f7be612347354bfbbcb9fc584f27da9243",
+        "commands": {
+            "link": {
+                "endpoints": {
+                    "shorten": "shorten",
+                    "expand": "expand",
+                    "info": "info"
+                }
+            },
+            "stats": {
+                "sets": [
+                    "clicks",
+                    "countries",
+                    "referrers"
+                ],
+                "unit": [
+                    "minute",
+                    "hour",
+                    "day",
+                    "week",
+                    "month",
+                    "infinity"
+                ],
+                "endpoints": {
+                    "clicks": "link/clicks",
+                    "countries": "link/countries",
+                    "referrers": "link/referrers"
                 },
-                "stats": {
-                    "sets": [
-                        "clicks",
-                        "countries",
-                        "referrers"
-                    ],
-                    "units": [
-                        "minute",
-                        "hour",
-                        "day",
-                        "week",
-                        "month"
-                    ],
-                    "endpoints": {
-                        "clicks": "link/clicks",
-                        "countries": "link/countries",
-                        "referrers": "link/referrers"
-                    }
-                },
-                "info": {
-                    "endpoints": {
-                        "info": "info"
-                    }
+                "defaults": {
+                    "unit": "infinity",
+                    "limit": 100
+                }
+            },
+            "info": {
+                "endpoints": {
+                    "info": "info"
                 }
             }
-        },
-
-        "goo.gl": {
-            "commands": [
-                "shorten",
-                "expand",
-                "stats"
-            ]
-        },
-        "tinyurl": {
-            "commands": [
-                "shorten"
-            ]
         }
+    },
+    "goo.gl": {
+        "commands": [
+            "shorten",
+            "expand",
+            "stats"
+        ]
+    },
+    "tinyurl": {
+        "commands": [
+            "shorten"
+        ]
     }
 }
