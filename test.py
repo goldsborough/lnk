@@ -8,67 +8,6 @@ import sys
 
 def main():
 
-	commands = [{
-					"short": "v",
-					"long": "verbose",
-					"action": "?" # Found?
-				},
-				{
-					"short": "u",
-					"long": "use",
-					"action": "+"    # Require argument
-				}]
-
-	if not args:
-			# Display usage
-			print("short url")
-			pass
-
-	n = 0
-
-	while n < len(args):
-		i = args[n]
-		if i.startswith("-"):
-			if i.startswith("--"):
-				for command in commands:
-					if i[2:] == command["long"]:
-						if command["action"] == "?":
-							command["found"] = True
-						elif command["action"] == "+":
-							if n == len(args) - 1:
-								raise RuntimeError("Missing argument for '-" +
-								                    command["short"] +
-								                     "' option.")
-							else:
-								command["argument"] = args[n + 1]
-								del args[n + 1]
-						args.remove(i)
-						n -= 1
-						break
-			else:
-				for command in commands:
-					if command["short"] in i[1:]:
-						if command["action"] == "?":
-							command["found"] = True
-						elif command["action"] == "+":
-							if i[::-1].find(command["short"]) or n == len(args) - 1:
-								raise RuntimeError("Missing argument for '-" +
-								                    command["short"] +
-								                     "' option.")
-							else:
-								command["argument"] = args[n + 1]
-								del args[n + 1]
-						if len(i) == 2:
-							del args[n]
-							n -= 1
-						else:
-							args[n] = i = i.replace(command["short"], "")
-		n += 1
-
-	print(args)
-	print(commands)
-
-	"""
 	config = { }
 
 	with open("config.json") as file:
@@ -85,7 +24,31 @@ def main():
 		                       config["commands"]["stats"]["endpoints"][e],
 		                       params=p).json()["data"]
 
-	
+	config = config["commands"]["stats"]
+
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument("-o",
+				   		"--only",
+				   		action="append",
+				   		choices=config["sets"])
+
+	parser.add_argument("-a",
+					    "--all",
+					    action="store_true")
+
+	parser.add_argument("-t",
+					    "--time",
+					    action="append",
+					    nargs=2)
+
+	parser.add_argument("url")
+
+	args = parser.parse_args("-o clicks -t 4 week bitly.com".split())
+
+	print(args)
+
+	"""
 	responses = [ ]
 
 	for unit in config["commands"]["stats"]["unit"]:
@@ -95,7 +58,8 @@ def main():
 						 r("clicks", parameters)["link_clicks"]))
 
 	length = len(max(responses, key=len)) + 1
-
+	"""
+	"""
 	s = "┌" + "─" * (length - 3) + "┐\n"
 
 	s += "│  " + "CLICKS" + "   │\n"

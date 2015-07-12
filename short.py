@@ -4,6 +4,7 @@ import sys
 import json
 
 import bitly
+
 from errors import Error
 
 class Short:
@@ -90,9 +91,5 @@ class Short:
 
 
 if __name__ == "__main__":
-
-	# short config [service, else general] ...
-	# short -e http://google.com
-	# short -vu bitly -e http://github.com
 
 	Short(sys.argv[1:])

@@ -18,25 +18,25 @@
                     "countries",
                     "referrers"
                 ],
-                "unit": [
-                    "minute",
-                    "hour",
-                    "day",
-                    "week",
-                    "month",
-                    "infinity"
+                "units": [
+                    "minutes",
+                    "hours",
+                    "days",
+                    "weeks",
+                    "months"
                 ],
                 "endpoints": {
                     "clicks": "link/clicks",
                     "countries": "link/countries",
                     "referrers": "link/referrers"
-                },
-                "defaults": {
-                    "unit": "infinity",
-                    "limit": 100
                 }
             },
             "info": {
+            	"sets": {
+            		"who": "created_by",
+            		"when": "created_at",
+            		"title": "title"
+            	},
                 "endpoints": {
                     "info": "info"
                 }

@@ -23,6 +23,11 @@ class APIError(Error):
 
 		super().__init__(what, Message=message)
 
+class ParseError(Error):
+	def __init__(self, what):
+
+		super().__init__(what)
+
 def warn(what):
 
 		print("\a\033[93mWarning\033[0m: {}".format(what))
