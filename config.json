@@ -29,12 +29,15 @@
                     "clicks": "link/clicks",
                     "countries": "link/countries",
                     "referrers": "link/referrers"
+                },
+                "defaults": {
+                	"limit": 10
                 }
             },
             "info": {
             	"sets": {
-            		"who": "created_by",
-            		"when": "created_at",
+            		"user": "created_by",
+            		"created": "created_at",
             		"title": "title"
             	},
                 "endpoints": {

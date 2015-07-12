@@ -1,35 +1,44 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-import requests
-import argparse
-import json
-import sys
+import os
+
+def beautify(boxes):
+
+	return Beautifier().beautify(boxes)
+
+class Box:
+	def __init__(self, parent=None, children=[]):
+
+		self.parent = parent
+
+		self.children = children
 
 class Beautifier:
 	def __init__(self):
 
-		pass
+		self.vertical = chr(0x2502)
+		self.horizontal = chr(0x2500)
+
+		self.leftBottom = chr(0x2514)
+		self.rightBottom = chr(0x2518)
+
+		self.leftTop = chr(0x250c)
+		self.rightTop = chr(0x2510)
+
+		self.leftMiddle = chr(0x251c)
+		self.rightMiddle =  chr(0x2524)
 
 	def beautify(self, boxes):
 
-		print(boxes)
+		if type(boxes) != list:
+			boxes = [boxes]
 
-		widths = self.getWidths(boxes)
+		self.widths = self.getWidths(boxes)
 
-		units = self.unify(boxes, widths)
+		lines = self.unify(boxes)
 
-		self.vertical = chr(0x2502),
-		self.horizontal = chr(0x2500),
-
-		self.leftBottom = chr(0x2514),
-		self.rightBottom = chr(0x2518),
-
-		self.leftTop = chr(0x250c),
-		self.rightTop = chr(0x2510),
-
-		self.leftMiddle = chr(0x251c),
-		self.rightMiddle =  chr(0x2524)
+		return (self.vertical + "\n").join(lines)
 
 	def getWidths(self, boxes, depth = 1):
 
@@ -91,14 +100,21 @@ class Beautifier:
 
 		for n, box in enumerate(boxes):
 
-			last = False
+			# "not n" makes 0 (first position) evaluate to True
+			first = not n and not depth
+
+			last = n + 1 == len(boxes) and "sub" not in box
+
+			lines.extend(self.boxify(box, self.widths[depth], last, first))
 
 			if "sub" in box:
 				subs = []
 				# Gather lines from all sub units
 				# and unify them into a single unit
 				for pos, sub in enumerate(box["sub"]):
-					subUnits = self.beautify(sub, depth + 1)
+
+					subUnits = self.unify(sub, depth + 1)
+
 					for line, unit in enumerate(subUnits):
 						# If this is the first line found at this
 						# position rjust it by the width of boxes
@@ -108,24 +124,11 @@ class Beautifier:
 							subs.append(unit.rjust(pos * self.widths[depth]))
 						else:
 							subs[line] += unit
+
+				# Add right border now
 				lines.extend(subs)
 
-			elif n + 1 == len(boxes):
-				last = True
-
-			# not n makes 0 (first position) evaluate to True
-			box = self.boxify(box, self.widths[depth], last, not n)
-
-			lines.extend()
-
 		return lines
-
-	def concatenate(self, units):
-
-		# Add units together
-		# Add bottom border
-		# Add right border
-		# Fuck bitches
 
 	def boxify(self, box, width, last=False, first=False):
 
@@ -134,34 +137,39 @@ class Beautifier:
 		lines = [ ]
 
 		# + 2 for left and right space
-		middle = self.horizontal * width + 2
+		middle = self.horizontal * (width + 2)
 
 		if first:
-			beauty += "{}{}{}\n".format(self.leftTop,
-								      middle,
-								      self.rightTop)
+			lines.append("{}{}{}".format(self.leftTop,
+										 middle,
+										 self.rightTop))
 
 		if type(data) == str:
-			beauty += "{0} {1} {0}\n".format(self.vertical,
-										     self.center(data, width))
+			string = data.upper() if first else data.title()
+			lines.append("{} {} ".format(self.vertical, 
+								          self.center(string, width)))
+
+			if last:
+				lines.append(self.leftBottom + middle + self.rightBottom)
 
 		else: # dict
 			keyWidth = len(max(data, key=len))
 
 			for key, value in data.items():
 
-				item = "{} {}".format((key + ":").ljust(keyWidth), value)
-				
-				beauty += "{0} {1} {0}".format(self.vertical,
-											   self.center(item, width))
+				string = (key + ":").ljust(keyWidth + 2).title() + str(value)
 
-		left = self.leftBottom if last else self.leftMiddle
 
-		right = self.rightBottom if laset else self.rightMiddle
+				lines.append("{} {} ".format(self.vertical,
+											 string.ljust(width)))
 
-		beauty += "{}{}{}".format(left, middle, right)
+			left = self.leftBottom if last else self.leftMiddle
 
-		return beauty
+			right = self.rightBottom if last else self.rightMiddle
+
+			lines.append("{}{}{}".format(left, middle, right))
+
+		return lines
 
 	def center(self, string, width):
 		length = len(string)
@@ -169,13 +177,3 @@ class Beautifier:
 		left = length + (width - length)//2
 
 		return string.rjust(left).ljust(width)
-
-
-def main():
-
-	print(Beautifer().beautify)
-
-if __name__ == "__main__":
-
-	main()
-

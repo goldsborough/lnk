@@ -9,7 +9,10 @@ import math
 import argparse
 import requests
 
+from pycountry import countries
+
 import errors
+import beautifier
 
 def handle(args):
 
@@ -148,16 +151,27 @@ class Stats(Command):
 							     nargs=2,
 							     metavar=("integer", "{{{}}}".format(units)))
 
+		self.parser.add_argument("-l",
+								 "--limit",
+								 type=int,
+								 default=self.config["defaults"]["limit"])
+
+		self.parser.add_argument("-i",
+								 "--info",
+								 action="store_true")
+
 		# {{}} to escape curly braces, {{{}}}
 		# to format something in curly braces 
 
 		self.parser.add_argument("urls", nargs='+')
 
-		self.parameters = { "timezone": int(time.timezone / 3600) }
+		self.parameters["timezone"] = int(time.timezone / 3600)
 
 	def parse(self, args):
 
 		args = self.parser.parse_args(args)
+
+		self.parameters["limit"] = args.limit
 
 		endpoints = args.only if args.only else self.config["sets"]
 
@@ -198,15 +212,28 @@ class Stats(Command):
 
 		stats = [ ]
 
-		print(args.urls)
+		self.info = [ ]
+
+		if args.info:
+			info = Info()
 
 		for url in args.urls:
 
-			single = self.retrieve(url, time, endpoints)
+			single = {  
+				"url" : url,
+				"info" : None
+			}
 
-			stats.append(self.beautify(single))
+			if args.info:
+				single["info"] = info.parse([url], False)[0]
 
-		return stats
+			single["data"] = self.retrieve(url, time, endpoints)
+
+			stats.append(single)
+
+		stats = self.preprocess(stats)
+
+		return beautifier.beautify(stats)
 
 	def retrieve(self, url, time, endpoints):
 
@@ -214,42 +241,106 @@ class Stats(Command):
 
 		self.parameters["link"] = url
 
-		for span, unit in time:
+		for endpoint in endpoints:
 
 			result = {
-						"unit": unit,
-						"span": span,
-						"data": { }
-					}
+				"type": endpoint,
+				"times": [ ]
+			}
 
-			# Get rid of the extra s in e.g. "weeks"
-			self.parameters["unit"] = unit[:-1]
+			for span, unit in time:
 
-			self.parameters["units"] = span
+				timepoint = {
+					"span" :  span,
+					"unit": unit
+				}
 
-			for endpoint in endpoints:
+				# Get rid of the extra s in e.g. "weeks"
+				self.parameters["unit"] = unit[:-1]
+
+				self.parameters["units"] = span
 
 				response = self.request(self.config["endpoints"][endpoint])
 
-				self.check(response,
-						   "retrieve {} for {}".format(endpoint, url))
+				self.check(response, "retrieve {} for {}".format(endpoint, url))
 
-				e = endpoint
+				# clicks is the only one where the data
+				# retrieved has a different name than its endpoint
+				e = endpoint if endpoint != "clicks" else "link_clicks"
 
-				# Does not change the value in 'endpoints'
-				if endpoint == "clicks":
-					endpoint = "link_clicks"
+				timepoint["data"] = response["data"][e]
 
-				result["data"][e] = response["data"][endpoint]
+				result["times"].append(timepoint)
 
 			stats.append(result)
 
 		return stats
 
-	def beautify(self, stats):
+	def preprocess(self, stats):
 
-		# Link,
-		pass
+		statistics = {
+			"data": "statistics",
+			"sub": []
+		}
+
+		maxWidth = lambda d: len(max(d,key=len) + 
+						    	 max(map(str,d.values()),key=len))
+
+		for url in stats:
+
+			box = {"data" : { "url" : url["url"] }}
+
+			if url["info"]:
+				box["data"].update(url["info"])
+
+			urlbox = [box]
+
+			for data in url["data"]:
+
+				box = { "data": data["type"] }
+
+				if data["type"] != "clicks":
+					urlbox.append(box)
+					box["sub"] = [ ]
+
+				else:
+					urlbox.append(box.copy())
+					box = { "data" : { } }
+					urlbox.append(box)
+
+				for timepoint in data["times"]:
+
+					if timepoint["span"] == -1:
+						time = "Total"
+					else:
+						time = "Last {} {}".format(timepoint["span"],
+											   	   timepoint["unit"])
+
+					if data["type"] == "clicks":
+						box["data"][time] = timepoint["data"]
+					else:
+
+						sub = [ ] if time == "Total" else [{"data": time}]
+
+						if not timepoint["data"]:
+							sub.append({"data": "None"})
+
+						# For each item, e.g. country + clicks
+						for item in timepoint["data"]:
+
+							if data["type"] == "countries":
+								# Convert short ISO name (e.g. US)
+								# to full name (e.g. United States)
+								country = countries.get(alpha2=item["country"])
+								item["country"] = country.name
+
+							sub.append({"data" : item})
+
+						box["sub"].append(sub)
+
+			statistics["sub"].append(urlbox)
+
+		return statistics
 
 class Info(Command):
 	def __init__(self):
@@ -271,7 +362,7 @@ class Info(Command):
 
 		self.parser.add_argument("urls", nargs="+")
 
-	def parse(self, args):
+	def parse(self, args, beauty=True):
 
 		args = self.parser.parse_args(args)
 
@@ -295,10 +386,10 @@ class Info(Command):
 			for i, j in result.items():
 				for k, l in self.config["sets"].items():
 					if i == l:
-						if k == "when":
+						if k == "created":
 							# UNIX timestamp to string
 							j = time.ctime(j)
-						elif k == "who" and not j:
+						elif k == "user" and not j:
 							j = "Not public"
 						mapped[k] = j  
 
@@ -306,7 +397,7 @@ class Info(Command):
 
 			info.append(mapped)
 
-		return self.beautify(info)
+		return info if not beauty else self.beautify(info)
 
 	def retrieve(self, url, sets):
 
@@ -355,7 +446,7 @@ class Info(Command):
 			boxes.append(lines)
 
 		# See when we need to wrap the boxes
-		wrap = int(os.get_terminal_size().columns / (width + 1))
+		wrap = int(os.get_terminal_size().columns / width)
 
 		beauty = ""
 
@@ -365,7 +456,7 @@ class Info(Command):
 
 			for line in range(len(row[0])):
 				for box in row:
-					beauty += box[line] + " "
+					beauty += box[line]
 				beauty += "\n"
 
 		return beauty.rstrip()
