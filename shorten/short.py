@@ -14,8 +14,8 @@ class Short:
 			# Display usage
 			print("short [-e] url")
 
-		with open("config.json") as file:
-			self.config = json.loads(file.read())
+		with open("../config/config.json") as config:
+			self.config = json.loads(config.read())
 
 		(verbose, service), args = self.parse(args)
 

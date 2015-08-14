@@ -25,17 +25,17 @@ def handle(args):
 	else:
 		return Link().parse(args)
  
-class Command:
+class Command(object):
 	def __init__(self, command):
 
-		with open("config.json") as file:
+		with open("../config/config.json") as file:
 			config = json.loads(file.read())["bitly"]
 
 		self.api = config["api"] + "v{}".format(config["version"])
 
 		self.config = config["commands"][command]
 
-		self.parameters = { "access_token": config["key"] }
+		self.parameters = {"access_token": config["key"]}
 
 	def parse(self):
 		pass
@@ -50,14 +50,11 @@ class Command:
 	def check(self, response, what, sub=None):
 
 		if not str(response["status_code"]).startswith('2'):
-			raise errors.HTTPError("Could not {}".format(what),
+			raise errors.HTTPError("Could not {}.".format(what),
 						    response["status_code"],
 				            response["status_txt"])
 
-		data = response["data"]
-
-		if sub:
-			data = data[sub][0]
+		data = response["data"][sub][0] if sub else response["data"]
 
 		if "error" in data:
 			raise errors.APIError("Could not {}.".format(what),
@@ -66,7 +63,7 @@ class Command:
 class Link(Command):
 	def __init__(self):
 
-		super().__init__("link")
+		super(Link, self).__init__("link")
 
 		self.parser = argparse.ArgumentParser()
 
@@ -94,7 +91,7 @@ class Link(Command):
 		for url in args.shorten:
 
 			if not self.http.match(url):
-				errors.warn("Prepending http:// to " + url)
+				errors.warn("Prepending 'http://' to " + url)
 				url = "http://" + url
 
 			result += "{} -> {}\n".format(url, self.shorten(url))			
@@ -255,7 +252,7 @@ class Stats(Command):
 					"unit": unit
 				}
 
-				# Get rid of the extra s in e.g. "weeks"
+				l# Get rid of the extra s in e.g. "weeks"
 				self.parameters["unit"] = unit[:-1]
 
 				self.parameters["units"] = span
