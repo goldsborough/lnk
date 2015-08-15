@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
-import os
-import re
-import json
-import time
-import math
 import argparse
+import json
+import pycountry
+import re
 import requests
-
-from pycountry import countries
+import time
 
 import errors
-import beautifier
 
 def handle(args):
 
@@ -238,7 +234,7 @@ class Stats(Command):
 
 	def retrieve(self, url, time, endpoints):
 
-		stats = [ ]
+		stats = []
 
 		self.parameters["link"] = url
 
@@ -246,7 +242,7 @@ class Stats(Command):
 
 			result = {
 				"type": endpoint,
-				"times": [ ]
+				"times": []
 			}
 
 			for span, unit in time:
@@ -297,7 +293,7 @@ class Info(Command):
 
 		self.parser.add_argument("urls", nargs="+")
 
-	def parse(self, args, beauty=False):
+	def parse(self, args):
 
 		args = self.parser.parse_args(args)
 
@@ -309,13 +305,13 @@ class Info(Command):
 
 		sets = [self.config["sets"][key] for key in sets]
 
-		info = [ ]
+		info = []
 
 		for url in args.urls:
 
 			result = self.retrieve(url, sets)
 
-			mapped = { }
+			mapped = {}
 
 			# Reverse map
 			for i, j in result.items():

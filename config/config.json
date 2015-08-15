@@ -1,61 +1,9 @@
 {
+    "services": [
+        "bitly",
+        "goo.gl",
+        "tinyurl"
+    ],
     "default": "bitly",
-    "bitly": {
-        "api": "https://api-ssl.bitly.com/",
-        "version": 3,
-        "key": "5513e7f7be612347354bfbbcb9fc584f27da9243",
-        "commands": {
-            "link": {
-                "endpoints": {
-                    "shorten": "shorten",
-                    "expand": "expand",
-                    "info": "info"
-                }
-            },
-            "stats": {
-                "sets": [
-                    "clicks",
-                    "countries",
-                    "referrers"
-                ],
-                "units": [
-                    "minutes",
-                    "hours",
-                    "days",
-                    "weeks",
-                    "months"
-                ],
-                "endpoints": {
-                    "clicks": "link/clicks",
-                    "countries": "link/countries",
-                    "referrers": "link/referrers"
-                },
-                "defaults": {
-                	"limit": 10
-                }
-            },
-            "info": {
-            	"sets": {
-            		"user": "created_by",
-            		"created": "created_at",
-            		"title": "title"
-            	},
-                "endpoints": {
-                    "info": "info"
-                }
-            }
-        }
-    },
-    "goo.gl": {
-        "commands": [
-            "shorten",
-            "expand",
-            "stats"
-        ]
-    },
-    "tinyurl": {
-        "commands": [
-            "shorten"
-        ]
-    }
+    "verbosity": 0
 }
