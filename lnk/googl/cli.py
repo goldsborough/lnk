@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
-import cli
+import click
 
-cli.main()
+@click.group()
+def googl():
+	pass

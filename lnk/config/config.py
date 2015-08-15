@@ -5,4 +5,4 @@ import os
 import json
 
 def get(config):
-	return json.loads(open("config/{0}.json".format(config)).read())
+	return json.loads(open("lnk/{0}/{0}.json".format(config)).read())
