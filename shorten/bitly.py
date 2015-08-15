@@ -1,5 +1,5 @@
-#!/usr/local/bin/python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#! -*- coding: utf-8 -*-
 
 import os
 import re
@@ -121,7 +121,7 @@ class Link(Command):
 class Stats(Command):
 	def __init__(self):
 
-		super().__init__("stats")
+		super(Stats, self).__init__("stats")
 
 		self.parser = argparse.ArgumentParser(prog="short stats",
 										      conflict_handler="resolve")
@@ -162,7 +162,7 @@ class Stats(Command):
 
 		self.parser.add_argument("urls", nargs='+')
 
-		self.parameters["timezone"] = int(time.timezone / 3600)
+		self.parameters["timezone"] = time.timezone // 3600
 
 	def parse(self, args):
 
@@ -209,7 +209,7 @@ class Stats(Command):
 
 		stats = [ ]
 
-		self.info = [ ]
+		self.info = []
 
 		if args.info:
 			info = Info()
@@ -228,9 +228,13 @@ class Stats(Command):
 
 			stats.append(single)
 
-		stats = self.preprocess(stats)
+		"""
+		# Convert short ISO name (e.g. US)
+		# to full name (e.g. United States)
+		country = countries.get(alpha2=item["country"])
+		"""
 
-		return beautifier.beautify(stats)
+		return stats
 
 	def retrieve(self, url, time, endpoints):
 
@@ -252,7 +256,7 @@ class Stats(Command):
 					"unit": unit
 				}
 
-				l# Get rid of the extra s in e.g. "weeks"
+				# Get rid of the extra s in e.g. "weeks"
 				self.parameters["unit"] = unit[:-1]
 
 				self.parameters["units"] = span
@@ -273,76 +277,10 @@ class Stats(Command):
 
 		return stats
 
-	def preprocess(self, stats):
-
-		statistics = {
-			"data": "statistics",
-			"sub": []
-		}
-
-		maxWidth = lambda d: len(max(d,key=len) + 
-						    	 max(map(str,d.values()),key=len))
-
-		for url in stats:
-
-			box = {"data" : { "url" : url["url"] }}
-
-			if url["info"]:
-				box["data"].update(url["info"])
-
-			urlbox = [box]
-
-			for data in url["data"]:
-
-				box = { "data": data["type"] }
-
-				if data["type"] != "clicks":
-					urlbox.append(box)
-					box["sub"] = [ ]
-
-				else:
-					urlbox.append(box.copy())
-					box = { "data" : { } }
-					urlbox.append(box)
-
-				for timepoint in data["times"]:
-
-					if timepoint["span"] == -1:
-						time = "Total"
-					else:
-						time = "Last {} {}".format(timepoint["span"],
-											   	   timepoint["unit"])
-
-					if data["type"] == "clicks":
-						box["data"][time] = timepoint["data"]
-					else:
-
-						sub = [ ] if time == "Total" else [{"data": time}]
-
-						if not timepoint["data"]:
-							sub.append({"data": "None"})
-
-						# For each item, e.g. country + clicks
-						for item in timepoint["data"]:
-
-							if data["type"] == "countries":
-								# Convert short ISO name (e.g. US)
-								# to full name (e.g. United States)
-								country = countries.get(alpha2=item["country"])
-								item["country"] = country.name
-
-							sub.append({"data" : item})
-
-						box["sub"].append(sub)
-
-			statistics["sub"].append(urlbox)
-
-		return statistics
-
 class Info(Command):
 	def __init__(self):
 
-		super().__init__("info")
+		super(Info, self).__init__("info")
 
 		self.parser = argparse.ArgumentParser("short info",
 											  conflict_handler="resolve")
@@ -359,7 +297,7 @@ class Info(Command):
 
 		self.parser.add_argument("urls", nargs="+")
 
-	def parse(self, args, beauty=True):
+	def parse(self, args, beauty=False):
 
 		args = self.parser.parse_args(args)
 
@@ -394,7 +332,7 @@ class Info(Command):
 
 			info.append(mapped)
 
-		return info if not beauty else self.beautify(info)
+		return info
 
 	def retrieve(self, url, sets):
 
@@ -409,51 +347,3 @@ class Info(Command):
 		response = response["data"]["info"][0]
 
 		return {i : response[i] for i in response if i in sets}
-
-	def beautify(self, info):
-
-		boxes = [ ]
-
-		width = 0
-
-		for i in info:
-
-			keyWidth = len(max(i.keys(), key=len)) + 1
-
-			valueWidth = len(max(map(str, i.values()), key=len))
-
-			# The horizontal bar of only - (dash-like) characters 
-			horizontal = chr(0x2500) * (keyWidth + valueWidth + 3)
-
-			if len(horizontal) + 2 > width:
-				width = len(horizontal) + 2
-
-			lines = [chr(0x250C) + horizontal + chr(0x2510)]
-
-			for key, value in i.items():
-
-				key = (key + ":").ljust(keyWidth).title()
-
-				value = str(value).ljust(valueWidth)
-
-				lines.append("{0} {1} {2} {0}".format(chr(0x2502), key, value))
-
-			lines.append(chr(0x2514) + horizontal + chr(0x2518))
-
-			boxes.append(lines)
-
-		# See when we need to wrap the boxes
-		wrap = int(os.get_terminal_size().columns / width)
-
-		beauty = ""
-
-		for n in range(math.ceil(len(boxes) / wrap)):
-
-			row = boxes[n * wrap : (n + 1) * wrap]
-
-			for line in range(len(row[0])):
-				for box in row:
-					beauty += box[line]
-				beauty += "\n"
-
-		return beauty.rstrip()
