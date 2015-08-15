@@ -3,12 +3,13 @@
 
 import argparse
 import json
-import pycountry
 import re
 import requests
 import time
 
 import errors
+
+from pycountry import countries
 
 def handle(args):
 
