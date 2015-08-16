@@ -3,6 +3,26 @@
 
 import click
 
-@click.group()
-def googl():
-	pass
+from service import Service
+
+class Googl(Service):
+
+	@click.group()
+	def run():
+		pass
+
+	@run.command()
+	def link():
+		pass
+
+	@run.command()
+	def stats():
+		pass
+
+	@run.command()
+	def info():
+		pass
+
+	@run.command()
+	def user():
+		pass

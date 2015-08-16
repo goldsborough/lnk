@@ -4,28 +4,13 @@
 from command import Command
 
 class Info(Command):
-	def __init__(self):
+	def __init__(self, *args):
 
 		super(Info, self).__init__("info")
 
-		self.parser = argparse.ArgumentParser("short info",
-											  conflict_handler="resolve")
-
-		self.parser.add_argument("-o",
-					   			 "--only",
-					   		 	 action="append",
-					   			 choices=self.config["sets"])
-
-		self.parser.add_argument("-h",
-								 "--hide",
-	 							 action="append",
-	 							 choices=self.config["sets"])
-
-		self.parser.add_argument("urls", nargs="+")
+		self.parse(args)
 
 	def parse(self, args):
-
-		args = self.parser.parse_args(args)
 
 		sets = args.only if args.only else self.config["sets"].keys()
 

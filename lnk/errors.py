@@ -31,6 +31,23 @@ class ParseError(Error):
 	def __init__(self, what):
 		super(ParseError, self).__init__(what)
 
+class InternalError(Error):
+	"""
+	Raised when something went wrong internally, i.e.
+	within methods that are non-accessible via the
+	API but are used for internal features or processing.
+	Basically get mad at the project creator.
+	"""
+
+	def __init__(self, what):
+		"""
+		Initializes the Error super-class.
+
+		Arguments:
+			what (str): A descriptive string regarding the cause of the error.
+		"""
+		super(InternalError, self).__init__(what)
+
 def warn(what):
 	print(ecstasy.beautify("\a<Warning>: {}".format(what), 
 						   ecstasy.Color.Yellow))

@@ -1,9 +1,0 @@
-{
-    "services": [
-        "bitly",
-        "goo.gl",
-        "tinyurl"
-    ],
-    "default": "bitly",
-    "verbosity": 0
-}

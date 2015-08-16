@@ -2,33 +2,59 @@
 #! -*- coding: utf-8 -*-
 
 import click
-import os
-import sys
 
-import bitly.info
-#import link
-#import stats
+import config
 
-sys.path.insert(0, os.path.abspath('..'))
+from bitly.info import Info
+from bitly.link import Link
+from bitly.stats import Stats
+from bitly.user import User
+
+from service import Service
 
 #from pycountry import countries
 
-@click.group()
-def bitly():
-	print("Bitly")
+manager = config.Manager('bitly')
 
-@bitly.command()
-def link():
-	print("Link")
+info = manager['commands']['info']
+stats = manager['commands']['stats']
 
-@bitly.command()
-def info():
-	print("Info")
+class Bitly(Service):
 
-@bitly.command()
-def stats():
-	print("Stats")
+	@click.group()
+	@click.option('-v', '--verbose', count=True)
+	def run(verbose):
+		if verbose == 0:
+			with config.Manager('lnk') as lnk:
+				verbose = lnk['verbosity']
 
-@bitly.command()
-def user():
-	print("User")
+	@run.command()
+	@click.option('-e', '--expand', is_flag=True)
+	@click.argument('urls', nargs=-1)
+	def link():
+		print("Link")
+
+	@run.command()
+	@click.option('-o',
+				  '--only',
+				  nargs=1,
+				  multiple=True,
+				  type=(click.Choice(info['sets'])))
+	@click.option('-h',
+				  '--hide',
+				  nargs=1,
+				  multiple=True,
+				  type=(click.Choice(info['sets'])))
+	@click.argument('urls', nargs=-1)
+	def info(only, hide, urls):
+		Info(only, hide, urls)
+
+	@run.command()
+	@click.argument('urls', nargs=-1)
+	def stats(urls):
+		Stats(urls)
+
+	@run.command()
+	@click.argument('urls', nargs=-1)
+	def user():
+		print("User")
