@@ -4,9 +4,7 @@
 import os
 import json
 
-import lnk.errors
-
-from . import errors
+import errors
 
 class Manager(object):
 
@@ -40,7 +38,7 @@ class Manager(object):
 	def assert_open(self):
 		if not self.file:
 			what = "No configuration file was ever opened!"
-			raise lnk.errors.InternalError(what)
+			raise errors.InternalError(what)
 
 	@property
 	def keys(self):

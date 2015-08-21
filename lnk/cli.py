@@ -2,7 +2,6 @@
 #! -*- coding: utf-8 -*-
 
 import click
-import json
 import os
 
 import config
@@ -19,8 +18,8 @@ class Main(click.MultiCommand):
 		namespace = {}
 		directory = os.path.dirname(__file__)
 		filename = os.path.join(directory, name, 'cli.py')
-		with open(filename) as file:
-			code = compile(file.read(), filename, 'exec')
+		with open(filename) as source:
+			code = compile(source.read(), filename, 'exec')
 			eval(code, namespace, namespace)
 		return getattr(namespace[name.title()], 'run')
 

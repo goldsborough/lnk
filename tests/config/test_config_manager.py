@@ -6,10 +6,14 @@ import json
 import pytest
 import sys
 
-sys.path.insert(0, os.path.abspath('../..'))
+here = os.path.dirname(os.path.abspath(__file__))
+root = os.path.dirname(os.path.dirname(here))
 
-import lnk.config
-import lnk.errors
+sys.path.insert(0, root)
+sys.path.insert(0, os.path.join(root, 'lnk'))
+
+import config
+import errors
 
 from collections import namedtuple
 
@@ -18,15 +22,12 @@ def fixture(request):
 	
 	which = 'test'
 	filename = '{0}.json'.format(which)
-
-	this = os.path.dirname(os.path.abspath(__file__))
-	root = os.path.dirname(os.path.dirname(this))
 	path = os.path.join(root, 'config', filename)
 
-	with open(os.path.join(this, filename)) as dummy:
-		config = json.load(dummy)
+	with open(os.path.join(here, filename)) as dummy:
+		configuration = json.load(dummy)
 		with open(path, 'w') as test:
-			json.dump(config, test)
+			json.dump(configuration, test)
 
 	def finalize():
 		os.remove(path)
@@ -40,22 +41,20 @@ def fixture(request):
 		'config'
 		])
 
-	manager = lnk.config.manager.Manager()
+	manager = config.manager.Manager()
 
-	return Fixture(which, path, manager, config)
+	return Fixture(which, path, manager, configuration)
 
 @pytest.fixture(scope='module')
 def changed():
 
-	this = os.path.dirname(os.path.abspath(__file__))
-
-	with open(os.path.join(this, 'changed.json')) as dummy:
+	with open(os.path.join(here, 'changed.json')) as dummy:
 		contents = dummy.read()
-		config = json.loads(contents)
+		configuration = json.loads(contents)
 
 	Fixture = namedtuple('Fixture', ['contents', 'config'])
 
-	return Fixture(contents, config)
+	return Fixture(contents, configuration)
 
 
 def test_config_manager_opens_correctly(fixture):
@@ -75,12 +74,12 @@ def test_config_manager_writes_correctly(fixture, changed):
 		assert json.load(test) == changed.config
 
 def test_config_manager_throws_for_invalid_key(fixture):
-	with pytest.raises(lnk.config.errors.InvalidKeyError):
+	with pytest.raises(errors.InvalidKeyError):
 		fixture.manager['random'] = None
 
 def test_config_manager_context_syntax_works(fixture, changed):
 
-	with lnk.config.manager.Manager(fixture.which) as manager:
+	with config.manager.Manager(fixture.which) as manager:
 		assert manager['fucks'] == -1
 		manager['fucks'] = 0
 		manager['animal'] = 'cat'
@@ -97,9 +96,9 @@ def test_config_manager_closes_correctly(fixture):
 	assert fixture.manager.config is None
 
 def test_config_manager_throws_for_write_when_no_file_open(fixture):
-	with pytest.raises(lnk.errors.InternalError):
+	with pytest.raises(errors.InternalError):
 		fixture.manager.write()
 
 def test_config_manager_throws_for_close_when_no_file_open(fixture):
-	with pytest.raises(lnk.errors.InternalError):
+	with pytest.raises(errors.InternalError):
 		fixture.manager.close()

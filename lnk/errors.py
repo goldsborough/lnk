@@ -30,6 +30,10 @@ class ParseError(Error):
 	def __init__(self, what):
 		super(ParseError, self).__init__(what)
 
+class InvalidKeyError(Error):
+	def __init__(self, what):
+		super(InvalidKeyError, self).__init__(what)
+
 class InternalError(Error):
 	"""
 	Raised when something went wrong internally, i.e.
