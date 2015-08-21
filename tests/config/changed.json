@@ -1,0 +1,9 @@
+{
+    "fruits": [
+        "apple", 
+        "mango", 
+        "elephant"
+    ], 
+    "animal": "unicorn", 
+    "fucks": -1
+}

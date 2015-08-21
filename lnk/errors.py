@@ -11,11 +11,10 @@ class Error(Exception):
 
 		self.verbose = self.what
 
-		for i, j in additional.items():
-			# Might be None
-			if j: 
-				self.verbose += ecstasy.beautify("\n<{}>: {}".format(i, j),
-												 ecstasy.Color.Red)
+		for key, value in additional.items():
+			if key and value:
+				line = "\n<{}>: {}".format(key, value)
+				self.verbose += ecstasy.beautify(line, ecstasy.Color.Red)
 
 		super(Error, self).__init__(self.what)
 

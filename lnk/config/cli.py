@@ -28,8 +28,10 @@ class Config(Service):
 			keys = list(key) if key else config.keys
 			values = list(value)
 			if quiet:
-				while value:
-					config[keys.pop(0)] = values.pop(0)
+				while values:
+					key = keys.pop(0)
+					value = values.pop(0)
+					config[key] = int(value) if value.isdigit() else value
 			else:
 				lines = [Config.get_line(config, key, values) for key in keys]
 				click.echo("\n".join(lines))
@@ -39,7 +41,8 @@ class Config(Service):
 		current = Config.get_value(config[key])
 		line = "{}: {}".format(key, ", ".join(current))
 		if values:
-			config[key] = values.pop(0)
+			value = values.pop(0)
+			config[key] = int(value) if value.isdigit() else value
 			line += " -> {}".format(config[key])
 		return line
 

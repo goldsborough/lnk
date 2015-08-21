@@ -5,5 +5,5 @@
         "tinyurl"
     ], 
     "default": "bitly", 
-    "verbosity": "0"
+    "verbosity": 0
 }
