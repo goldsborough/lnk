@@ -41,7 +41,7 @@ def fixture(request):
 		'config'
 		])
 
-	manager = config.manager.Manager()
+	manager = config.Manager()
 
 	return Fixture(which, path, manager, configuration)
 
@@ -79,11 +79,12 @@ def test_config_manager_throws_for_invalid_key(fixture):
 
 def test_config_manager_context_syntax_works(fixture, changed):
 
-	with config.manager.Manager(fixture.which) as manager:
+	with config.Manager(fixture.which) as manager:
 		assert manager['fucks'] == -1
 		manager['fucks'] = 0
 		manager['animal'] = 'cat'
 		assert manager.config == fixture.config
+		manager.write()
 
 	with open(fixture.file) as test:
 		assert json.load(test) == fixture.config

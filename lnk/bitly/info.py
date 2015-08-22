@@ -3,11 +3,12 @@
 
 from command import Command
 
+def handle(*args):
+	Info(args)
+
 class Info(Command):
-	def __init__(self, *args):
-
-		super(Info, self).__init__("info")
-
+	def __init__(self, args):
+		super(Info, self).__init__("bitly", "info")
 		self.parse(args)
 
 	def parse(self, args):

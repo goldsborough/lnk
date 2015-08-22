@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+import click
 import ecstasy
 
 class Error(Exception):
 	def __init__(self, what, **additional):
-
-		self.what = ecstasy.beautify("\a<Error>: {}".format(what),
-									 ecstasy.Color.Red)
-
+		what = "\a<Error>: {}".format(what)
+		self.what = ecstasy.beautify(what, ecstasy.Color.Red)
 		self.verbose = self.what
 
 		for key, value in additional.items():
@@ -52,5 +51,5 @@ class InternalError(Error):
 		super(InternalError, self).__init__(what)
 
 def warn(what):
-	print(ecstasy.beautify("\a<Warning>: {}".format(what), 
-						   ecstasy.Color.Yellow))
+	what = "\a<Warning>: {}".format(what)
+	click.echo(ecstasy.beautify(what, ecstasy.Color.Yellow))

@@ -1,46 +1,39 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
-import json
 import re
 import requests
 
+import config
 import errors
 
 class Command(object):
-	def __init__(self, command):
 
-		with open("../config/config.json") as file:
-			config = json.loads(file.read())["bitly"]
+	def __init__(self, service, command):
+		with config.Manager(service) as manager:
+			self.url = manager['url'] + 'v{}'.format(manager['version'])
+			self.config = manager['commands'][command]
+			self.parameters = {'access_token': manager['key']}
+			self.endpoints = self.config.get('endpoints')
+			self.http = re.compile(r'https?://')
 
-		self.api = config["api"] + "v{}".format(config["version"])
-
-		self.config = config["commands"][command]
-
-		self.parameters = {"access_token": config["key"]}
-
-		self.http = re.compile(r"http(s?)://")
-
-	def parse(self):
+	def parse(self, *args):
 		raise NotImplementedError
 
-	def request(self, endpoint):
-
-		response = requests.get("{}/{}".format(self.api, endpoint),
-							    params=self.parameters)
-
+	def get(self, endpoint):
+		url = '{}/{}'.format(self.url, endpoint)
+		response = requests.get(url, params=self.parameters)
 		return response.json()
 
 	@staticmethod
 	def verify(response, what, sub=None):
+		if not str(response['status_code']).startswith('2'):
+			raise errors.HTTPError('Could not {}.'.format(what),
+								   response['status_code'],
+						           response['status_txt'])
 
-		if not str(response["status_code"]).startswith('2'):
-			raise errors.HTTPError("Could not {}.".format(what),
-						    response["status_code"],
-				            response["status_txt"])
+		data = response['data'][sub][0] if sub else response['data']
 
-		data = response["data"][sub][0] if sub else response["data"]
-
-		if "error" in data:
-			raise errors.APIError("Could not {}.".format(what),
-			                	  data["error"])
+		if 'error' in data:
+			what = 'Could not {}.'.format(what)
+			raise errors.APIError(what, data['error'])

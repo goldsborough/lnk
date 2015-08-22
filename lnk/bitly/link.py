@@ -1,69 +1,44 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(".."))
-
+import click
 import errors
 
 from command import Command
 
+def handle(*args):
+	Link(*args)
+
 class Link(Command):
-	def __init__(self, args):
 
-		super(Link, self).__init__("link")
+	def __init__(self, *args):
+		super(Link, self).__init__('bitly', 'link')
+		self.parse(*args)
 
-		self.parser = argparse.ArgumentParser()
-
-		self.parser.add_argument("-e",
-						  		 "--expand",
-						  		 action="append")
-
-		self.parser.add_argument("shorten", nargs="*")
-
-		self.parse(args)
-
-	def parse(self, args):
-
-		args = self.parser.parse_args(args)
-
-		result = ""
-
-		if args.expand:
-
-			for url in args.expand:
-				result += "{} -> {}\n".format(url, self.expand(url))
-
-			del self.parameters["shortUrl"]
-
-		for url in args.shorten:
-
+	def parse(self, expand, shorten):
+		lines = []
+		for url in expand:
+			lines.append('{0} -> {1}'.format(url, self.expand(url)))
+		if expand:
+			del self.parameters['shortUrl']
+		for url in shorten:
 			if not self.http.match(url):
-				errors.warn("Prepending 'http://' to " + url)
-				url = "http://" + url
+				errors.warn("Prepending 'http://' to {0}".format(url))
+				url = 'http://{0}'.format(url)
+			lines.append('{0} -> {1}'.format(url, self.shorten(url)))
 
-			result += "{} -> {}\n".format(url, self.shorten(url))			
-
-		return result.rstrip()
+		click.echo('\n'.join(lines))
 
 	def shorten(self, url):
-
-		self.parameters["longUrl"] = url
-
-		response = self.request(self.config["endpoints"]["shorten"])
-
-		self.verify(response, "shorten url")
+		self.parameters['longUrl'] = url
+		response = self.get(self.endpoints['shorten'])
+		self.verify(response, 'shorten url')
 
 		return response['data']['url']
 
 	def expand(self, url):
-
-		self.parameters["shortUrl"] = url
-
-		response = self.request(self.config["endpoints"]["expand"])
-
-		self.verify(response, "expand url", "expand")
+		self.parameters['shortUrl'] = url
+		response = self.get(self.endpoints['expand'])
+		self.verify(response, 'expand url', 'expand')
 
 		return response['data']['expand'][0]['long_url']

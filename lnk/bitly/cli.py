@@ -5,34 +5,49 @@ import click
 
 import config
 
-from bitly.info import Info
-from bitly.link import Link
-from bitly.stats import Stats
-from bitly.user import User
+import bitly.info
+import bitly.link
+import bitly.stats
+import bitly.user
 
 from service import Service
-
-#from pycountry import countries
 
 manager = config.Manager('bitly')
 
 info = manager['commands']['info']
 stats = manager['commands']['stats']
+stats = manager['commands']['user']
 
 class Bitly(Service):
 
-	@click.group()
+	@click.group(invoke_without_command=True,
+				 no_args_is_help=True,
+				 context_settings=dict(ignore_unknown_options=True))
 	@click.option('-v', '--verbose', count=True)
-	def run(verbose):
+	@click.argument('args', nargs=-1)
+	@click.version_option(version=manager['version'],
+						  message='Bitly API v%(version)s')
+	@click.pass_context
+	def run(context, verbose, args):
 		if verbose == 0:
 			with config.Manager('lnk') as lnk:
 				verbose = lnk['verbosity']
+		if args[0] in ['stats', 'info', 'user', 'link']:
+			getattr(Bitly, args[0])(args[1:])
+		else:
+			Bitly.link(args)
+			
 
 	@run.command()
-	@click.option('-e', '--expand', is_flag=True)
+	@click.option('-e',
+				  '--expand',
+				  multiple=True)
+	@click.option('-s',
+				  '--shorten',
+				  multiple=True)
 	@click.argument('urls', nargs=-1)
-	def link():
-		print("Link")
+	def link(expand, shorten, urls):
+		bitly.link.handle(expand, shorten + urls)
 
 	@run.command()
 	@click.option('-o',
@@ -47,14 +62,14 @@ class Bitly(Service):
 				  type=(click.Choice(info['sets'])))
 	@click.argument('urls', nargs=-1)
 	def info(only, hide, urls):
-		Info(only, hide, urls)
+		bitly.info.handle(only, hide, urls)
 
 	@run.command()
+	@click.option('--long/--short', default=True)
 	@click.argument('urls', nargs=-1)
-	def stats(urls):
-		Stats(urls)
+	def stats(urls, long):
+		bitly.stats.Stats(urls)
 
 	@run.command()
-	@click.argument('urls', nargs=-1)
 	def user():
-		print("User")
+		bitly.user.User()

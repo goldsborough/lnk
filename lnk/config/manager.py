@@ -14,14 +14,14 @@ class Manager(object):
 
 		parent = os.path.dirname(os.path.dirname(os.path.dirname(path)))
 
-		self.path = os.path.join(parent, "config")
+		self.path = os.path.join(parent, 'config')
 
 		self.which = which
 		self.file = None
 		self.config = self.open(which) if which else None
 
 	def open(self, which):
-		self.file = os.path.join(self.path, "{0}.json".format(which))
+		self.file = os.path.join(self.path, '{0}.json'.format(which))
 		with open(self.file) as source:
 			self.config = json.load(source)
 		return self.config
@@ -32,12 +32,12 @@ class Manager(object):
 
 	def write(self):
 		self.assert_open()
-		with open(self.file, "wt") as destination:
+		with open(self.file, 'wt') as destination:
 			json.dump(self.config, destination, indent=4)
 
 	def assert_open(self):
 		if not self.file:
-			what = "No configuration file was ever opened!"
+			what = 'No configuration file was ever opened!'
 			raise errors.InternalError(what)
 
 	@property
@@ -65,4 +65,4 @@ class Manager(object):
 		return self
 
 	def __exit__(self, type, value, traceback):
-		self.write()
+		self.close()
