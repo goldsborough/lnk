@@ -36,7 +36,7 @@ class Config(Service):
 
 	@staticmethod
 	def real_run(which, keys, values, quiet, all_keys):
-		with config.Manager(which) as manager:
+		with config.Manager(which, write=True) as manager:
 			keys = manager.keys if (not keys or all_keys) else list(keys)
 			values = list(values)
 			if quiet:

@@ -6,9 +6,16 @@ import json
 
 import errors
 
+def get(which, key):
+	"""
+	Convenience method to retrieve only one
+	key without having to instantiate a Manager object.
+	"""
+	return Manager(which)[key]
+
 class Manager(object):
 
-	def __init__(self, which=None):
+	def __init__(self, which=None, write=False):
 
 		path = os.path.abspath(__file__)
 
@@ -16,6 +23,7 @@ class Manager(object):
 
 		self.path = os.path.join(parent, 'config')
 
+		self.write_upon_exit = write
 		self.which = which
 		self.file = None
 		self.config = self.open(which) if which else None
@@ -65,4 +73,6 @@ class Manager(object):
 		return self
 
 	def __exit__(self, type, value, traceback):
+		if self.write_upon_exit:
+			self.write()
 		self.close()

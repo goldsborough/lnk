@@ -3,17 +3,30 @@
 
 import click
 import ecstasy
+import sys
 
 class Error(Exception):
+
 	def __init__(self, what, **additional):
-		what = "\a<Error>: {}".format(what)
-		self.what = ecstasy.beautify(what, ecstasy.Color.Red)
-		self.verbose = self.what
+		additional['Type'] = (type(self).__name__, 2)
+		additional['Error'] = (what, 0)
+
+		# Each nested list corresponds to one further level of verbosity
+		levels = [[], [], [], []]
 
 		for key, value in additional.items():
 			if key and value:
-				line = "\n<{}>: {}".format(key, value)
-				self.verbose += ecstasy.beautify(line, ecstasy.Color.Red)
+				level = 1 # default
+				if isinstance(value, tuple):
+					level = value[1]
+					value = value[0]
+				line = '<{0}>: {1}'.format(key, value)
+				line = ecstasy.beautify(line, ecstasy.Color.Red)
+				levels[level].append(line)
+
+		#\a is the bell character (makes a 'beep' sound)
+		self.what = '\a{0}'.format(levels[0][0])
+		self.verbose = ['\n'.join(level) for level in levels if level]
 
 		super(Error, self).__init__(self.what)
 
@@ -53,3 +66,15 @@ class InternalError(Error):
 def warn(what):
 	what = "\a<Warning>: {}".format(what)
 	click.echo(ecstasy.beautify(what, ecstasy.Color.Yellow))
+
+def catch(verbose, action, *args, **kwargs):
+	if sys.version_info[0] < 3:
+		try:
+			action(*args, **kwargs)
+		except Error, e:
+			click.echo('\n'.join(e.verbose[:verbose + 1]))
+	else:
+		try:
+			action(*args, **kwargs)
+		except Error as e:
+			click.echo('\n'.join(e.verbose[:verbose + 1]))

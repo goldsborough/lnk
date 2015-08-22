@@ -4,6 +4,7 @@
 import click
 
 import config
+import errors
 
 import bitly.info
 import bitly.link
@@ -23,7 +24,10 @@ class Bitly(Service):
 	@click.group(invoke_without_command=True,
 				 no_args_is_help=True,
 				 context_settings=dict(ignore_unknown_options=True))
-	@click.option('-v', '--verbose', count=True)
+	@click.option('-v',
+				  '--verbose',
+				  count=True,
+				  default=config.get('lnk', 'verbosity'))
 	@click.argument('args', nargs=-1)
 	@click.version_option(version=manager['version'],
 						  message='Bitly API v%(version)s')
@@ -33,24 +37,24 @@ class Bitly(Service):
 			with config.Manager('lnk') as lnk:
 				verbose = lnk['verbosity']
 		if args[0] in ['stats', 'info', 'user', 'link']:
-			getattr(Bitly, args[0])(args[1:])
+			errors.catch(verbose, getattr(Bitly, args[0]), args[1:])
 		else:
-			Bitly.link(args)
+			errors.catch(verbose, Bitly.link, args)
 			
 
 	@run.command()
+	@click.option('-q/-l',
+				  '--quiet/--loud',
+				  default=False)
 	@click.option('-e',
 				  '--expand',
 				  multiple=True)
 	@click.option('-s',
 				  '--shorten',
 				  multiple=True)
-	@click.option('-q/-l',
-				  '--quiet/--loud',
-				  default=False)
 	@click.argument('urls', nargs=-1)
-	def link(expand, shorten, quiet, urls):
-		bitly.link.handle(expand, shorten + urls, quiet)
+	def link(quiet, expand, shorten, urls):
+		bitly.link.handle(quiet, expand, shorten + urls)
 
 	@run.command()
 	@click.option('-o',

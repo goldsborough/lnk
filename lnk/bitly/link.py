@@ -15,7 +15,7 @@ class Link(Command):
 		super(Link, self).__init__('bitly', 'link')
 		self.parse(*args)
 
-	def parse(self, expand, shorten, quiet):
+	def parse(self, quiet, expand, shorten):
 		lines = []
 		for url in expand:
 			lines.append('{0} -> {1}'.format(url, self.expand(url)))

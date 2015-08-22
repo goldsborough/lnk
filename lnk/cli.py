@@ -9,23 +9,14 @@ import config
 class Main(click.MultiCommand):
 
 	def __init__(self):
-		super(Main, self).__init__(context_settings=dict(ignore_unknown_options=True))
+		super(Main, self).__init__(context_settings=dict(
+								  ignore_unknown_options=True))
 		self.commands = {}
 		with config.Manager('lnk') as manager:
 			self.default = manager['default']
 			for command in manager['services'] + ['config']:
 				command = command.replace('.', '')
 				self.commands[command] = self.get_function(command)
-
-	@staticmethod
-	def get_function(name):
-		namespace = {}
-		directory = os.path.dirname(__file__)
-		filename = os.path.join(directory, name, 'cli.py')
-		with open(filename) as source:
-			code = compile(source.read(), filename, 'exec')
-			eval(code, namespace, namespace)
-		return getattr(namespace[name.title()], 'run')
 
 	def invoke(self, context):
 		if context.args[0] not in self.commands.keys():
@@ -37,6 +28,16 @@ class Main(click.MultiCommand):
 			
 	def get_command(self, context, name):
 		return self.commands[name]
+
+	@staticmethod
+	def get_function(name):
+		namespace = {}
+		directory = os.path.dirname(__file__)
+		filename = os.path.join(directory, name, 'cli.py')
+		with open(filename) as source:
+			code = compile(source.read(), filename, 'exec')
+			eval(code, namespace, namespace)
+		return getattr(namespace[name.title()], 'run')
 		
 
 main = Main()
