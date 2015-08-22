@@ -45,9 +45,12 @@ class Bitly(Service):
 	@click.option('-s',
 				  '--shorten',
 				  multiple=True)
+	@click.option('-q/-l',
+				  '--quiet/--loud',
+				  default=False)
 	@click.argument('urls', nargs=-1)
-	def link(expand, shorten, urls):
-		bitly.link.handle(expand, shorten + urls)
+	def link(expand, shorten, quiet, urls):
+		bitly.link.handle(expand, shorten + urls, quiet)
 
 	@run.command()
 	@click.option('-o',

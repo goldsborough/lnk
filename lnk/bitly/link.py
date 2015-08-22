@@ -15,7 +15,7 @@ class Link(Command):
 		super(Link, self).__init__('bitly', 'link')
 		self.parse(*args)
 
-	def parse(self, expand, shorten):
+	def parse(self, expand, shorten, quiet):
 		lines = []
 		for url in expand:
 			lines.append('{0} -> {1}'.format(url, self.expand(url)))
@@ -23,8 +23,9 @@ class Link(Command):
 			del self.parameters['shortUrl']
 		for url in shorten:
 			if not self.http.match(url):
-				errors.warn("Prepending 'http://' to {0}".format(url))
 				url = 'http://{0}'.format(url)
+				if not quiet:
+					errors.warn("Prepending 'http://' to {0}".format(url))
 			lines.append('{0} -> {1}'.format(url, self.shorten(url)))
 
 		click.echo('\n'.join(lines))
