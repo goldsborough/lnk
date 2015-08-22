@@ -13,14 +13,14 @@ class Command(object):
 		with config.Manager(service) as manager:
 			self.url = manager['url'] + 'v{}'.format(manager['version'])
 			self.config = manager['commands'][command]
+			self.endpoints = self.config['endpoints']
 			self.parameters = {'access_token': manager['key']}
-			self.endpoints = self.config.get('endpoints')
 			self.http = re.compile(r'https?://')
 
-	def parse(self, *args):
+	def fetch(self, *args):
 		raise NotImplementedError
 
-	def get(self, endpoint):
+	def request(self, endpoint):
 		url = '{}/{}'.format(self.url, endpoint)
 		response = requests.get(url, params=self.parameters)
 		return response.json()

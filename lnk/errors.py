@@ -11,9 +11,17 @@ class Error(Exception):
 		additional['Type'] = (type(self).__name__, 2)
 		additional['Error'] = (what, 0)
 
+		levels = self.get_levels(additional)
+
+		#\a is the bell character (makes a 'beep' sound)
+		self.what = '\a{0}'.format(levels[0][0])
+		self.verbose = ['\n'.join(level) for level in levels if level]
+
+		super(Error, self).__init__(self.what)
+
+	def get_levels(self, additional):
 		# Each nested list corresponds to one further level of verbosity
 		levels = [[], [], [], []]
-
 		for key, value in additional.items():
 			if key and value:
 				level = 1 # default
@@ -24,11 +32,7 @@ class Error(Exception):
 				line = ecstasy.beautify(line, ecstasy.Color.Red)
 				levels[level].append(line)
 
-		#\a is the bell character (makes a 'beep' sound)
-		self.what = '\a{0}'.format(levels[0][0])
-		self.verbose = ['\n'.join(level) for level in levels if level]
-
-		super(Error, self).__init__(self.what)
+		return levels
 
 class HTTPError(Error):
 	def __init__(self, what, code=None, status=None):

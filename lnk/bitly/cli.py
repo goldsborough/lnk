@@ -13,11 +13,12 @@ import bitly.user
 
 from service import Service
 
-manager = config.Manager('bitly')
+settings = config.Manager('lnk')
+service = config.Manager('bitly')
 
-info = manager['commands']['info']
-stats = manager['commands']['stats']
-stats = manager['commands']['user']
+info = service['commands']['info']
+stats = service['commands']['stats']
+stats = service['commands']['user']
 
 class Bitly(Service):
 
@@ -27,9 +28,9 @@ class Bitly(Service):
 	@click.option('-v',
 				  '--verbose',
 				  count=True,
-				  default=config.get('lnk', 'verbosity'))
+				  default=settings['verbosity'])
 	@click.argument('args', nargs=-1)
-	@click.version_option(version=manager['version'],
+	@click.version_option(version=service['version'],
 						  message='Bitly API v%(version)s')
 	@click.pass_context
 	def run(context, verbose, args):
@@ -37,12 +38,17 @@ class Bitly(Service):
 			with config.Manager('lnk') as lnk:
 				verbose = lnk['verbosity']
 		if args[0] in ['stats', 'info', 'user', 'link']:
-			errors.catch(verbose, getattr(Bitly, args[0]), args[1:])
+			command = args[0]
+			args = args[1:] if args[1:] else ['--help']
+			errors.catch(verbose, getattr(Bitly, command), args)
 		else:
 			errors.catch(verbose, Bitly.link, args)
 			
 
 	@run.command()
+	@click.option('-c/-n',
+				  '--copy/--no-copy',
+				  default=settings['copy'])
 	@click.option('-q/-l',
 				  '--quiet/--loud',
 				  default=False)
@@ -53,23 +59,23 @@ class Bitly(Service):
 				  '--shorten',
 				  multiple=True)
 	@click.argument('urls', nargs=-1)
-	def link(quiet, expand, shorten, urls):
-		bitly.link.handle(quiet, expand, shorten + urls)
+	def link(copy, quiet, expand, shorten, urls):
+		bitly.link.echo(copy, quiet, expand, shorten + urls)
 
 	@run.command()
 	@click.option('-o',
 				  '--only',
 				  nargs=1,
 				  multiple=True,
-				  type=(click.Choice(info['sets'])))
+				  type=click.Choice(info['sets']))
 	@click.option('-h',
 				  '--hide',
 				  nargs=1,
 				  multiple=True,
-				  type=(click.Choice(info['sets'])))
+				  type=click.Choice(info['sets']))
 	@click.argument('urls', nargs=-1)
 	def info(only, hide, urls):
-		bitly.info.handle(only, hide, urls)
+		bitly.info.echo(only, hide, urls)
 
 	@run.command()
 	@click.option('--long/--short', default=True)
