@@ -28,8 +28,7 @@ class Command(object):
 		response = requests.get(url, params=self.parameters)
 		return response.json()
 
-	@staticmethod
-	def verify(response, what, sub=None):
+	def verify(self, response, what, sub=None):
 		if not str(response['status_code']).startswith('2'):
 			raise errors.HTTPError('Could not {}.'.format(what),
 								   response['status_code'],

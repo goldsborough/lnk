@@ -3,9 +3,9 @@
 
 import click
 import ecstasy
-import pycountry
 import time
 
+import bitly.countries
 import bitly.info
 
 from collections import namedtuple
@@ -119,7 +119,7 @@ class Stats(Command):
 			if key == 'None':
 				key = 'Other'
 		 	elif full:
-				key = pycountry.countries.get(alpha2=key).name
+				key = bitly.countries.names[key]
 		elif key == 'direct':
 			key = key.title()
 
