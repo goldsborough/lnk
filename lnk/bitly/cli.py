@@ -3,22 +3,26 @@
 
 import click
 
+import command
 import config
 import errors
 
+import bitly.stats
 import bitly.info
 import bitly.link
-import bitly.stats
 import bitly.user
 
 from service import Service
 
-settings = config.Manager('lnk')
-service = config.Manager('bitly')
+lnk_config = config.Manager('lnk')
+bitly_config = config.Manager('bitly')
 
-info = service['commands']['info']
-stats = service['commands']['stats']
-stats = service['commands']['user']
+info_config = bitly_config['commands']['info']
+stats_config = bitly_config['commands']['stats']
+user_config = bitly_config['commands']['user']
+
+units = stats_config['units']
+units += ['{0}s'.format(i) for i in units]
 
 class Bitly(Service):
 
@@ -28,9 +32,9 @@ class Bitly(Service):
 	@click.option('-v',
 				  '--verbose',
 				  count=True,
-				  default=settings['verbosity'])
+				  default=lnk_config['verbosity'])
 	@click.argument('args', nargs=-1)
-	@click.version_option(version=service['version'],
+	@click.version_option(version=bitly_config['version'],
 						  message='Bitly API v%(version)s')
 	@click.pass_context
 	def run(context, verbose, args):
@@ -48,7 +52,7 @@ class Bitly(Service):
 	@run.command()
 	@click.option('-c/-n',
 				  '--copy/--no-copy',
-				  default=settings['copy'])
+				  default=lnk_config['copy'])
 	@click.option('-q/-l',
 				  '--quiet/--loud',
 				  default=False)
@@ -67,21 +71,45 @@ class Bitly(Service):
 				  '--only',
 				  nargs=1,
 				  multiple=True,
-				  type=click.Choice(info['sets']))
+				  type=click.Choice(info_config['sets']))
 	@click.option('-h',
 				  '--hide',
 				  nargs=1,
 				  multiple=True,
-				  type=click.Choice(info['sets']))
+				  type=click.Choice(info_config['sets']))
 	@click.argument('urls', nargs=-1)
 	def info(only, hide, urls):
 		bitly.info.echo(only, hide, urls)
 
 	@run.command()
-	@click.option('--long/--short', default=True)
+	@click.option('-o',
+	   			  '--only',
+	   		 	  multiple=True,
+	   			  type=click.Choice(stats_config['sets']))
+	@click.option('-h',
+ 				  '--hide',
+				  multiple=True,
+	   			  type=click.Choice(stats_config['sets']))
+	@click.option('-t',
+ 			      '--time',
+			      nargs=2,
+			      multiple=True,
+			      type=(int, click.Choice(units)))
+	@click.option('--forever',
+				  is_flag=True)
+	@click.option('-l',
+				  '--limit',
+				  type=int,
+				  default=stats_config['defaults']['limit'])
+	@click.option('-i',
+				  '--info/--no-info',
+				  default=stats_config['defaults']['info'])
+	@click.option('-f/-s',
+				  '--full-countries/--short-countries',
+				  default=stats_config['defaults']['full-countries'])
 	@click.argument('urls', nargs=-1)
-	def stats(urls, long):
-		bitly.stats.Stats(urls)
+	def stats(only, hide, time, forever, limit, info, full_countries, urls):
+		bitly.stats.echo(only, hide, time, forever, limit, info, full_countries, urls)
 
 	@run.command()
 	def user():

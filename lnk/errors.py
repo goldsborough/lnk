@@ -8,16 +8,16 @@ import sys
 class Error(Exception):
 
 	def __init__(self, what, **additional):
-		additional['Type'] = (type(self).__name__, 2)
-		additional['Error'] = (what, 0)
-
-		levels = self.get_levels(additional)
-
 		#\a is the bell character (makes a 'beep' sound)
-		self.what = '\a{0}'.format(levels[0][0])
-		self.verbose = ['\n'.join(level) for level in levels if level]
+		additional['Error'] = ('\a{0}'.format(what), 0)
+		additional['Type'] = (type(self).__name__, 2)
+
+		self.levels = self.get_levels(additional)
 
 		super(Error, self).__init__(self.what)
+
+	def what(self):
+		return self.levels[0][0]
 
 	def get_levels(self, additional):
 		# Each nested list corresponds to one further level of verbosity
@@ -32,7 +32,7 @@ class Error(Exception):
 				line = ecstasy.beautify(line, ecstasy.Color.Red)
 				levels[level].append(line)
 
-		return levels
+		return ['\n'.join(level) for level in levels if level]
 
 class HTTPError(Error):
 	def __init__(self, what, code=None, status=None):
@@ -72,13 +72,8 @@ def warn(what):
 	click.echo(ecstasy.beautify(what, ecstasy.Color.Yellow))
 
 def catch(verbose, action, *args, **kwargs):
-	if sys.version_info[0] < 3:
-		try:
-			action(*args, **kwargs)
-		except Error, e:
-			click.echo('\n'.join(e.verbose[:verbose + 1]))
-	else:
-		try:
-			action(*args, **kwargs)
-		except Error as e:
-			click.echo('\n'.join(e.verbose[:verbose + 1]))
+	try:
+		action(*args, **kwargs)
+	except Error:
+		_, e, _ = sys.exc_info()
+		click.echo('\n'.join(e.levels[:verbose + 1]))

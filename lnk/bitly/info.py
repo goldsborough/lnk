@@ -11,8 +11,10 @@ def echo(*args):
 
 class Info(Command):
 
-	def __init__(self):
-		super(Info, self).__init__("bitly", "info")
+	def __init__(self, raw=False):
+		super(Info, self).__init__('bitly', 'info')
+
+		self.raw = raw
 		self.sets = self.config['sets']
 		self.reverse = {value:key for key,value in self.sets.items()}
 
@@ -23,55 +25,38 @@ class Info(Command):
 		for key in hide:
 			del sets[key]
 
-		maximum = 0
-		results = []
+		lines = []
 		for url in urls:
 			data = self.get(url, sets)
-			result, width = self.lineify(url, data, sets)
-			if width > maximum:
-				maximum = width
-			results.append(result)
+			result = self.lineify(url, data, sets)
+			lines.append(result)
 
-		return '\n'.join(self.boxify(results, width))
+		return lines if self.raw else self.boxify(lines)
 
 	def lineify(self, url, data, sets): 
 		line = 'URL: {0}'.format(url)
-		width = len(line)
 		lines = [line]
 		for key, value in data.items():
 			line = self.format(key, value)
-			if len(line) > width:
-				width = len(line)
 			lines.append(line)
-		return lines, width
+		return lines
 
 	def format(self, key, value):
 		key = self.reverse[key]
 		if key == 'created':
 			value = time.ctime(value)
-		elif key == "user" and value is None:
-			value = "Not public"
+		elif key == 'user' and value is None:
+			value = 'Not public'
 
 		return '{0}: {1}'.format(key.title(), value)
 
-	def boxify(self, results, width):
-		border = width + 2
-		lines = ['┌{}┐'.format('─' * border)]
-		for n, result in enumerate(results):
-			for line in result:
-				line = '│ {0} │'.format(line.ljust(width))
-				lines.append(line)
-			if n + 1 < len(results):
-				lines.append('├{}┤'.format('─' * border))
-		return lines + ['└{}┘'.format('─' * border)]
-
 	def get(self, url, sets):
-		self.parameters["shortUrl"] = url
+		self.parameters['shortUrl'] = url
 
-		response = self.request(self.endpoints["info"])
+		response = self.request(self.endpoints['info'])
 		self.verify(response,
-				   "retrieve information for {0}".format(url),
-				   "info")
+				   "retrieve information for '{0}'".format(url),
+				   'info')
 
-		response = response["data"]["info"][0]
+		response = response['data']['info'][0]
 		return {k:v for k,v in response.items() if k in sets.values()}

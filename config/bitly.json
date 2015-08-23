@@ -13,11 +13,11 @@
         }, 
         "stats": {
             "units": [
-                "minutes", 
-                "hours", 
-                "days", 
-                "weeks", 
-                "months"
+                "minute", 
+                "hour", 
+                "day", 
+                "week", 
+                "month"
             ], 
             "endpoints": {
                 "referrers": "link/referrers", 
@@ -25,7 +25,11 @@
                 "countries": "link/countries"
             }, 
             "defaults": {
-                "limit": 10
+                "limit": 10,
+                "info": false,
+                "full-countries": true,
+                "span": 1,
+                "unit": "forever"
             }, 
             "sets": [
                 "clicks", 

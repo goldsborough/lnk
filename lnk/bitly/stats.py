@@ -1,163 +1,155 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+import click
+import ecstasy
+import pycountry
+import time
+
+import bitly.info
+
+from collections import namedtuple
+
 from command import Command
 
+def echo(*args):
+	click.echo(Stats().fetch(*args))
+
 class Stats(Command):
-	def __init__(self):
 
-		super(Stats, self).__init__("stats")
+	Timespan = namedtuple('Timespan', ['span', 'unit'])
 
-		self.parser = argparse.ArgumentParser(prog="short stats",
-										      conflict_handler="resolve")
+	def __init__(self, raw=False):
+		super(Stats, self).__init__('bitly', 'stats')
 
-		self.parser.add_argument("-o",
-					   			 "--only",
-					   		 	 action="append",
-					   			 choices=self.config["sets"])
+		self.raw = raw
+		self.info = bitly.info.Info(raw=True)
+		self.sets = self.config['sets']
 
-		self.parser.add_argument("-h",
-								 "--hide",
-	 							 action="append",
-	 							 choices=self.config["sets"])
+		self.parameters['timezone'] = time.timezone // 3600
 
-		self.parser.add_argument("-a",
-							     "--all",
-							     action="store_true")
+	def fetch(self, only, hide, times, forever, limit, add_info, full, urls):
 
-		units = ", ".join(self.config["units"])
+		self.parameters['limit'] = limit
 
-		self.parser.add_argument("-t",
-							     "--time",
-							     action="append",
-							     nargs=2,
-							     metavar=("integer", "{{{}}}".format(units)))
+		sets = self.sets
+		if only:
+			sets = {i for i in sets if i in only}
+		for i in hide:
+			del sets[i]
 
-		self.parser.add_argument("-l",
-								 "--limit",
-								 type=int,
-								 default=self.config["defaults"]["limit"])
+		timespans = self.get_timespans(times, forever)
 
-		self.parser.add_argument("-i",
-								 "--info",
-								 action="store_true")
+		info = self.info.fetch(only, hide, urls) if add_info else []
 
-		# {{}} to escape curly braces, {{{}}}
-		# to format something in curly braces 
+		results = []
+		for n, url in enumerate(urls):
+			header = info[n] if add_info else ['URL: {0}'.format(url)]
 
-		self.parser.add_argument("urls", nargs='+')
+			for n, line in enumerate(header):
+				colon = line.find(':')
+				line = '<{0}>{1}'.format(line[:colon], line[colon:])
+				line = ecstasy.beautify(line, ecstasy.Color.Red)
+				header[n] = line
 
-		self.parameters["timezone"] = time.timezone // 3600
+			data = self.get(url, timespans, sets)
+			lines = self.lineify(data, full)
 
-	def parse(self, args):
+			results.append(header + lines)
 
-		args = self.parser.parse_args(args)
+		return results if self.raw else self.boxify(results)
 
-		self.parameters["limit"] = args.limit
-
-		endpoints = args.only if args.only else self.config["sets"]
-
-		if args.hide:
-			for i in args.hide:
-				endpoints.remove(i)
-
-		time = args.time
-
-		if not time:
-			# 'day' is Bitly's default unit. The important part
-			# is to set the time span to -1, that retrieves
-			# all data for all time units (since forever)
-			time = [(-1, "days")]
-
+	def get_timespans(self, times, forever):
+		timespans = set()
+		if not times:
+			unit = self.defaults['unit']
+			if unit == 'forever':
+				timespans.add(Stats.Timespan(-1, 'day'))
+			else:
+				timespans.add(Stats.Timespan(self.defaults['span'], unit))
 		else:
-			for n, (span, unit) in enumerate(time):
+			if forever:
+				# -1 = since forever (unit could be any)
+				timespans.add(Stats.Timespan(-1, 'day'))
+			for span, unit in times:
+				timespans.add(Stats.Timespan(span, unit))
+		return timespans
 
-				try:
-					span = int(span)
+	def lineify(self, data, full): 
+		lines = []
 
-				except ValueError:
-					raise errors.ParseError("'{}' ".format(span) +
-											"is not a valid"     +
-						  					"time span (integer)!")
+		for subject, items in data.items():
+			lines.append('{0}:'.format(subject.title()))
+			lines += self.listify(subject, items, full)
 
-				if unit not in self.config["units"]:
-					units = ", ".join(self.config["units"])
-					raise errors.ParseError("'{}' ".format(unit)   +
-									        "is not a valid time " +
-									        "unit ({})!".format(units))
+		return lines
 
-				if unit == "minute" and span > 60:
-						raise errors.Error("'{}'".format(span) +
-										   "exceeds maximum of 60 minutes!")
+	def listify(self, subject, data, full):
+		lines = []
+		for result in data:
+			timespan = result['timespan']
+			items = result['data']
 
-				time[n] = (span, unit)
+			if timespan.span == -1:
+				line = 'Since forever'
+			else:
+				line = 'Last {0} {1}'.format(timespan.span, timespan.unit)
 
-		stats = [ ]
+			lines.append(' + {0}:'.format(line))
 
-		self.info = []
+			if not items:
+				lines[-1] += ' None'
+				continue
 
-		if args.info:
-			info = Info()
+			if isinstance(items, list):
+				for item in items:
+					clicks = item.pop('clicks')
+					key = item.values()[0]
+					line = self.format(subject, key, clicks, full)
+					lines.append(line)
+			else:
+				# for clicks
+				lines[-1] += ' {0}'.format(items)
 
-		for url in args.urls:
+		return lines
 
-			single = {  
-				"url" : url,
-				"info" : None
-			}
+	def format(self, subject, key, value, full):
 
-			if args.info:
-				single["info"] = info.parse([url], False)[0]
+		if subject == 'countries':
+			if key == 'None':
+				key = 'Other'
+		 	elif full:
+				key = pycountry.countries.get(alpha2=key).name
+		elif key == 'direct':
+			key = key.title()
 
-			single["data"] = self.retrieve(url, time, endpoints)
+		return '  - {0}: {1}'.format(key, value)
 
-			stats.append(single)
+	def get(self, url, timespans, sets):
+		self.parameters['link'] = url
 
-		"""
-		# Convert short ISO name (e.g. US)
-		# to full name (e.g. United States)
-		country = countries.get(alpha2=item["country"])
-		"""
+		results = {}
+		for endpoint in sets:
+			results[endpoint] = []
+			for timespan in timespans:
 
-		return stats
+				self.parameters['unit'] = timespan.unit
 
-	def retrieve(self, url, time, endpoints):
+				if timespan.unit.endswith('s'):
+					# Get rid of the plural s in e.g. 'weeks'
+					self.parameters['unit'] = timespan.unit[:-1]
 
-		stats = []
+				self.parameters['units'] = timespan.span
 
-		self.parameters["link"] = url
+				response = self.request(self.endpoints[endpoint])
 
-		for endpoint in endpoints:
+				self.verify(response,
+							'retrieve {0} for {1}'.format(endpoint, url))
 
-			result = {
-				"type": endpoint,
-				"times": []
-			}
+				# For 'clicks' the key has a different name than the endpoint
+				e = endpoint if endpoint != 'clicks' else 'link_clicks'
 
-			for span, unit in time:
+				data = {'timespan': timespan, 'data': response['data'][e]}
+				results[endpoint].append(data)
 
-				timepoint = {
-					"span" :  span,
-					"unit": unit
-				}
-
-				# Get rid of the extra s in e.g. "weeks"
-				self.parameters["unit"] = unit[:-1]
-
-				self.parameters["units"] = span
-
-				response = self.request(self.config["endpoints"][endpoint])
-
-				self.verify(response, "retrieve {} for {}".format(endpoint, url))
-
-				# clicks is the only one where the data
-				# retrieved has a different name than its endpoint
-				e = endpoint if endpoint != "clicks" else "link_clicks"
-
-				timepoint["data"] = response["data"][e]
-
-				result["times"].append(timepoint)
-
-			stats.append(result)
-
-		return stats
+		return results
