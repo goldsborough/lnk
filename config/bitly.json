@@ -17,7 +17,9 @@
                 "shorten": "shorten", 
                 "expand": "expand"
             }, 
-            "settings": {}
+            "settings": {
+
+            }
         }, 
         "stats": {
             "units": [
@@ -39,15 +41,24 @@
             }, 
             "settings": {
                 "info": "False", 
-                "full-countries": true, 
+                "long-countries": true, 
                 "limit": 10, 
                 "unit": "forever", 
                 "span": 1
             }
         }, 
         "user": {
-            "endpoints": {}, 
-            "settings": {}
+            "sets": [
+                "info",
+                "history"
+            ],
+            "endpoints": {
+                "info": "user/info",
+                "history": "user/link_history"
+            }, 
+            "settings": {
+
+            }
         }
     }, 
     "version": 3, 

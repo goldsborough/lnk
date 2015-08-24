@@ -103,13 +103,33 @@ class Bitly(Service):
 	@click.option('-i',
 				  '--info/--no-info',
 				  default=stats_config['settings']['info'])
-	@click.option('-f/-s',
-				  '--full-countries/--short-countries',
-				  default=stats_config['settings']['full-countries'])
+	@click.option('-l/-s',
+				  '--long/--short',
+				  default=stats_config['settings']['long-countries'])
 	@click.argument('urls', nargs=-1)
-	def stats(only, hide, time, forever, limit, info, full_countries, urls):
-		bitly.stats.echo(only, hide, time, forever, limit, info, full_countries, urls)
+	def stats(only, hide, time, forever, limit, info, long, urls):
+		bitly.stats.echo(only, hide, time, forever, limit, info, long, urls)
 
 	@run.command()
-	def user():
-		bitly.user.User()
+	@click.option('-o',
+	   			  '--only',
+	   		 	  multiple=True,
+	   			  type=click.Choice(stats_config['sets']))
+	@click.option('-h',
+ 				  '--hide',
+				  multiple=True,
+	   			  type=click.Choice(stats_config['sets']))
+	@click.option('-t',
+ 			      '--time',
+			      nargs=2,
+			      multiple=True,
+			      type=(int, click.Choice(units)))
+	@click.option('--forever',
+				  is_flag=True)
+	@click.option('-l',
+				  '--limit',
+				  type=int,
+				  default=stats_config['settings']['limit'])
+	@click.argument('urls', nargs=-1)
+	def user(only, hide, time, forever, limit, urls):
+		bitly.user.echo(only, hide, time, forever, limit, urls)

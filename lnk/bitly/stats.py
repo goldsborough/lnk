@@ -26,7 +26,6 @@ class Stats(Command):
 
 		self.raw = raw
 		self.info = bitly.info.Info(raw=True)
-		self.sets = self.config['sets']
 
 		self.parameters['timezone'] = time.timezone // 3600
 
@@ -93,11 +92,11 @@ class Stats(Command):
 	def get_timespans(self, times, forever):
 		timespans = set()
 		if not times:
-			unit = self.defaults['unit']
+			unit = self.settings['unit']
 			if unit == 'forever':
 				timespans.add(Stats.Timespan(-1, 'day'))
 			else:
-				timespans.add(Stats.Timespan(self.defaults['span'], unit))
+				timespans.add(Stats.Timespan(self.settings['span'], unit))
 		else:
 			if forever:
 				# -1 = since forever (unit could be any)

@@ -18,7 +18,8 @@ class Command(object):
 			self.url = manager['url'] + 'v{0}'.format(manager['version'])
 			self.config = manager['commands'][command]
 			self.endpoints = self.config['endpoints']
-			self.defaults = self.config.get('defaults')
+			self.settings = self.config.get('settings')
+			self.sets = self.config.get('sets')
 			self.parameters = {'access_token': manager['key']}
 			self.http = re.compile(r'https?://')
 
@@ -67,11 +68,11 @@ class Command(object):
 
 	@staticmethod
 	def get_escaped(results):
-		pattern = re.compile(r'^(\s*[-+*]\s*)?'    		# list bullet
-							      r'(?:\033\[[\d;]+m)?' # escape codes
-							      r'([\s\w]+)'				# formatted string
-							      r'(?:\033\[[\d;]+m)?' # escape codes
-							      r'(.*)$')				# anything
+		pattern = re.compile(r'^(.*)'    			# anything
+						     r'(?:\033\[[\d;]+m)'   # escape codes
+						     r'(.+)'			 	# formatted string
+						     r'(?:\033\[[\d;]+m)'   # escape codes
+						     r'(.*)$')				# anything
 
 		Line = namedtuple('Line', ['raw', 'escaped'])
 		width = 0
