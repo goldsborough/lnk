@@ -30,20 +30,15 @@ class Stats(Command):
 		self.parameters['timezone'] = time.timezone // 3600
 
 	def fetch(self, only, hide, times, forever, limit, add_info, full, urls):
-
 		self.parameters['limit'] = limit
 
-		sets = self.sets
-		if only:
-			sets = {i for i in sets if i in only}
-		for i in hide:
-			del sets[i]
+		sets = self.filter(only, hide)
 
 		timespans = self.get_timespans(times, forever)
 
 		info = self.info.fetch(only, hide, urls) if add_info else []
 
-		results = []
+		result = []
 		for n, url in enumerate(urls):
 			header = info[n] if add_info else ['URL: {0}'.format(url)]
 
@@ -56,9 +51,9 @@ class Stats(Command):
 			data = self.get(url, timespans, sets)
 			lines = self.lineify(data, full)
 
-			results.append(header + lines)
+			result.append(header + lines)
 
-		return results if self.raw else self.boxify(results)
+		return result if self.raw else self.boxify(result)
 
 	def get(self, url, timespans, sets):
 		self.parameters['link'] = url
@@ -78,8 +73,8 @@ class Stats(Command):
 
 				response = self.request(self.endpoints[endpoint])
 
-				self.verify(response,
-							'retrieve {0} for {1}'.format(endpoint, url))
+				message = 'retrieve {0} for {1}'.format(endpoint, url)
+				self.verify(response, message)
 
 				# For 'clicks' the key has a different name than the endpoint
 				e = endpoint if endpoint != 'clicks' else 'link_clicks'
@@ -88,6 +83,14 @@ class Stats(Command):
 				results[endpoint].append(data)
 
 		return results
+
+	def filter(self, only, hide):
+		sets = self.sets
+		if only:
+			sets = [i for i in sets if i in only]
+		for i in hide:
+			del sets[i]
+		return sets
 
 	def get_timespans(self, times, forever):
 		timespans = set()
@@ -107,7 +110,6 @@ class Stats(Command):
 
 	def lineify(self, data, full): 
 		lines = []
-
 		for subject, items in data.items():
 			lines.append('{0}:'.format(subject.title()))
 			lines += self.listify(subject, items, full)

@@ -76,9 +76,11 @@ class Bitly(Service):
 				  nargs=1,
 				  multiple=True,
 				  type=click.Choice(info_config['sets']))
+	@click.option('--hide-empty',
+ 				  is_flag=True)
 	@click.argument('urls', nargs=-1)
-	def info(only, hide, urls):
-		bitly.info.echo(only, hide, urls)
+	def info(only, hide, hide_empty, urls):
+		bitly.info.echo(only, hide, hide_empty, urls)
 
 	@run.command()
 	@click.option('-o',
@@ -114,22 +116,18 @@ class Bitly(Service):
 	@click.option('-o',
 	   			  '--only',
 	   		 	  multiple=True,
-	   			  type=click.Choice(stats_config['sets']))
+	   			  type=click.Choice(user_config['sets']))
 	@click.option('-h',
  				  '--hide',
 				  multiple=True,
-	   			  type=click.Choice(stats_config['sets']))
-	@click.option('-t',
- 			      '--time',
-			      nargs=2,
-			      multiple=True,
-			      type=(int, click.Choice(units)))
-	@click.option('--forever',
-				  is_flag=True)
-	@click.option('-l',
-				  '--limit',
-				  type=int,
-				  default=stats_config['settings']['limit'])
-	@click.argument('urls', nargs=-1)
-	def user(only, hide, time, forever, limit, urls):
-		bitly.user.echo(only, hide, time, forever, limit, urls)
+	   			  type=click.Choice(user_config['sets']))
+	@click.option('-e/-a',
+ 				  '--everything/--all',
+ 				  is_flag=True)
+	@click.option('-h',
+ 				  '--history/--no-history',
+ 				  default=user_config['settings']['history'])
+	@click.option('--hide-empty',
+ 				  is_flag=True)
+	def user(only, hide, everything, history, hide_empty):
+		bitly.user.echo(only, hide, everything, history, hide_empty)

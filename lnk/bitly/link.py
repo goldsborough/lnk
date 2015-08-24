@@ -14,14 +14,16 @@ def echo(*args):
 
 class Link(Command):
 
-	def __init__(self, *args):
+	def __init__(self, raw=False):
 		super(Link, self).__init__('bitly', 'link')
 		self.already_copied = False
+		self.raw = raw
 
 	def fetch(self, copy, quiet, expand, shorten):
-		lines = self.shorten(copy, quiet, shorten) if shorten else []
-		lines += self.expand(copy, expand)
-		return self.boxify([lines])
+		result = self.shorten(copy, quiet, shorten) if shorten else []
+		result += self.expand(copy, expand)
+
+		return result if self.raw else self.boxify([result])
 
 	def expand(self, copy, urls):
 		lines = []

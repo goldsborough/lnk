@@ -3,13 +3,21 @@
     "commands": {
         "info": {
             "endpoints": {
-                "info": "info"
+                "info": "info",
+                "history": "user/link_history"
             }, 
-            "settings": {}, 
+            "settings": {
+
+                }, 
             "sets": {
                 "created": "created_at", 
                 "user": "created_by", 
-                "title": "title"
+                "title": "title",
+                "archived": "archived",
+                "modified": "modified_at",
+                "privacy": "private",
+                "note": "note",
+                "shares": "shares"
             }
         }, 
         "link": {
@@ -48,16 +56,23 @@
             }
         }, 
         "user": {
-            "sets": [
-                "info",
-                "history"
-            ],
+            "sets": {
+                "login": "login",
+                "url": "profile_url" ,
+                "image": "profile_image",
+                "date": "member_since",
+                "name": "full_name",
+                "display": "display_name",
+                "share": "share_accounts",
+                "key": "apiKey",
+                "privacy": "default_link_privacy"
+            },
             "endpoints": {
-                "info": "user/info",
-                "history": "user/link_history"
+                "info": "user/info"
             }, 
             "settings": {
-
+                "history": false,
+                "hide-empty": false
             }
         }
     }, 
