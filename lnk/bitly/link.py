@@ -31,7 +31,7 @@ class Link(Command):
 		for url in urls:
 			expanded = self.get_long(url)
 			expanded = self.copy(copy, expanded)
-			lines.append('{0} -> {1}'.format(url, expanded))
+			lines.append('{0} => {1}'.format(url, expanded))
 		return lines
 
 	def shorten(self, copy, quiet, urls):
@@ -43,7 +43,7 @@ class Link(Command):
 					errors.warn("Prepending 'http://' to {0}".format(url))
 			short = self.get_short(url)
 			short = self.copy(copy, short)
-			lines.append('{0} -> {1}'.format(url, short))
+			lines.append('{0} => {1}'.format(url, short))
 		return lines
 
 	def get_short(self, url):

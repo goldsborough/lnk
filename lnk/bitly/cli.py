@@ -20,9 +20,13 @@ bitly_config = config.Manager('bitly')
 info_config = bitly_config['commands']['info']
 stats_config = bitly_config['commands']['stats']
 user_config = bitly_config['commands']['user']
+history_config = bitly_config['commands']['history']
 
 units = stats_config['units']
 units += ['{0}s'.format(i) for i in units]
+
+display = history_config['settings']['display']
+expanded_default = None if display == 'both' else display == 'expanded'
 
 class Bitly(Service):
 
@@ -40,7 +44,7 @@ class Bitly(Service):
 	def run(context, verbose, args):
 		if verbose == 0:
 			verbose = lnk_config['verbosity']
-		if args[0] in ['stats', 'info', 'user', 'link']:
+		if args[0] in bitly_config['commands'].keys():
 			cmd = args[0]
 			args = args[1:] if args[1:] else ['--help']
 			errors.catch(verbose, getattr(Bitly, cmd), args)
@@ -131,3 +135,31 @@ class Bitly(Service):
  				  is_flag=True)
 	def user(only, hide, everything, history, hide_empty):
 		bitly.user.echo(only, hide, everything, history, hide_empty)
+
+	@run.command()
+	@click.option('-t',
+				  '--time',
+ 			      '--last',
+			      nargs=2,
+			      multiple=True,
+			      type=(int, click.Choice(units)))
+	@click.option('-r',
+				  '--range',
+ 			      '--time-range',
+			      nargs=4,
+			      multiple=True,
+			      type=(int, click.Choice(units), int, click.Choice(units)))
+	@click.option('--forever',
+				  is_flag=True)
+	@click.option('-l',
+				  '--limit',
+				  type=int,
+				  default=history_config['settings']['limit'])
+	@click.option('-e/-s',
+				  '--expanded/--short',
+				  default=expanded_default)
+	@click.option('-b',
+				  '--both',
+				  is_flag=True)
+	def history(last, time_range, forever, limit, expanded, both):
+		bitly.history.echo(set(last), set(time_range), forever, limit, expanded, both)
