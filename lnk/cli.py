@@ -13,7 +13,7 @@ class Main(click.MultiCommand):
 								  ignore_unknown_options=True))
 		self.commands = {}
 		with config.Manager('lnk') as manager:
-			self.default = manager['default']
+			self.default = manager['settings']['service']
 			for command in manager['services'] + ['config']:
 				command = command.replace('.', '')
 				self.commands[command] = self.get_function(command)

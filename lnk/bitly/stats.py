@@ -14,7 +14,6 @@ import bitly.info
 
 from command import Command
 
-
 def echo(*args):
 	click.echo(Stats().fetch(*args))
 

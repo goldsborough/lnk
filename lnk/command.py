@@ -15,7 +15,7 @@ class Command(object):
 
 	def __init__(self, service, command):
 		with config.Manager(service) as manager:
-			self.url = manager['url'] + 'v{}'.format(manager['version'])
+			self.url = manager['url'] + 'v{0}'.format(manager['version'])
 			self.config = manager['commands'][command]
 			self.endpoints = self.config['endpoints']
 			self.defaults = self.config.get('defaults')

@@ -16,10 +16,12 @@ class Error(Exception):
 
 		super(Error, self).__init__(self.what)
 
+	@property
 	def what(self):
 		return self.levels[0][0]
 
-	def get_levels(self, additional):
+	@staticmethod
+	def get_levels(additional):
 		# Each nested list corresponds to one further level of verbosity
 		levels = [[], [], [], []]
 		for key, value in additional.items():
@@ -71,9 +73,9 @@ def warn(what):
 	what = "\a<Warning>: {}".format(what)
 	click.echo(ecstasy.beautify(what, ecstasy.Color.Yellow))
 
-def catch(verbose, action, *args, **kwargs):
+def catch(verbosity, action, *args, **kwargs):
 	try:
 		action(*args, **kwargs)
 	except Error:
 		_, e, _ = sys.exc_info()
-		click.echo('\n'.join(e.levels[:verbose + 1]))
+		click.echo('\n'.join(e.levels[:verbosity + 1]))

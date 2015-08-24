@@ -4,7 +4,9 @@
         "goo.gl", 
         "tinyurl"
     ], 
-    "default": "bitly", 
-    "verbosity": 0, 
-    "copy": "True"
+    "settings": {
+        "verbosity": 0, 
+        "copy": "True", 
+        "service": "bitly"
+    }
 }

@@ -14,7 +14,7 @@ import bitly.user
 
 from service import Service
 
-lnk_config = config.Manager('lnk')
+lnk_config = config.Manager('lnk')['settings']
 bitly_config = config.Manager('bitly')
 
 info_config = bitly_config['commands']['info']
@@ -39,12 +39,11 @@ class Bitly(Service):
 	@click.pass_context
 	def run(context, verbose, args):
 		if verbose == 0:
-			with config.Manager('lnk') as lnk:
-				verbose = lnk['verbosity']
+			verbose = lnk_config['verbosity']
 		if args[0] in ['stats', 'info', 'user', 'link']:
-			command = args[0]
+			cmd = args[0]
 			args = args[1:] if args[1:] else ['--help']
-			errors.catch(verbose, getattr(Bitly, command), args)
+			errors.catch(verbose, getattr(Bitly, cmd), args)
 		else:
 			errors.catch(verbose, Bitly.link, args)
 			
@@ -100,13 +99,13 @@ class Bitly(Service):
 	@click.option('-l',
 				  '--limit',
 				  type=int,
-				  default=stats_config['defaults']['limit'])
+				  default=stats_config['settings']['limit'])
 	@click.option('-i',
 				  '--info/--no-info',
-				  default=stats_config['defaults']['info'])
+				  default=stats_config['settings']['info'])
 	@click.option('-f/-s',
 				  '--full-countries/--short-countries',
-				  default=stats_config['defaults']['full-countries'])
+				  default=stats_config['settings']['full-countries'])
 	@click.argument('urls', nargs=-1)
 	def stats(only, hide, time, forever, limit, info, full_countries, urls):
 		bitly.stats.echo(only, hide, time, forever, limit, info, full_countries, urls)

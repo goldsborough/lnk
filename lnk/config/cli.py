@@ -4,6 +4,7 @@
 import click
 
 import config
+import errors
 
 from service import Service
 
@@ -11,7 +12,8 @@ from service import Service
 class Config(Service):
 
 	@click.command()
-	@click.argument('which', default='None')
+	@click.argument('which', default='lnk')
+	@click.argument('command', default='None')
 	@click.option('-k',
 				  '--key',
 				  nargs=1,
@@ -26,30 +28,40 @@ class Config(Service):
 				  '--quiet/--loud',
 				  default=False)
 	@click.option('--all', '--all-keys', is_flag=True)
-	def run(which, key, value, quiet, all_keys):
-		if not key and not all_keys:
-			Config.run(['--help'])
-		elif which == 'None':
-			Config.real_run('lnk', key, value, quiet, all_keys)
+	def run(which, command, key, value, quiet, all_keys):
+		if key or all_keys:
+			errors.catch(0,
+						 Config.real_run,
+						 which, command,
+						 key,
+						 value,
+						 quiet,
+						 all_keys)
 		else:
-			Config.real_run(which, key, value, quiet, all_keys)
+			Config.run(['--help'])
 
 	@staticmethod
-	def real_run(which, keys, values, quiet, all_keys):
+	def real_run(which, command, keys, values, quiet, all_keys):
 		with config.Manager(which, write=True) as manager:
-			keys = manager.keys if (not keys or all_keys) else list(keys)
+			if command != 'None':
+				manager = manager['commands'][command]
+			manager = manager['settings']
+			keys = manager.keys() if (not keys or all_keys) else list(keys)
 			values = list(values)
 			if quiet:
 				while values:
 					key = keys.pop(0)
+					Config.assert_key_is_valid(key, manager)
 					value = values.pop(0)
 					manager[key] = int(value) if value.isdigit() else value
+
 			else:
 				lines = [Config.get_line(manager, key, values) for key in keys]
 				click.echo("\n".join(lines))
 
 	@staticmethod
 	def get_line(manager, key, values):
+		Config.assert_key_is_valid(key, manager)
 		current = Config.get_value(manager[key])
 		line = "{}: {}".format(key, ", ".join(current))
 		if values:
@@ -65,3 +77,8 @@ class Config(Service):
 		elif isinstance(value, dict):
 			return ["{}: {}".format(k,v) for k,v in value.items()]
 		return [str(value)]
+
+	@staticmethod
+	def assert_key_is_valid(key, manager):
+		if key not in manager:
+			raise errors.InvalidKeyError("Key '{0}' not found.".format(key))

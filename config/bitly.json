@@ -5,11 +5,19 @@
             "endpoints": {
                 "info": "info"
             }, 
+            "settings": {}, 
             "sets": {
-                "title": "title", 
+                "created": "created_at", 
                 "user": "created_by", 
-                "created": "created_at"
+                "title": "title"
             }
+        }, 
+        "link": {
+            "endpoints": {
+                "shorten": "shorten", 
+                "expand": "expand"
+            }, 
+            "settings": {}
         }, 
         "stats": {
             "units": [
@@ -19,37 +27,34 @@
                 "week", 
                 "month"
             ], 
+            "sets": [
+                "clicks", 
+                "countries", 
+                "referrers"
+            ], 
             "endpoints": {
                 "referrers": "link/referrers", 
                 "clicks": "link/clicks", 
                 "countries": "link/countries"
             }, 
-            "defaults": {
-                "limit": 10,
-                "info": false,
-                "full-countries": true,
-                "span": 1,
-                "unit": "forever"
-            }, 
-            "sets": [
-                "clicks", 
-                "countries", 
-                "referrers"
-            ]
-        }, 
-        "link": {
-            "endpoints": {
-                "shorten": "shorten", 
-                "expand": "expand"
+            "settings": {
+                "info": "False", 
+                "full-countries": true, 
+                "limit": 10, 
+                "unit": "forever", 
+                "span": 1
             }
         }, 
         "user": {
-            "endpoints": {}
+            "endpoints": {}, 
+            "settings": {}
         }
     }, 
-    "user": {
-        "login": null
-    }, 
     "version": 3, 
-    "key": "5513e7f7be612347354bfbbcb9fc584f27da9243"
+    "key": "5513e7f7be612347354bfbbcb9fc584f27da9243", 
+    "settings": {
+        "user": {
+            "login": null
+        }
+    }
 }
