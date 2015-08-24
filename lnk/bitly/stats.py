@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import click
 import ecstasy
 import time
 
+from collections import namedtuple
+
 import bitly.countries
 import bitly.info
 
-from collections import namedtuple
-
 from command import Command
+
 
 def echo(*args):
 	click.echo(Stats().fetch(*args))
@@ -58,6 +61,35 @@ class Stats(Command):
 			results.append(header + lines)
 
 		return results if self.raw else self.boxify(results)
+
+	def get(self, url, timespans, sets):
+		self.parameters['link'] = url
+
+		results = {}
+		for endpoint in sets:
+			results[endpoint] = []
+			for timespan in timespans:
+
+				self.parameters['unit'] = timespan.unit
+
+				if timespan.unit.endswith('s'):
+					# Get rid of the plural s in e.g. 'weeks'
+					self.parameters['unit'] = timespan.unit[:-1]
+
+				self.parameters['units'] = timespan.span
+
+				response = self.request(self.endpoints[endpoint])
+
+				self.verify(response,
+							'retrieve {0} for {1}'.format(endpoint, url))
+
+				# For 'clicks' the key has a different name than the endpoint
+				e = endpoint if endpoint != 'clicks' else 'link_clicks'
+
+				data = {'timespan': timespan, 'data': response['data'][e]}
+				results[endpoint].append(data)
+
+		return results
 
 	def get_timespans(self, times, forever):
 		timespans = set()
@@ -113,7 +145,8 @@ class Stats(Command):
 
 		return lines
 
-	def format(self, subject, key, value, full):
+	@staticmethod
+	def format(subject, key, value, full):
 
 		if subject == 'countries':
 			if key == 'None':
@@ -124,32 +157,3 @@ class Stats(Command):
 			key = key.title()
 
 		return '  - {0}: {1}'.format(key, value)
-
-	def get(self, url, timespans, sets):
-		self.parameters['link'] = url
-
-		results = {}
-		for endpoint in sets:
-			results[endpoint] = []
-			for timespan in timespans:
-
-				self.parameters['unit'] = timespan.unit
-
-				if timespan.unit.endswith('s'):
-					# Get rid of the plural s in e.g. 'weeks'
-					self.parameters['unit'] = timespan.unit[:-1]
-
-				self.parameters['units'] = timespan.span
-
-				response = self.request(self.endpoints[endpoint])
-
-				self.verify(response,
-							'retrieve {0} for {1}'.format(endpoint, url))
-
-				# For 'clicks' the key has a different name than the endpoint
-				e = endpoint if endpoint != 'clicks' else 'link_clicks'
-
-				data = {'timespan': timespan, 'data': response['data'][e]}
-				results[endpoint].append(data)
-
-		return results

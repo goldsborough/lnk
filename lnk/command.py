@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import re
 import requests
 
@@ -28,7 +30,8 @@ class Command(object):
 		response = requests.get(url, params=self.parameters)
 		return response.json()
 
-	def verify(self, response, what, sub=None):
+	@staticmethod
+	def verify(response, what, sub=None):
 		if not str(response['status_code']).startswith('2'):
 			raise errors.HTTPError('Could not {}.'.format(what),
 								   response['status_code'],
@@ -40,15 +43,16 @@ class Command(object):
 			what = 'Could not {}.'.format(what)
 			raise errors.APIError(what, data['error'])
 
-	def boxify(self, results):
-		results, width = self.get_escaped(results)
+	@staticmethod
+	def boxify(results):
+		results, width = Command.get_escaped(results)
 
 		border = width + 2
 		lines = ['┌{0}┐'.format('─' * border)]
 
 		for n, result in enumerate(results):
 			for line in result:
-				adjusted = self.ljust(line, width)
+				adjusted = Command.ljust(line, width)
 				lines.append('│ {0} │'.format(adjusted))
 			if n + 1 < len(results):
 				lines.append('├{0}┤'.format('─' * border))
@@ -57,10 +61,18 @@ class Command(object):
 
 		return '\n'.join(lines)
 
-	def ljust(self, line, width):
+	@staticmethod
+	def ljust(line, width):
 		return line.raw + ' ' * (width - len(line.escaped))
 
-	def get_escaped(self, results):
+	@staticmethod
+	def get_escaped(results):
+		pattern = re.compile(r'^(\s*[-+*]\s*)?'    		# list bullet
+							      r'(?:\033\[[\d;]+m)?' # escape codes
+							      r'([\s\w]+)'				# formatted string
+							      r'(?:\033\[[\d;]+m)?' # escape codes
+							      r'(.*)$')				# anything
+
 		Line = namedtuple('Line', ['raw', 'escaped'])
 		width = 0
 		mapped = []
@@ -69,7 +81,7 @@ class Command(object):
 			for line in result:
 				escaped = line
 				if '\033' in line:
-					match = self.get_escaped.line.search(line)
+					match = pattern.search(line)
 					escaped = ''.join([i for i in match.groups() if i])
 				if len(escaped) > width:
 					width = len(escaped)
@@ -77,10 +89,3 @@ class Command(object):
 			mapped.append(lines)
 
 		return mapped, width
-
-	# static variable of boxify
-	get_escaped.line = re.compile(r'^(\s*[-+*]\s*)?'    # list bullet
-							      r'(?:\033\[[\d;]+m)?' # escape codes
-							      r'(\w+)'				# formatted string
-							      r'(?:\033\[[\d;]+m)?' # escape codes
-							      r'(.*)$')				# anything

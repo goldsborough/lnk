@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import click
 import time
 
@@ -28,12 +30,23 @@ class Info(Command):
 		lines = []
 		for url in urls:
 			data = self.get(url, sets)
-			result = self.lineify(url, data, sets)
+			result = self.lineify(url, data)
 			lines.append(result)
 
 		return lines if self.raw else self.boxify(lines)
 
-	def lineify(self, url, data, sets): 
+	def get(self, url, sets):
+		self.parameters['shortUrl'] = url
+
+		response = self.request(self.endpoints['info'])
+		self.verify(response,
+				   "retrieve information for '{0}'".format(url),
+				   'info')
+
+		response = response['data']['info'][0]
+		return {k:v for k,v in response.items() if k in sets.values()}
+
+	def lineify(self, url, data): 
 		line = 'URL: {0}'.format(url)
 		lines = [line]
 		for key, value in data.items():
@@ -49,14 +62,3 @@ class Info(Command):
 			value = 'Not public'
 
 		return '{0}: {1}'.format(key.title(), value)
-
-	def get(self, url, sets):
-		self.parameters['shortUrl'] = url
-
-		response = self.request(self.endpoints['info'])
-		self.verify(response,
-				   "retrieve information for '{0}'".format(url),
-				   'info')
-
-		response = response['data']['info'][0]
-		return {k:v for k,v in response.items() if k in sets.values()}

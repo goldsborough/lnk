@@ -55,7 +55,7 @@ class Config(Service):
 		if values:
 			value = values.pop(0)
 			manager[key] = int(value) if value.isdigit() else value
-			line += " -> {}".format(manager[key])
+			line += " => {}".format(manager[key])
 		return line
 
 	@staticmethod
