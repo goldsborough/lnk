@@ -161,5 +161,11 @@ class Bitly(Service):
 	@click.option('-b',
 				  '--both',
 				  is_flag=True)
-	def history(last, time_range, forever, limit, expanded, both):
-		bitly.history.echo(set(last), set(time_range), forever, limit, expanded, both)
+	@click.option('--list',
+				  '--listed',
+				  is_flag=True)
+	def history(last, time_range, forever, limit, expanded, both, listed):
+		if not last and not time_range and not forever:
+			message = 'Please specify at least one time range (e.g. --forever)'
+			raise click.UsageError(message)
+		bitly.history.echo(set(last), set(time_range), forever, limit, expanded, both, listed)

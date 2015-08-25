@@ -2,19 +2,27 @@
     "url": "https://api-ssl.bitly.com/", 
     "commands": {
         "info": {
-            "sets": {
-                "archived": "archived", 
-                "privacy": "private", 
-                "title": "title", 
-                "modified": "modified_at", 
-                "shares": "shares", 
-                "created": "created_at", 
-                "note": "note", 
-                "user": "created_by"
-            }, 
             "endpoints": {
                 "info": "info", 
                 "history": "user/link_history"
+            }, 
+            "settings": {}, 
+            "sets": {
+                "archived": "archived", 
+                "title": "title", 
+                "created": "created_at", 
+                "modified": "modified_at", 
+                "shares": "shares", 
+                "note": "note", 
+                "privacy": "private", 
+                "user": "created_by",
+                "expanded": "long_url"
+            }
+        }, 
+        "link": {
+            "endpoints": {
+                "shorten": "shorten", 
+                "expand": "expand"
             }, 
             "settings": {}
         }, 
@@ -26,6 +34,11 @@
                 "week", 
                 "month"
             ], 
+            "sets": [
+                "clicks", 
+                "countries", 
+                "referrers"
+            ], 
             "endpoints": {
                 "referrers": "link/referrers", 
                 "clicks": "link/clicks", 
@@ -33,32 +46,13 @@
             }, 
             "settings": {
                 "info": "False", 
-                "span": 1, 
                 "limit": 10, 
+                "span": 1, 
                 "long-countries": true, 
                 "unit": "forever"
-            }, 
-            "sets": [
-                "clicks", 
-                "countries", 
-                "referrers"
-            ]
-        }, 
-        "link": {
-            "endpoints": {
-                "shorten": "shorten", 
-                "expand": "expand"
-            }, 
-            "settings": {}
+            }
         }, 
         "user": {
-            "endpoints": {
-                "info": "user/info"
-            }, 
-            "settings": {
-                "hide-empty": false, 
-                "history": false
-            }, 
             "sets": {
                 "name": "full_name", 
                 "privacy": "default_link_privacy", 
@@ -69,6 +63,13 @@
                 "date": "member_since", 
                 "login": "login", 
                 "display": "display_name"
+            }, 
+            "endpoints": {
+                "info": "user/info"
+            }, 
+            "settings": {
+                "hide-empty": false, 
+                "history": false
             }
         }, 
         "history": {
@@ -84,7 +85,7 @@
             }, 
             "settings": {
                 "limit": 10, 
-                "display": "expanded"
+                "display": "short"
             }
         }
     }, 

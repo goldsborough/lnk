@@ -25,44 +25,48 @@ class History(Command):
 			"month": 18446400
 		}
 
-	def fetch(self, last, ranges, forever, limit, expanded, both):
+	def fetch(self, last, ranges, forever, limit, expanded, both, listed):
 		self.parameters['limit'] = limit
 
-		result = self.forever(expanded, both) if forever else []
-		result += self.ranges(ranges, expanded, both)
-		result += self.last(last, expanded, both)
+		result = self.forever(expanded, both, listed) if forever else []
+		result += self.ranges(ranges, expanded, both, listed)
+		result += self.last(last, expanded, both, listed)
 
 		# Remove last empty line
 		result = result[:-1]
 
+		if listed:
+			return '\n'.join(result)
 		return result if self.raw else self.boxify([result])
 
-	def forever(self, expanded, both):
-		header = ['Since forever:']
-		return header + self.get_list(expanded, both)
+	def forever(self, expanded, both, listed):
+		urls = self.get_list(expanded, both, listed)
+		return urls if listed else ['Since forever:'] + urls
 
-	def ranges(self, ranges, expanded, both):
+	def ranges(self, ranges, expanded, both, listed):
 		lines = []
 		for timespan in ranges:
 			before = timespan[:2]
 			after = timespan[2:]
 
-			header = 'Between {0} {1}'.format(before[0], before[1])
-			header +=' and {0} {1} ago:'.format(after[0], after[1])
-			lines.append(header)
+			if not listed:
+				header = 'Between {0} {1}'.format(before[0], before[1])
+				header +=' and {0} {1} ago:'.format(after[0], after[1])
+				lines.append(header)
 
 			self.set_time(after, before)
-			lines += self.get_list(expanded, both)
+			lines += self.get_list(expanded, both, listed)
 
 		return lines
 
-	def last(self, last, expanded, both):
+	def last(self, last, expanded, both, listed):
 		lines = []
 		for timespan in last:
-			header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
-			lines.append(header)
+			if not listed:
+				header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
+				lines.append(header)
 			self.set_time(timespan)
-			lines += self.get_list(expanded, both)
+			lines += self.get_list(expanded, both, listed)
 		return lines
 
 	def set_time(self, after=None, before=None):
@@ -79,18 +83,21 @@ class History(Command):
 		offset = span * self.seconds[unit]
 		return time.time() - offset
 
-	def get_list(self, expanded, both):
+	def get_list(self, expanded, both, listed):
 		lines = []
 		for url in self.get():
 			if both or expanded is None:
-				expanded = self.link.get_long(url)
-				lines.append(' - {0} => {1}'.format(url, expanded))
-			elif expanded:
-				expanded = self.link.get_long(url)
-				lines.append('- {0}'.format(expanded))
+				line = self.link.get_long(url)
+				if not listed:
+					line = ' - {0} => {1}'.format(url, line)
+				lines.append(line)
 			else:
-				lines.append('- {0}'.format(url))
-		return lines
+				if expanded:
+					url = self.link.get_long(url)
+				if not listed:
+					url = '- {0}'.format(url)
+				lines.append(url)
+		return lines + ['']
 
 	def get(self):
 		response = self.request(self.endpoints['history'])

@@ -25,6 +25,7 @@ class Info(Command):
 
 		result = []
 		for url in urls:
+			url = url.strip() # needed sometimes
 			data = self.get(url, sets.values())
 			lines = self.lineify(url, data, hide_empty)
 			result.append(lines)
