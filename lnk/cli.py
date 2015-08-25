@@ -16,7 +16,8 @@ class Main(click.MultiCommand):
 			self.default = manager['settings']['service']
 			for command in manager['services'] + ['config']:
 				command = command.replace('.', '')
-				self.commands[command] = self.get_function(command)
+				if command == 'bitly':
+					self.commands[command] = self.get_function(command)
 
 	def invoke(self, context):
 		if context.args[0] not in self.commands.keys():
@@ -37,7 +38,8 @@ class Main(click.MultiCommand):
 		with open(filename) as source:
 			code = compile(source.read(), filename, 'exec')
 			eval(code, namespace, namespace)
-		return getattr(namespace[name.title()], 'run')
-		
+		return namespace['main']
 
-main = Main()
+def main(args):
+	command = Main()
+	command.main(args, standalone_mode=False)

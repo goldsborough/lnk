@@ -44,9 +44,9 @@ class APIError(Error):
 	def __init__(self, what, message=None):
 		super(APIError, self).__init__(what, Message=message)
 
-class ParseError(Error):
+class UsageError(Error):
 	def __init__(self, what):
-		super(ParseError, self).__init__(what)
+		super(UsageError, self).__init__(what)
 
 class InvalidKeyError(Error):
 	def __init__(self, what):
@@ -69,13 +69,26 @@ class InternalError(Error):
 		"""
 		super(InternalError, self).__init__(what)
 
+class Catch(object):
+
+	def __init__(self, verbosity=0):
+		self.verbosity = verbosity
+
+	def catch(self, function, *args, **kwargs):
+		try:
+			try:
+				function(*args, **kwargs)
+			except click.ClickException:
+				_, e, _ = sys.exc_info()
+				raise UsageError(e.message)
+		except Error:
+			_, e, _ = sys.exc_info()
+			click.echo('\n'.join(e.levels[:self.verbosity + 1]))	
+
+def catch(function, *args, **kwargs):
+	"""Convenience wrapper for a Catch object with default verbosity."""
+	Catch().catch(function, *args, **kwargs)
+
 def warn(what):
 	what = "\a<Warning>: {}".format(what)
 	click.echo(ecstasy.beautify(what, ecstasy.Color.Yellow))
-
-def catch(verbosity, action, *args, **kwargs):
-	try:
-		action(*args, **kwargs)
-	except Error:
-		_, e, _ = sys.exc_info()
-		click.echo('\n'.join(e.levels[:verbosity + 1]))

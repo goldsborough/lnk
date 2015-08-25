@@ -30,8 +30,7 @@ class Config(Service):
 	@click.option('--all', '--all-keys', is_flag=True)
 	def run(which, command, key, value, quiet, all_keys):
 		if key or all_keys:
-			errors.catch(0,
-						 Config.real_run,
+			errors.catch(Config.real_run,
 						 which, command,
 						 key,
 						 value,

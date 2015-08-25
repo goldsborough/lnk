@@ -10,4 +10,4 @@ args = sys.argv
 if not sys.stdin.isatty():
 	args += sys.stdin.read().split()
 
-cli.main()
+cli.main(args[1:])
