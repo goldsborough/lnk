@@ -71,8 +71,9 @@ class InternalError(Error):
 
 class Catch(object):
 
-	def __init__(self, verbosity=0):
+	def __init__(self, verbosity=0, usage=None):
 		self.verbosity = verbosity
+		self.usage = usage
 
 	def catch(self, function, *args, **kwargs):
 		try:
@@ -83,7 +84,9 @@ class Catch(object):
 				raise UsageError(e.message)
 		except Error:
 			_, e, _ = sys.exc_info()
-			click.echo('\n'.join(e.levels[:self.verbosity + 1]))	
+			click.echo('\n'.join(e.levels[:self.verbosity + 1]))
+			if self.usage:
+				click.echo(self.usage)
 
 def catch(function, *args, **kwargs):
 	"""Convenience wrapper for a Catch object with default verbosity."""

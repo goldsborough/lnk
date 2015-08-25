@@ -44,8 +44,9 @@ def main(context, verbose, args):
 		name = 'link'
 	else:
 		args = args[1:] if args[1:] else ['--help']
-	catch = errors.Catch(verbose)
-	catch.catch(globals()[name].main, args, standalone_mode=False)
+	which = globals()[name]
+	catch = errors.Catch(verbose, which.get_help(context))
+	catch.catch(which.main, args, standalone_mode=False)
 
 @main.command()
 @click.option('-c/-n',
@@ -56,10 +57,12 @@ def main(context, verbose, args):
 			  default=False)
 @click.option('-e',
 			  '--expand',
-			  multiple=True)
+			  multiple=True,
+			  metavar='URL')
 @click.option('-s',
 			  '--shorten',
-			  multiple=True)
+			  multiple=True,
+			  metavar='URL')
 @click.argument('urls', nargs=-1)
 def link(copy, quiet, expand, shorten, urls):
 	bitly.link.echo(copy, quiet, expand, shorten + urls)
