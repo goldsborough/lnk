@@ -7,6 +7,7 @@ import Queue
 import re
 import requests
 import threading
+import sys
 
 import config
 import errors
@@ -17,44 +18,68 @@ class Command(object):
 
 	def __init__(self, service, command):
 		with config.Manager(service) as manager:
-			self.url = manager['url'] + 'v{0}'.format(manager['version'])
+			self.url = manager['url']
+			self.api = '{0}/v{1}'.format(self.url, manager['version'])
 			self.config = manager['commands'][command]
 			self.endpoints = self.config['endpoints']
 			self.settings = self.config.get('settings')
 			self.sets = self.config.get('sets')
 			self.parameters = {'access_token': manager['key']}
-			self.http = re.compile(r'https?://')
-			self.queue = Queue.Queue()
-			self.lock = threading.Lock()
+		self.http = re.compile(r'https?://')	
+		self.queue = Queue.Queue()
+		self.lock = threading.Lock()
+		self.errors = Queue.Queue()
 
 	def fetch(self, *args):
 		raise NotImplementedError
 
-	def request(self, endpoint, parameters):
-		url = '{}/{}'.format(self.url, endpoint)
-		parameters.update(self.parameters)
-		response = requests.get(url, params=parameters)
-		return response.json()
+	def get(self, endpoint, parameters=None):
+		url = '{0}/{1}'.format(self.api, endpoint)
+		if not parameters:
+			parameters = self.parameters
+		else:
+			parameters.update(self.parameters)
 
-	@staticmethod
-	def new_thread(function, *args, **kwargs):
-		thread = threading.Thread(target=function, args=args)
+		return requests.get(url, params=parameters)
+
+	def post(self, endpoint, authorization=None):
+		url = '{0}/{1}'.format(self.url, endpoint)
+
+		return requests.post(url, auth=authorization)
+
+	def new_thread(self, function, *args, **kwargs):
+		def proxy(*args, **kwargs):
+			try:
+				function(*args, **kwargs)
+			except Exception:
+				_, error, _ = sys.exc_info()
+				self.errors.put(error)
+		thread = threading.Thread(target=proxy, args=args, kwargs=kwargs)
 		thread.daemon = True
 		thread.start()
 		return thread
 
+	def join(self, threads, timeout=10):
+		for thread in threads:
+			thread.join(timeout=timeout)
+		if not self.errors.empty():
+			raise self.errors.get()
+
 	@staticmethod
-	def verify(response, what, sub=None):
+	def verify(response, what, inner=None):
+		response = response.json()
 		if not str(response['status_code']).startswith('2'):
 			raise errors.HTTPError('Could not {}.'.format(what),
 								   response['status_code'],
 						           response['status_txt'])
-
-		data = response['data'][sub][0] if sub else response['data']
-
+		data = response['data']
+		if inner:
+			data = data[inner][0]
 		if 'error' in data:
 			what = 'Could not {}.'.format(what)
 			raise errors.APIError(what, data['error'])
+
+		return data
 
 	@staticmethod
 	def boxify(results):
