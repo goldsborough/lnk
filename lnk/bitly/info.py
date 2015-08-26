@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 
 import click
 import time
+import Queue
+import threading
 
 from command import Command
 
@@ -25,10 +27,9 @@ class Info(Command):
 
 		result = []
 		for url in urls:
-			url = url.strip() # needed sometimes
-			data = self.get(url, sets.values())
-			lines = self.lineify(url, data, hide_empty)
-			result.append(lines)
+			self.queue.put(url.strip())
+			self.new_thread(self.get, sets.values(), result, hide_empty)
+		self.queue.join()
 
 		return result if self.raw else self.boxify(result)
 
@@ -40,14 +41,27 @@ class Info(Command):
 			del sets[key]
 		return sets
 
-	def get(self, url, sets):
-		data = self.get_info(url)
-		data.update(self.get_history(url))
-		return {key : data[key] for key in data if key in sets}
+	def get(self, sets, result, hide_empty):
+		data = {}
+		url = self.queue.get()
+		
+		first = self.new_thread(lambda: data.update(self.get_info(url)))
+		second = self.new_thread(lambda: data.update(self.get_history(url)))
+
+		first.join()
+		second.join()
+
+		selection = {key : data[key] for key in data if key in sets}
+		lines = self.lineify(url, selection, hide_empty)
+
+		self.lock.acquire()
+		result.append(lines)
+		self.lock.release()
+
+		self.queue.task_done()
 
 	def get_info(self, url):
-		self.parameters['shortUrl'] = url
-		response = self.request(self.endpoints['info'])
+		response = self.request(self.endpoints['info'], dict(shortUrl=url))
 		self.verify(response,
 				   "retrieve information for '{0}'".format(url),
 				   'info')
@@ -55,7 +69,7 @@ class Info(Command):
 		return response['data']['info'][0]
 
 	def get_history(self, url):
-		response = self.request(self.endpoints['history'])
+		response = self.request(self.endpoints['history'], dict(link=url))
 		self.verify(response,
 				   "retrieve history for '{0}'".format(url))
 		return response['data']['link_history'][0]

@@ -81,6 +81,7 @@ class Catch(object):
 				function(*args, **kwargs)
 			except click.ClickException:
 				_, e, _ = sys.exc_info()
+				# Re-raise as an error we can handle (and format)
 				raise UsageError(e.message)
 		except Error:
 			_, e, _ = sys.exc_info()
@@ -89,7 +90,7 @@ class Catch(object):
 				click.echo(self.usage)
 
 def catch(function, *args, **kwargs):
-	"""Convenience wrapper for a Catch object with default verbosity."""
+	"""Convenience function for a Catch object with default verbosity (0)."""
 	Catch().catch(function, *args, **kwargs)
 
 def warn(what):

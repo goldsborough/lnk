@@ -40,7 +40,7 @@ class History(Command):
 		return result if self.raw else self.boxify([result])
 
 	def forever(self, expanded, both, listed):
-		urls = self.get_list(expanded, both, listed)
+		urls = self.lineify(expanded, both, listed)
 		return urls if listed else ['Since forever:'] + urls
 
 	def ranges(self, ranges, expanded, both, listed):
@@ -55,7 +55,7 @@ class History(Command):
 				lines.append(header)
 
 			self.set_time(after, before)
-			lines += self.get_list(expanded, both, listed)
+			lines += self.lineify(expanded, both, listed)
 
 		return lines
 
@@ -66,7 +66,7 @@ class History(Command):
 				header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
 				lines.append(header)
 			self.set_time(timespan)
-			lines += self.get_list(expanded, both, listed)
+			lines += self.lineify(expanded, both, listed)
 		return lines
 
 	def set_time(self, after=None, before=None):
@@ -83,7 +83,7 @@ class History(Command):
 		offset = span * self.seconds[unit]
 		return time.time() - offset
 
-	def get_list(self, expanded, both, listed):
+	def lineify(self, expanded, both, listed):
 		lines = []
 		for url in self.get():
 			if both or expanded is None:

@@ -4,7 +4,6 @@
 import click
 import ecstasy
 import pyperclip
-import Queue
 import threading
 
 import errors
@@ -20,8 +19,6 @@ class Link(Command):
 		super(Link, self).__init__('bitly', 'link')
 		self.already_copied = False
 		self.raw = raw
-		self.queue = Queue.Queue()
-		self.lock = threading.Lock()
 
 	def fetch(self, copy, quiet, expand, shorten):
 		result = self.shorten_urls(copy, quiet, shorten)
@@ -31,11 +28,13 @@ class Link(Command):
 
 	def expand_urls(self, copy, urls):
 		lines = []
-		self.parameters['longUrl'] = None
 		for url in urls:
-			expanded = self.get_long(url)
-			expanded = self.copy(copy, expanded)
-			lines.append('{0} => {1}'.format(url, expanded))
+			self.queue.put(url)
+			thread = threading.Thread(target=self.expand, args=(lines, copy))
+			thread.setDaemon(True)
+			thread.start()
+		self.queue.join()
+
 		return lines
 
 	def shorten_urls(self, copy, quiet, urls):
@@ -45,37 +44,45 @@ class Link(Command):
 				url = 'http://{0}'.format(url)
 				if not quiet:
 					errors.warn("Prepending 'http://' to {0}".format(url))
-			self.shorten(lines, url, copy)
-			#self.queue.put(url)
-			#args = (lines, copy)
-			#thread = threading.Thread(target=self.shorten, args=args)
-			#thread.setDaemon(True)
-			#thread.start()
-		#self.queue.join()
+			self.queue.put(url)
+			self.new_thread(self.shorten, lines, copy)
+		self.queue.join()
+
 		return lines
 
-	def shorten(self, lines, url, copy):
-		#url = self.queue.get()
+	def expand(self, lines, copy):
+		url = self.queue.get()
+		expanded = self.get_long(url)
+		formatted = self.copy(copy, expanded)
+
+		self.lock.acquire()
+		lines.append('{0} => {1}'.format(url, formatted))
+		self.lock.release()
+
+		self.queue.task_done()
+
+	def shorten(self, lines, copy):
+		url = self.queue.get()
 		short = self.get_short(url)
-		short = self.copy(copy, short)
-		#self.lock.acquire()
-		lines.append('{0} => {1}'.format(url, short))
-		#self.lock.release()
-		#self.queue.task_done()
+		formatted = self.copy(copy, short)
 
-	def get_short(self, url):
-		self.parameters['longUrl'] = url
-		response = self.request(self.endpoints['shorten'])
-		self.verify(response, 'shorten url')
+		self.lock.acquire()
+		lines.append('{0} => {1}'.format(url, formatted))
+		self.lock.release()
 
-		return response['data']['url']
+		self.queue.task_done()
 
 	def get_long(self, url):
-		self.parameters['shortUrl'] = url
-		response = self.request(self.endpoints['expand'])
+		response = self.request(self.endpoints['expand'], dict(shortUrl=url))
 		self.verify(response, 'expand url', 'expand')
 
 		return response['data']['expand'][0]['long_url']
+
+	def get_short(self, url):
+		response = self.request(self.endpoints['shorten'], dict(longUrl=url))
+		self.verify(response, 'shorten url')
+
+		return response['data']['url']
 
 	def copy(self, copy, url):
 		if copy and not self.already_copied:

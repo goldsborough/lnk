@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import click
 import ecstasy
 import time
+import threading
 
 from collections import namedtuple
 
@@ -26,7 +27,6 @@ class Stats(Command):
 
 		self.raw = raw
 		self.info = bitly.info.Info(raw=True)
-
 		self.parameters['timezone'] = time.timezone // 3600
 
 	def fetch(self, only, hide, times, forever, limit, add_info, full, urls):
@@ -56,33 +56,44 @@ class Stats(Command):
 		return result if self.raw else self.boxify(result)
 
 	def get(self, url, timespans, sets):
-		self.parameters['link'] = url
-
+		parameters = {'link': url}
 		results = {}
 		for endpoint in sets:
 			results[endpoint] = []
 			for timespan in timespans:
 
-				self.parameters['unit'] = timespan.unit
+				parameters['unit'] = timespan.unit
 
 				if timespan.unit.endswith('s'):
 					# Get rid of the plural s in e.g. 'weeks'
-					self.parameters['unit'] = timespan.unit[:-1]
+					parameters['unit'] = timespan.unit[:-1]
 
-				self.parameters['units'] = timespan.span
+				parameters['units'] = timespan.span
 
-				response = self.request(self.endpoints[endpoint])
+				self.queue.put((url, endpoint, timespan, parameters))
+				self.new_thread(self.retrieve, results)
 
-				message = 'retrieve {0} for {1}'.format(endpoint, url)
-				self.verify(response, message)
-
-				# For 'clicks' the key has a different name than the endpoint
-				e = endpoint if endpoint != 'clicks' else 'link_clicks'
-
-				data = {'timespan': timespan, 'data': response['data'][e]}
-				results[endpoint].append(data)
+		self.queue.join()
 
 		return results
+
+	def retrieve(self, results):
+		url, endpoint, timespan, parameters = self.queue.get()
+
+		response = self.request(self.endpoints[endpoint], parameters)
+		what = 'retrieve {0} for {1}'.format(endpoint, url)
+		self.verify(response, what)
+
+		# For 'clicks' the key has a different name than the endpoint
+		e = endpoint if endpoint != 'clicks' else 'link_clicks'
+
+		data = {'timespan': timespan, 'data': response['data'][e]}
+
+		self.lock.acquire()
+		results[endpoint].append(data)
+		self.lock.release()
+
+		self.queue.task_done()
 
 	def filter(self, only, hide):
 		sets = self.sets

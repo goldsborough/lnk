@@ -3,8 +3,10 @@
 
 from __future__ import unicode_literals
 
+import Queue
 import re
 import requests
+import threading
 
 import config
 import errors
@@ -22,14 +24,24 @@ class Command(object):
 			self.sets = self.config.get('sets')
 			self.parameters = {'access_token': manager['key']}
 			self.http = re.compile(r'https?://')
+			self.queue = Queue.Queue()
+			self.lock = threading.Lock()
 
 	def fetch(self, *args):
 		raise NotImplementedError
 
-	def request(self, endpoint):
+	def request(self, endpoint, parameters):
 		url = '{}/{}'.format(self.url, endpoint)
-		response = requests.get(url, params=self.parameters)
+		parameters.update(self.parameters)
+		response = requests.get(url, params=parameters)
 		return response.json()
+
+	@staticmethod
+	def new_thread(function, *args, **kwargs):
+		thread = threading.Thread(target=function, args=args)
+		thread.daemon = True
+		thread.start()
+		return thread
 
 	@staticmethod
 	def verify(response, what, sub=None):
