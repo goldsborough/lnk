@@ -3,26 +3,22 @@
 
 import click
 
-from service import Service
+@click.group()
+def main():
+	pass
 
-class Tinyurl(Service):
+@main.command()
+def link():
+	pass
 
-	@click.group()
-	def run():
-		pass
+@main.command()
+def stats():
+	pass
 
-	@run.command()
-	def link():
-		pass
+@main.command()
+def info():
+	pass
 
-	@run.command()
-	def stats():
-		pass
-
-	@run.command()
-	def info():
-		pass
-
-	@run.command()
-	def user():
-		pass
+@main.command()
+def user():
+	pass

@@ -41,9 +41,10 @@ class History(Command):
 
 	def forever(self, expanded, both, pretty):
 		lines = []
-		for url in self.get({}):
+		for url in self.request():
 			line = self.lineify(url, expanded, both, pretty)
-			lines += [line, '']
+			lines.append(line)
+		lines.append('')
 
 		return ['Since forever:'] + lines if pretty else lines
 
@@ -57,11 +58,11 @@ class History(Command):
 				header +=' and {0} {1} ago:'.format(after[0], after[1])
 				lines.append(header)
 			parameters = self.set_time(after, before)
-			for url in self.get(parameters):
+			for url in self.request(parameters):
 				line = self.lineify(url, expanded, both, pretty)
 				lines.append(line)
 
-		return lines
+		return lines + [''] if lines else []
 
 	def last(self, last, expanded, both, pretty):
 		lines = []
@@ -70,11 +71,11 @@ class History(Command):
 				header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
 				lines.append(header)
 			parameters = self.set_time(timespan)
-			for url in self.get(parameters):
+			for url in self.request(parameters):
 				line = self.lineify(url, expanded, both, pretty)
 				lines.append(line)
 
-		return lines
+		return lines + [''] if lines else []
 
 	def set_time(self, after=None, before=None):
 		if before:
@@ -98,8 +99,8 @@ class History(Command):
 			url = self.link.get_long(url)
 		return '- {0}'.format(url) if pretty else url
 
-	def get(self, parameters):
-		response = self.request(self.endpoints['history'], parameters)
-		self.verify(response, 'retrieve history')
+	def request(self, parameters=None):
+		response = self.get(self.endpoints['history'], parameters)
+		response = self.verify(response, 'retrieve history')
 
 		return [i['link'] for i in response['data']['link_history']]

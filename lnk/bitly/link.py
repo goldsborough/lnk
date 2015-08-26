@@ -4,7 +4,7 @@
 import click
 import ecstasy
 import pyperclip
-import threading
+import sys
 
 import errors
 
@@ -28,25 +28,25 @@ class Link(Command):
 
 	def expand_urls(self, copy, urls):
 		lines = []
+		threads = []
 		for url in urls:
 			self.queue.put(url)
-			thread = threading.Thread(target=self.expand, args=(lines, copy))
-			thread.setDaemon(True)
-			thread.start()
-		self.queue.join()
+			threads.append(self.new_thread(self.expand, lines, copy))
+		self.join(threads)
 
 		return lines
 
 	def shorten_urls(self, copy, quiet, urls):
 		lines = []
+		threads = []
 		for url in urls:
 			if not self.http.match(url):
 				url = 'http://{0}'.format(url)
 				if not quiet:
 					errors.warn("Prepending 'http://' to {0}".format(url))
 			self.queue.put(url)
-			self.new_thread(self.shorten, lines, copy)
-		self.queue.join()
+			threads.append(self.new_thread(self.shorten, lines, copy))
+		self.join(threads)
 
 		return lines
 
@@ -59,8 +59,6 @@ class Link(Command):
 		lines.append('{0} => {1}'.format(url, formatted))
 		self.lock.release()
 
-		self.queue.task_done()
-
 	def shorten(self, lines, copy):
 		url = self.queue.get()
 		short = self.get_short(url)
@@ -70,19 +68,18 @@ class Link(Command):
 		lines.append('{0} => {1}'.format(url, formatted))
 		self.lock.release()
 
-		self.queue.task_done()
-
 	def get_long(self, url):
-		response = self.request(self.endpoints['expand'], dict(shortUrl=url))
-		self.verify(response, 'expand url', 'expand')
+		response = self.get(self.endpoints['expand'], dict(shortUrl=url))
+		response = self.verify(response,
+							   "expand url '{0}'".format(url),
+							   'expand')
 
-		return response['data']['expand'][0]['long_url']
+		return response['expand'][0]['long_url']
 
 	def get_short(self, url):
-		response = self.request(self.endpoints['shorten'], dict(longUrl=url))
-		self.verify(response, 'shorten url')
-
-		return response['data']['url']
+		response = self.get(self.endpoints['shorten'], dict(longUrl=url))
+		response = self.verify(response, "shorten url '{0}'".format(url))
+		return response['url']
 
 	def copy(self, copy, url):
 		if copy and not self.already_copied:

@@ -11,6 +11,8 @@ import bitly.stats
 import bitly.info
 import bitly.link
 import bitly.user
+import bitly.history
+import bitly.key
 
 lnk_config = config.Manager('lnk')['settings']
 bitly_config = config.Manager('bitly')
@@ -19,6 +21,7 @@ info_config = bitly_config['commands']['info']
 stats_config = bitly_config['commands']['stats']
 user_config = bitly_config['commands']['user']
 history_config = bitly_config['commands']['history']
+key_config = bitly_config['commands']['key']
 
 units = stats_config['units']
 units += ['{0}s'.format(i) for i in units]
@@ -124,26 +127,26 @@ def stats(only, hide, time, forever, limit, info, long, urls):
 			  multiple=True,
    			  type=click.Choice(user_config['sets']))
 @click.option('-e/-a',
-				  '--everything/--all',
-				  is_flag=True)
+			  '--everything/--all',
+			  is_flag=True)
 @click.option('-h',
-				  '--history/--no-history',
-				  default=user_config['settings']['history'])
+			  '--history/--no-history',
+			  default=user_config['settings']['history'])
 @click.option('--hide-empty',
-				  is_flag=True)
+			  is_flag=True)
 def user(only, hide, everything, history, hide_empty):
 	bitly.user.echo(only, hide, everything, history, hide_empty)
 
 @main.command()
 @click.option('-t',
 			  '--time',
-			      '--last',
+		      '--last',
 		      nargs=2,
 		      multiple=True,
 		      type=(int, click.Choice(units)))
 @click.option('-r',
 			  '--range',
-			      '--time-range',
+		      '--time-range',
 		      nargs=4,
 		      multiple=True,
 		      type=(int, click.Choice(units), int, click.Choice(units)))
@@ -169,3 +172,19 @@ def history(last, time_range, forever, limit, expanded, both, pretty):
 	if not both and expanded is None:
 		both = True
 	bitly.history.echo(last, time_range, forever, limit, expanded, both, pretty)
+
+@main.command()
+@click.option('--generate', is_flag=True)
+@click.option('-l',
+			  '--login',
+			  prompt=True)
+@click.option('-p',
+			  '--password',
+			  prompt=True,
+			  hide_input=True,
+              confirmation_prompt=True)
+@click.option('-s/-h',
+			  '--show/--hide',
+			  default=key_config['settings']['show'])
+def key(generate, login, password, show):
+	bitly.key.echo(generate, login, password, show)

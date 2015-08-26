@@ -31,7 +31,7 @@ class User(Command):
 
 	def fetch(self, only, hide, _, history, hide_empty):
 		sets = self.filter(only, hide)
-		data = self.get(sets.values())
+		data = self.request(sets.values())
 		result = self.lineify(data, hide_empty)
 
 		if history:
@@ -68,10 +68,9 @@ class User(Command):
 			value = time.ctime(value)
 		return '{0}: {1}'.format(self.keys[key], value)
 
-	def get(self, sets):
-		response = self.request(self.endpoints['info'])
-		self.verify(response, 'retrieve user info')
-		data = response['data']
+	def request(self, sets):
+		response = self.get(self.endpoints['info'])
+		data = self.verify(response, 'retrieve user info')
 
 		return self.order(data, sets)
 

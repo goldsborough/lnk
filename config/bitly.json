@@ -1,29 +1,22 @@
 {
-    "url": "https://api-ssl.bitly.com/", 
+    "url": "https://api-ssl.bitly.com", 
     "commands": {
         "info": {
-            "endpoints": {
-                "info": "info", 
-                "history": "user/link_history"
-            }, 
-            "settings": {}, 
             "sets": {
                 "archived": "archived", 
-                "title": "title", 
                 "created": "created_at", 
+                "expanded": "long_url", 
                 "modified": "modified_at", 
                 "shares": "shares", 
                 "note": "note", 
                 "privacy": "private", 
-                "user": "created_by",
-                "expanded": "long_url",
+                "user": "created_by", 
+                "title": "title", 
                 "tags": "tags"
-            }
-        }, 
-        "link": {
+            }, 
             "endpoints": {
-                "shorten": "shorten", 
-                "expand": "expand"
+                "info": "info", 
+                "history": "user/link_history"
             }, 
             "settings": {}
         }, 
@@ -35,11 +28,6 @@
                 "week", 
                 "month"
             ], 
-            "sets": [
-                "clicks", 
-                "countries", 
-                "referrers"
-            ], 
             "endpoints": {
                 "referrers": "link/referrers", 
                 "clicks": "link/clicks", 
@@ -47,30 +35,49 @@
             }, 
             "settings": {
                 "info": "False", 
-                "limit": 10, 
                 "span": 1, 
+                "limit": 10, 
                 "long-countries": true, 
                 "unit": "forever"
-            }
+            }, 
+            "sets": [
+                "clicks", 
+                "countries", 
+                "referrers"
+            ]
+        }, 
+        "link": {
+            "endpoints": {
+                "shorten": "shorten", 
+                "expand": "expand"
+            }, 
+            "settings": {}
         }, 
         "user": {
-            "sets": {
-                "name": "full_name", 
-                "privacy": "default_link_privacy", 
-                "url": "profile_url", 
-                "image": "profile_image", 
-                "share": "share_accounts", 
-                "key": "apiKey", 
-                "date": "member_since", 
-                "login": "login", 
-                "display": "display_name"
-            }, 
             "endpoints": {
                 "info": "user/info"
             }, 
             "settings": {
                 "hide-empty": false, 
                 "history": false
+            }, 
+            "sets": {
+                "name": "full_name", 
+                "privacy": "default_link_privacy", 
+                "url": "profile_url", 
+                "image": "profile_image", 
+                "share": "share_accounts",
+                "date": "member_since", 
+                "login": "login", 
+                "display": "display_name"
+            }
+        }, 
+        "key": {
+            "endpoints": {
+                "oauth": "oauth/access_token"
+            }, 
+            "settings": {
+                "show": false
             }
         }, 
         "history": {
@@ -86,13 +93,13 @@
             }, 
             "settings": {
                 "limit": 10, 
-                "display": "short",
+                "display": "short", 
                 "pretty": true
             }
         }
     }, 
     "version": 3, 
-    "key": "5513e7f7be612347354bfbbcb9fc584f27da9243", 
+    "key": "c0b14bd71e4e9e5b9fc3841ac62115fd4b98eaac", 
     "settings": {
         "user": {
             "login": null

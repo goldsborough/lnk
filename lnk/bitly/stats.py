@@ -48,14 +48,14 @@ class Stats(Command):
 				line = ecstasy.beautify(line, ecstasy.Color.Red)
 				header[n] = line
 
-			data = self.get(url, timespans, sets)
+			data = self.request(url, timespans, sets)
 			lines = self.lineify(data, full)
 
 			result.append(header + lines)
 
 		return result if self.raw else self.boxify(result)
 
-	def get(self, url, timespans, sets):
+	def request(self, url, timespans, sets):
 		parameters = {'link': url}
 		results = {}
 		for endpoint in sets:
@@ -82,7 +82,7 @@ class Stats(Command):
 
 		response = self.request(self.endpoints[endpoint], parameters)
 		what = 'retrieve {0} for {1}'.format(endpoint, url)
-		self.verify(response, what)
+		response = self.verify(response, what)
 
 		# For 'clicks' the key has a different name than the endpoint
 		e = endpoint if endpoint != 'clicks' else 'link_clicks'

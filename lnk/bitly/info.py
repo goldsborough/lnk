@@ -41,7 +41,7 @@ class Info(Command):
 			del sets[key]
 		return sets
 
-	def get(self, sets, result, hide_empty):
+	def request(self, sets, result, hide_empty):
 		data = {}
 		url = self.queue.get()
 
@@ -60,18 +60,18 @@ class Info(Command):
 
 		self.queue.task_done()
 
-	def get_info(self, url):
-		response = self.request(self.endpoints['info'], dict(shortUrl=url))
-		self.verify(response,
-				   "retrieve information for '{0}'".format(url),
-				   'info')
+	def request_info(self, url):
+		response = self.get(self.endpoints['info'], dict(shortUrl=url))
+		response = self.verify(response,
+							   "retrieve information for '{0}'".format(url),
+							   'info')
 
 		return response['data']['info'][0]
 
-	def get_history(self, url):
-		response = self.request(self.endpoints['history'], dict(link=url))
-		self.verify(response,
-				   "retrieve history for '{0}'".format(url))
+	def request_history(self, url):
+		response = self.get(self.endpoints['history'], dict(link=url))
+		response = self.verify(response,
+				   			   "retrieve history for '{0}'".format(url))
 		return response['data']['link_history'][0]
 
 	def lineify(self, url, data, hide_empty): 

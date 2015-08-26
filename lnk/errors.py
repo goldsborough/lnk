@@ -80,12 +80,12 @@ class Catch(object):
 			try:
 				function(*args, **kwargs)
 			except click.ClickException:
-				_, e, _ = sys.exc_info()
+				_, error, _ = sys.exc_info()
 				# Re-raise as an error we can handle (and format)
-				raise UsageError(e.message)
+				raise UsageError(error.message)
 		except Error:
-			_, e, _ = sys.exc_info()
-			click.echo('\n'.join(e.levels[:self.verbosity + 1]))
+			_, error, _ = sys.exc_info()
+			click.echo('\n'.join(error.levels[:self.verbosity + 1]))
 			if self.usage:
 				click.echo(self.usage)
 

@@ -15,9 +15,8 @@ class Main(click.MultiCommand):
 		with config.Manager('lnk') as manager:
 			self.default = manager['settings']['service']
 			for command in manager['services'] + ['config']:
-				command = command.replace('.', '')
-				if command == 'bitly':
-					self.commands[command] = self.get_function(command)
+				command = command.replace('.', '') # goo.gl -> googl
+				self.commands[command] = self.get_function(command)
 
 	def invoke(self, context):
 		if context.args[0] not in self.commands.keys():
