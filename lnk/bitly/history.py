@@ -25,48 +25,55 @@ class History(Command):
 			"month": 18446400
 		}
 
-	def fetch(self, last, ranges, forever, limit, expanded, both, listed):
+	def fetch(self, last, ranges, forever, limit, expanded, both, pretty):
 		self.parameters['limit'] = limit
 
-		result = self.forever(expanded, both, listed) if forever else []
-		result += self.ranges(ranges, expanded, both, listed)
-		result += self.last(last, expanded, both, listed)
+		result = self.forever(expanded, both, pretty) if forever else []
+		result += self.ranges(set(ranges), expanded, both, pretty)
+		result += self.last(set(last), expanded, both, pretty)
 
 		# Remove last empty line
 		result = result[:-1]
 
-		if listed:
+		if not pretty:
 			return '\n'.join(result)
 		return result if self.raw else self.boxify([result])
 
-	def forever(self, expanded, both, listed):
-		urls = self.lineify(expanded, both, listed)
-		return urls if listed else ['Since forever:'] + urls
+	def forever(self, expanded, both, pretty):
+		lines = []
+		for url in self.get({}):
+			line = self.lineify(url, expanded, both, pretty)
+			lines += [line, '']
 
-	def ranges(self, ranges, expanded, both, listed):
+		return ['Since forever:'] + lines if pretty else lines
+
+	def ranges(self, ranges, expanded, both, pretty):
 		lines = []
 		for timespan in ranges:
 			before = timespan[:2]
 			after = timespan[2:]
-
-			if not listed:
+			if pretty:
 				header = 'Between {0} {1}'.format(before[0], before[1])
 				header +=' and {0} {1} ago:'.format(after[0], after[1])
 				lines.append(header)
-
-			self.set_time(after, before)
-			lines += self.lineify(expanded, both, listed)
+			parameters = self.set_time(after, before)
+			for url in self.get(parameters):
+				line = self.lineify(url, expanded, both, pretty)
+				lines.append(line)
 
 		return lines
 
-	def last(self, last, expanded, both, listed):
+	def last(self, last, expanded, both, pretty):
 		lines = []
 		for timespan in last:
-			if not listed:
+			if pretty:
 				header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
 				lines.append(header)
-			self.set_time(timespan)
-			lines += self.lineify(expanded, both, listed)
+			parameters = self.set_time(timespan)
+			for url in self.get(parameters):
+				line = self.lineify(url, expanded, both, pretty)
+				lines.append(line)
+
 		return lines
 
 	def set_time(self, after=None, before=None):
@@ -83,24 +90,16 @@ class History(Command):
 		offset = span * self.seconds[unit]
 		return time.time() - offset
 
-	def lineify(self, expanded, both, listed):
-		lines = []
-		for url in self.get():
-			if both or expanded is None:
-				line = self.link.get_long(url)
-				if not listed:
-					line = ' - {0} => {1}'.format(url, line)
-				lines.append(line)
-			else:
-				if expanded:
-					url = self.link.get_long(url)
-				if not listed:
-					url = '- {0}'.format(url)
-				lines.append(url)
-		return lines + ['']
+	def lineify(self, url, expanded, both, pretty):
+		if not pretty and both:
+			expanded = self.link.get_long(url)
+			return ' - {0} => {1}'.format(url, expanded)
+		if expanded:
+			url = self.link.get_long(url)
+		return '- {0}'.format(url) if pretty else url
 
-	def get(self):
-		response = self.request(self.endpoints['history'])
+	def get(self, parameters):
+		response = self.request(self.endpoints['history'], parameters)
 		self.verify(response, 'retrieve history')
 
 		return [i['link'] for i in response['data']['link_history']]

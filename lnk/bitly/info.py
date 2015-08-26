@@ -44,12 +44,12 @@ class Info(Command):
 	def get(self, sets, result, hide_empty):
 		data = {}
 		url = self.queue.get()
-		
+
 		first = self.new_thread(lambda: data.update(self.get_info(url)))
 		second = self.new_thread(lambda: data.update(self.get_history(url)))
 
-		first.join()
-		second.join()
+		first.join(timeout=10)
+		second.join(timeout=10)
 
 		selection = {key : data[key] for key in data if key in sets}
 		lines = self.lineify(url, selection, hide_empty)
@@ -80,7 +80,7 @@ class Info(Command):
 			if hide_empty and (value is None or value == ''):
 				continue
 			if isinstance(value, list):
-				lines.append(self.format(key))
+				lines.append(self.format(key, value))
 				lines += [' - {0}'.format(i) for i in value]
 			else:
 				lines.append(self.format(key, value))
@@ -97,6 +97,8 @@ class Info(Command):
 
 		if isinstance(value, bool):
 			value = 'Yes' if value else 'No'
+		elif isinstance(value, list):
+			value = ''
 		elif not value:
 			value = 'None'
 

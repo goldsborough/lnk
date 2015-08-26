@@ -159,11 +159,13 @@ def user(only, hide, everything, history, hide_empty):
 @click.option('-b',
 			  '--both',
 			  is_flag=True)
-@click.option('--list',
-			  '--listed',
-			  is_flag=True)
-def history(last, time_range, forever, limit, expanded, both, listed):
+@click.option('--pretty/--plain',
+			  default=history_config['settings']['pretty'])
+def history(last, time_range, forever, limit, expanded, both, pretty):
 	if not last and not time_range and not forever:
 		message = 'Please specify at least one time range (e.g. --forever)'
 		raise click.UsageError(message)
-	bitly.history.echo(set(last), set(time_range), forever, limit, expanded, both, listed)
+	# Default case for both
+	if not both and expanded is None:
+		both = True
+	bitly.history.echo(last, time_range, forever, limit, expanded, both, pretty)

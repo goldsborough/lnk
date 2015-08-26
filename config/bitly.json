@@ -16,7 +16,8 @@
                 "note": "note", 
                 "privacy": "private", 
                 "user": "created_by",
-                "expanded": "long_url"
+                "expanded": "long_url",
+                "tags": "tags"
             }
         }, 
         "link": {
@@ -85,7 +86,8 @@
             }, 
             "settings": {
                 "limit": 10, 
-                "display": "short"
+                "display": "short",
+                "pretty": true
             }
         }
     }, 
