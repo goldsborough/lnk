@@ -18,7 +18,9 @@
                 "info": "info", 
                 "history": "user/link_history"
             }, 
-            "settings": {}
+            "settings": {
+                "hide-empty": false
+            }
         }, 
         "stats": {
             "units": [

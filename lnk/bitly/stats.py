@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import click
 import ecstasy
 import time
-import threading
 
 from collections import namedtuple
 
