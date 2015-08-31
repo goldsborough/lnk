@@ -6,7 +6,7 @@ import time
 
 import bitly.link
 
-from command import Command
+from bitly.command import Command
 
 def echo(*args):
 	click.echo(History().fetch(*args))
@@ -14,7 +14,7 @@ def echo(*args):
 class History(Command):
 
 	def __init__(self, raw=False):
-		super(History, self).__init__('bitly', 'history')
+		super(History, self).__init__('history')
 		self.raw = raw
 		self.link = bitly.link.Link(raw=True)
 		self.seconds = {
@@ -35,9 +35,9 @@ class History(Command):
 		# Remove last empty line
 		result = result[:-1]
 
-		if not pretty:
-			return '\n'.join(result)
-		return result if self.raw else self.boxify([result])
+		if self.raw:
+			return result
+		return self.boxify([result]) if pretty else '\n'.join(result)
 
 	def forever(self, expanded, both, pretty):
 		lines = []

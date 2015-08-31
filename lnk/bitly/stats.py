@@ -12,7 +12,7 @@ from collections import namedtuple
 import bitly.countries
 import bitly.info
 
-from command import Command
+from bitly.command import Command
 
 def echo(*args):
 	click.echo(Stats().fetch(*args))
@@ -22,7 +22,7 @@ class Stats(Command):
 	Timespan = namedtuple('Timespan', ['span', 'unit'])
 
 	def __init__(self, raw=False):
-		super(Stats, self).__init__('bitly', 'stats')
+		super(Stats, self).__init__('stats')
 
 		self.raw = raw
 		self.info = bitly.info.Info(raw=True)

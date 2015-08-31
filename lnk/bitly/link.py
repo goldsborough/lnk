@@ -15,15 +15,18 @@ def echo(*args):
 class Link(Command):
 
 	def __init__(self, raw=False):
-		super(Link, self).__init__('bitly', 'link')
+		super(Link, self).__init__('link')
 		self.already_copied = False
 		self.raw = raw
 
-	def fetch(self, copy, quiet, expand, shorten):
+	def fetch(self, copy, quiet, expand, shorten, pretty):
+		pretty = pretty or self.raw
 		result = self.shorten_urls(copy, quiet, shorten)
 		result += self.expand_urls(copy, expand)
 
-		return result if self.raw else self.boxify([result])
+		if self.raw:
+			return result
+		return self.boxify([result]) if pretty else '\n'.join(result)
 
 	def expand_urls(self, copy, urls):
 		lines = []
@@ -42,7 +45,7 @@ class Link(Command):
 			if not self.http.match(url):
 				url = 'http://{0}'.format(url)
 				if not quiet:
-					errors.warn("Prepending 'http://' to {0}".format(url))
+					errors.warn("Prepending 'http://' to '{0}'".format(url))
 			self.queue.put(url)
 			threads.append(self.new_thread(self.shorten, lines, copy))
 		self.join(threads)
@@ -82,7 +85,7 @@ class Link(Command):
 
 	def copy(self, copy, url):
 		if copy and not self.already_copied:
+			self.already_copied = True
 			pyperclip.copy(url)
 			url = ecstasy.beautify('<{0}>'.format(url), ecstasy.Style.Bold)
-			self.already_copied = True
 		return url

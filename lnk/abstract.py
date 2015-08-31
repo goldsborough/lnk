@@ -14,7 +14,7 @@ import errors
 
 from collections import namedtuple
 
-class Command(object):
+class AbstractCommand(object):
 
 	def __init__(self, service, command):
 		with config.Manager(service) as manager:
@@ -24,7 +24,6 @@ class Command(object):
 			self.endpoints = self.config['endpoints']
 			self.settings = self.config.get('settings')
 			self.sets = self.config.get('sets')
-			self.parameters = {'access_token': manager['key']}
 		self.http = re.compile(r'https?://')	
 		self.queue = Queue.Queue()
 		self.lock = threading.Lock()
@@ -69,28 +68,28 @@ class Command(object):
 	def verify(response, what, inner=None):
 		response = response.json()
 		if not str(response['status_code']).startswith('2'):
-			raise errors.HTTPError('Could not {}.'.format(what),
+			raise errors.HTTPError('Could not {0}.'.format(what),
 								   response['status_code'],
 						           response['status_txt'])
 		data = response['data']
 		if inner:
 			data = data[inner][0]
 		if 'error' in data:
-			what = 'Could not {}.'.format(what)
+			what = 'Could not {0}.'.format(what)
 			raise errors.APIError(what, data['error'])
 
 		return data
 
 	@staticmethod
 	def boxify(results):
-		results, width = Command.get_escaped(results)
+		results, width = AbstractCommand.get_escaped(results)
 
 		border = width + 2
 		lines = ['┌{0}┐'.format('─' * border)]
 
 		for n, result in enumerate(results):
 			for line in result:
-				adjusted = Command.ljust(line, width)
+				adjusted = AbstractCommand.ljust(line, width)
 				lines.append('│ {0} │'.format(adjusted))
 			if n + 1 < len(results):
 				lines.append('├{0}┤'.format('─' * border))

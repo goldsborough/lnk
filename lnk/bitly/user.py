@@ -10,14 +10,14 @@ from collections import OrderedDict
 
 import bitly.history
 
-from command import Command
+from bitly.command import Command
 
 def echo(*args):
 	click.echo(User().fetch(*args))
 
 class User(Command):
 	def __init__(self, raw=False):
-		super(User, self).__init__('bitly', 'user')
+		super(User, self).__init__('user')
 		self.history = bitly.history.History(raw=True)
 		self.raw = raw
 		self.keys = {}

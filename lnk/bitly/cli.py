@@ -3,7 +3,6 @@
 
 import click
 
-import command
 import config
 import errors
 
@@ -17,6 +16,7 @@ import bitly.key
 lnk_config = config.Manager('lnk')['settings']
 bitly_config = config.Manager('bitly')
 
+link_config = bitly_config['commands']['link']
 info_config = bitly_config['commands']['info']
 stats_config = bitly_config['commands']['stats']
 user_config = bitly_config['commands']['user']
@@ -72,10 +72,13 @@ def main(context, verbose, args):
 			  multiple=True,
 			  metavar='URL',
 			  help='Shorten a long url.')
+@click.option('--pretty/--plain',
+			  default=link_config['settings']['pretty'],
+			  help='Whether to show the links in a pretty box or as a plain list.')
 @click.argument('urls', nargs=-1)
-def link(copy, quiet, expand, shorten, urls):
+def link(copy, quiet, expand, shorten, urls, pretty):
 	"""Link shortening and expansion."""
-	bitly.link.echo(copy, quiet, expand, shorten + urls)
+	bitly.link.echo(copy, quiet, expand, shorten + urls, pretty)
 
 @main.command()
 @click.option('-o',
@@ -195,7 +198,7 @@ def user(only, hide, everything, history, hide_empty):
 			  help='Whether to show expanded and shortened links.')
 @click.option('--pretty/--plain',
 			  default=history_config['settings']['pretty'],
-			  help='Whether to show the history in a pretty box or as a raw list.')
+			  help='Whether to show the history in a pretty box or as a plain list.')
 def history(last, time_range, forever, limit, expanded, both, pretty):
 	"""Retrieve link history."""
 	if not last and not time_range and not forever:

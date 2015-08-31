@@ -53,7 +53,9 @@
                 "shorten": "shorten", 
                 "expand": "expand"
             }, 
-            "settings": {}
+            "settings": {
+                "pretty": true
+            }
         }, 
         "user": {
             "endpoints": {
@@ -102,9 +104,5 @@
     }, 
     "version": 3, 
     "key": "c0b14bd71e4e9e5b9fc3841ac62115fd4b98eaac", 
-    "settings": {
-        "user": {
-            "login": null
-        }
-    }
+    "settings": { }
 }

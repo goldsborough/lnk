@@ -5,10 +5,8 @@ from __future__ import unicode_literals
 
 import click
 import time
-import Queue
-import threading
 
-from command import Command
+from bitly.command import Command
 
 def echo(*args):
 	click.echo(Info().fetch(*args))
@@ -16,7 +14,7 @@ def echo(*args):
 class Info(Command):
 
 	def __init__(self, raw=False):
-		super(Info, self).__init__('bitly', 'info')
+		super(Info, self).__init__('info')
 
 		self.raw = raw
 		self.sets = self.config['sets']

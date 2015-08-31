@@ -6,7 +6,7 @@ import click
 import errors
 import config
 
-from command import Command
+from bitly.command import Command
 
 CLIENT_ID = '049118cdcf01c6b267f77582990d48da9127259a'
 CLIENT_SECRET = 'b5257382fd1c7118688cae7942d5128b4d995c9e'
@@ -17,7 +17,7 @@ def echo(*args):
 class Key(Command):
 
 	def __init__(self, raw=False):
-		super(Key, self).__init__('bitly', 'key')
+		super(Key, self).__init__('key')
 		self.raw = raw
 		self.parameters['client_id'] = CLIENT_ID
 		self.parameters['client_service'] = CLIENT_SECRET
