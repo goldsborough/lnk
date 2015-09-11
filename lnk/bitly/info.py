@@ -64,18 +64,18 @@ class Info(Command):
 							   "retrieve information for '{0}'".format(url),
 							   'info')
 
-		return response['data']['info'][0]
+		return response
 
 	def request_history(self, url):
 		response = self.get(self.endpoints['history'], dict(link=url))
 		response = self.verify(response,
 				   			   "retrieve history for '{0}'".format(url))
-		return response['data']['link_history'][0]
+		return response['link_history'][0]
 
 	def lineify(self, url, data, hide_empty): 
 		lines = ['URL: {0}'.format(url)]
 		for key, value in data.items():
-			if hide_empty and (value is None or value == ''):
+			if hide_empty and (not value and value != 0):
 				continue
 			if isinstance(value, list):
 				lines.append(self.format(key, value))
@@ -95,9 +95,9 @@ class Info(Command):
 
 		if isinstance(value, bool):
 			value = 'Yes' if value else 'No'
-		elif isinstance(value, list):
-			value = ''
 		elif not value:
 			value = 'None'
+		elif isinstance(value, list):
+			value = ''
 
 		return '{0}: {1}'.format(key.title(), value)

@@ -122,8 +122,7 @@ def info(only, hide, hide_empty, urls):
 @click.option('--forever',
 			  is_flag=True,
 			  help='Show statistics for all timespans (since forever).')
-@click.option('-l',
-			  '--limit',
+@click.option('--limit',
 			  type=int,
 			  default=stats_config['settings']['limit'],
 			  help='Limit the amount of statistics retrieved per set.')
