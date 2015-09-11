@@ -4,9 +4,9 @@
 import click
 import time
 
-import bitly.link
+import googl.link
 
-from bitly.command import Command
+from googl.command import Command
 
 def echo(*args):
 	click.echo(History().fetch(*args))
@@ -104,4 +104,4 @@ class History(Command):
 		response = self.get(self.endpoints['history'], parameters)
 		response = self.verify(response, 'retrieve history')
 
-		return [i['link'] for i in response['link_history']]
+		return [i['link'] for i in response['data']['link_history']]

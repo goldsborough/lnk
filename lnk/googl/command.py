@@ -3,6 +3,8 @@
 
 import config
 import errors
+import json
+import requests
 
 from abstract import AbstractCommand
 
@@ -10,7 +12,7 @@ class Command(AbstractCommand):
 	def __init__(self, which):
 		super(Command, self).__init__('googl', which)
 		with config.Manager('googl') as manager:
-			self.parameters = {'access_token': manager['key']}
+			self.parameters = {'key': manager['key']}
 
 	@staticmethod
 	def verify(response, what):
@@ -19,8 +21,13 @@ class Command(AbstractCommand):
 			raise errors.HTTPError('Could not {0}.'.format(what),
 								   response['error']['code'],
 						           response['error']['message'])
-		elif response['status'] == 'MALWARE':
-			errors.warn("goo.gl believes the url '{0}' is malware"
-						"!".format(response['longUrl']))
 
-		return data
+		return response
+
+	def post(self, endpoint, data=None):
+		url = '{0}/{1}'.format(self.api, endpoint)
+		headers = {'content-type': 'application/json'}
+		return requests.post(url,
+							 params=self.parameters,
+							 data=json.dumps(data),
+							 headers=headers)

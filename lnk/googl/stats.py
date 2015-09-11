@@ -12,7 +12,7 @@ from collections import namedtuple
 import countries
 import bitly.info
 
-from bitly.command import Command
+from googl.command import Command
 
 def echo(*args):
 	click.echo(Stats().fetch(*args))
@@ -25,12 +25,10 @@ class Stats(Command):
 		super(Stats, self).__init__('stats')
 
 		self.raw = raw
-		self.info = bitly.info.Info(raw=True)
-		self.parameters['timezone'] = time.timezone // 3600
+		self.info = googl.info.Info(raw=True)
+		self.parameters['projection'] = 'FULL'
 
-	def fetch(self, only, hide, times, forever, limit, add_info, full, urls):
-		self.parameters['limit'] = limit
-
+	def fetch(self, only, hide, times, forever, add_info, full, urls):
 		sets = self.filter(only, hide)
 		timespans = self.get_timespans(times, forever)
 		info = self.info.fetch(only, hide, urls) if add_info else []
@@ -74,17 +72,22 @@ class Stats(Command):
 
 		return results
 
-	def request(self, results):
-		url, endpoint, timespan, parameters = self.queue.get()
+	def request(self, url, timespans, sets, results):
 
-		response = self.get(self.endpoints[endpoint], parameters)
-		what = "retrieve {0} for '{1}'".format(endpoint, url)
+		response = self.get(self.endpoints['stats'], dict(shortUrl=url))
+		what = "retrieve statistics for '{1}'".format(url)
 		response = self.verify(response, what)
 
-		# For 'clicks' the key has a different name than the endpoint
-		e = endpoint if endpoint != 'clicks' else 'link_clicks'
-
-		data = {'timespan': timespan, 'data': response['data'][e]}
+		statistics = response['analytics']
+		data = {}
+		for item in sets:
+			point = []
+			for timespan in statistics:
+				if timespan in timespans:
+					point.append({
+						'timespan': timespan,
+						'data': statistics[timespan].get(item)
+					})
 
 		self.lock.acquire()
 		results[endpoint].append(data)
@@ -99,22 +102,6 @@ class Stats(Command):
 		for i in hide:
 			del sets[i]
 		return sets
-
-	def get_timespans(self, times, forever):
-		timespans = set()
-		if not times:
-			unit = self.settings['unit']
-			if unit == 'forever':
-				timespans.add(Stats.Timespan(-1, 'day'))
-			else:
-				timespans.add(Stats.Timespan(self.settings['span'], unit))
-		else:
-			if forever:
-				# -1 = since forever (unit could be any)
-				timespans.add(Stats.Timespan(-1, 'day'))
-			for span, unit in times:
-				timespans.add(Stats.Timespan(span, unit))
-		return timespans
 
 	def lineify(self, data, full): 
 		lines = []
@@ -152,6 +139,21 @@ class Stats(Command):
 				lines[-1] += ' {0}'.format(items)
 
 		return lines
+
+	def get_timespans(self, times, forever):
+		timespans = set()
+		if not times:
+			unit = self.settings['unit']
+			if unit == 'forever':
+				timespans.add(Stats.Timespan(-1, 'allTime'))
+			else:
+				timespans.add(Stats.Timespan(self.settings['span'], unit))
+		else:
+			if forever:
+				timespans.add(Stats.Timespan(-1, 'forever'))
+			for span, unit in times:
+				timespans.add(Stats.Timespan(span, unit))
+		return timespans
 
 	@staticmethod
 	def format(subject, key, value, full):

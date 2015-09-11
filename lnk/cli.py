@@ -19,8 +19,11 @@ class Main(click.MultiCommand):
 				self.commands[command] = self.get_function(command)
 
 	def invoke(self, context):
-		if context.args[0] not in self.commands.keys():
+		escaped = context.args[0].replace('.', '')
+		if escaped not in self.commands.keys():
 			context.args.insert(0, self.default)
+		else:
+			context.args[0] = escaped
 		super(Main, self).invoke(context)
 
 	def list_commands(self, context):

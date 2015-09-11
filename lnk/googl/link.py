@@ -20,7 +20,6 @@ class Link(Command):
 		self.raw = raw
 
 	def fetch(self, copy, quiet, expand, shorten, pretty):
-		pretty = pretty or self.raw
 		result = self.shorten_urls(copy, quiet, shorten)
 		result += self.expand_urls(copy, expand)
 
@@ -74,13 +73,20 @@ class Link(Command):
 		response = self.get(self.endpoints['expand'], dict(shortUrl=url))
 		response = self.verify(response, "expand url '{0}'".format(url))
 
+		if response['status'] in ['MALWARE', 'PHISHING']:
+			errors.warn("Careful! goo.gl believes the url '{0}' is {1}"
+						"!".format(response['longUrl']),
+								   response['status'].lower())
+		elif response['status'] == 'REMOVED':
+			return '{0} (removed)'.format(response['longUrl'])
+
 		return response['longUrl']
 
 	def get_short(self, url):
-		response = self.post(self.endpoints['shorten'], data=dict(longUrl=url))
+		response = self.post(self.endpoints['shorten'], dict(longUrl=url))
 		response = self.verify(response, "shorten url '{0}'".format(url))
 
-		return response['url']
+		return response['id']
 
 	def copy(self, copy, url):
 		if copy and not self.already_copied:

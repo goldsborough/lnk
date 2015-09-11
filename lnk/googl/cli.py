@@ -10,8 +10,8 @@ import googl.link
 import googl.info
 import googl.stats
 import googl.history
-import googl.user
-import googl.key
+#import googl.user
+#import googl.key
 
 lnk_config = config.Manager('lnk')['settings']
 googl_config = config.Manager('googl')
@@ -97,3 +97,36 @@ def link(copy, quiet, expand, shorten, urls, pretty):
 def info(only, hide, urls):
 	"""Information about links."""
 	googl.info.echo(only, hide, urls)
+
+@main.command()
+@click.option('-o',
+   			  '--only',
+   		 	  multiple=True,
+   			  type=click.Choice(stats_config['sets']),
+   			  help='Display only this/these set(s) of statistics.')
+@click.option('-h',
+			  '--hide',
+			  multiple=True,
+   			  type=click.Choice(stats_config['sets']),
+   			  help='Hide this/these set(s) of statistics.')
+@click.option('-t',
+			  '--time',
+		      nargs=2,
+		      multiple=True,
+		      type=(int, click.Choice(units)),
+		      help='Show statistics for this/these timespan(s).')
+@click.option('--forever',
+			  is_flag=True,
+			  help='Show statistics for all timespans (since forever).')
+@click.option('-i',
+			  '--info/--no-info',
+			  default=stats_config['settings']['info'],
+			  help='Also display information for each link.')
+@click.option('-l/-s',
+			  '--long/--short',
+			  default=stats_config['settings']['long-countries'],
+			  help='Whether to show long or short (abbreviated) country names.')
+@click.argument('urls', nargs=-1)
+def stats(only, hide, time, forever, limit, info, long, urls):
+	"""Statistics and metrics for links."""
+	bitly.stats.echo(only, hide, time, forever, limit, info, long, urls)

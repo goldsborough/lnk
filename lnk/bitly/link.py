@@ -20,7 +20,6 @@ class Link(Command):
 		self.raw = raw
 
 	def fetch(self, copy, quiet, expand, shorten, pretty):
-		pretty = pretty or self.raw
 		result = self.shorten_urls(copy, quiet, shorten)
 		result += self.expand_urls(copy, expand)
 
@@ -76,7 +75,7 @@ class Link(Command):
 							   "expand url '{0}'".format(url),
 							   'expand')
 
-		return response['expand'][0]['long_url']
+		return response['long_url']
 
 	def get_short(self, url):
 		response = self.get(self.endpoints['shorten'], dict(longUrl=url))

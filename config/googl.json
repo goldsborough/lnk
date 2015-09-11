@@ -7,7 +7,7 @@
                 "expanded": "longUrl"
             }, 
             "endpoints": {
-                "info": "/url/expand", 
+                "info": "/url/expand"
             }, 
             "settings": {
             }
@@ -21,25 +21,26 @@
                 "month"
             ], 
             "endpoints": {
-                "referrers": "link/referrers", 
+               "stats": "/url/expand"
             }, 
             "settings": {
                 "info": "False", 
-                "span": 1, 
-                "limit": 10, 
+                "span": 1,
                 "long-countries": true, 
                 "unit": "forever"
             }, 
-            "sets": [
-                "clicks", 
-                "countries", 
-                "referrers"
-            ]
+            "sets": {
+                "clicks": "shortUrlClicks", 
+                "countries": "countries", 
+                "referrers": "referrers",
+                "browsers": "browsers",
+                "platforms": "platforms"
+            }
         }, 
         "link": {
             "endpoints": {
-                "shorten": "url/shorten", 
-                "expand": "url/expand"
+                "shorten": "url", 
+                "expand": "url"
             }, 
             "settings": {
                 "pretty": true
@@ -91,6 +92,6 @@
         }
     }, 
     "version": 1, 
-    "key": "", 
+    "key": "AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc", 
     "settings": { }
 }
