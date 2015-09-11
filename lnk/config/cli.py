@@ -24,6 +24,7 @@ import errors
 			  default=False)
 @click.option('--all', '--all-keys', is_flag=True)
 def main(which, command, key, value, quiet, all_keys):
+	"""Configuration and settings interface."""
 	if key or all_keys:
 		errors.catch(run,
 					 which,

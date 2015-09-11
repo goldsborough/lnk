@@ -3,6 +3,7 @@
 
 import click
 import ecstasy
+import requests
 import sys
 
 class Error(Exception):
@@ -52,6 +53,10 @@ class InvalidKeyError(Error):
 	def __init__(self, what):
 		super(InvalidKeyError, self).__init__(what)
 
+class ConnectionError(Error):
+	def __init__(self, what):
+		super(ConnectionError, self).__init__(what)
+
 class InternalError(Error):
 	"""
 	Raised when something went wrong internally, i.e.
@@ -71,11 +76,13 @@ class InternalError(Error):
 
 class Catch(object):
 
-	def __init__(self, verbosity=0, usage=None):
+	def __init__(self, verbosity=0, usage=None, service=None):
 		self.verbosity = verbosity
 		self.usage = usage
+		self.service = '{0} '.format(service) if service else ''
 
 	def catch(self, function, *args, **kwargs):
+		"""Executes a function and handles any potential exceptions."""
 		try:
 			try:
 				function(*args, **kwargs)
@@ -83,10 +90,14 @@ class Catch(object):
 				_, error, _ = sys.exc_info()
 				# Re-raise as an error we can handle (and format)
 				raise UsageError(error.message)
+			except requests.exceptions.ConnectionError:
+				_, error, _ = sys.exc_info()
+				raise ConnectionError('Could not establish connection '
+									  'to {0}server!'.format(self.service))
 		except Error:
 			_, error, _ = sys.exc_info()
 			click.echo('\n'.join(error.levels[:self.verbosity + 1]))
-			if self.usage:
+			if isinstance(error, UsageError) and self.usage:
 				click.echo(self.usage)
 
 def catch(function, *args, **kwargs):

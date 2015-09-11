@@ -42,6 +42,7 @@ expanded_default = None if display == 'both' else display == 'expanded'
 @click.pass_context
 def main(context, verbose, args):
 	"""Bitly command-line client."""
+	# Can't be zero because it's counted (0 = no flag)
 	if verbose == 0:
 		verbose = lnk_config['verbosity']
 	name = args[0]
@@ -50,7 +51,7 @@ def main(context, verbose, args):
 	else:
 		args = args[1:] if args[1:] else ['--help']
 	which = globals()[name]
-	catch = errors.Catch(verbose, which.get_help(context))
+	catch = errors.Catch(verbose, which.get_help(context), 'bitly')
 	catch.catch(which.main, args, standalone_mode=False)
 
 @main.command()
@@ -61,7 +62,7 @@ def main(context, verbose, args):
 @click.option('-q/-l',
 			  '--quiet/--loud',
 			  default=False,
-			  help='Whether or not to print the expanded/shortened links.')
+			  help='Whether or not to print warnings.')
 @click.option('-e',
 			  '--expand',
 			  multiple=True,

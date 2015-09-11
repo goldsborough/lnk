@@ -7,7 +7,7 @@ import pyperclip
 
 import errors
 
-from command import Command
+from googl.command import Command
 
 def echo(*args):
 	click.echo(Link().fetch(*args))
@@ -72,16 +72,14 @@ class Link(Command):
 
 	def get_long(self, url):
 		response = self.get(self.endpoints['expand'], dict(shortUrl=url))
-		response = self.verify(response,
-							   "expand url '{0}'".format(url),
-							   'expand')
+		response = self.verify(response, "expand url '{0}'".format(url))
 
-		return response['expand'][0]['long_url']
+		return response['longUrl']
 
 	def get_short(self, url):
-		response = self.get(self.endpoints['shorten'], dict(longUrl=url))
+		response = self.post(self.endpoints['shorten'], data=dict(longUrl=url))
 		response = self.verify(response, "shorten url '{0}'".format(url))
-		
+
 		return response['url']
 
 	def copy(self, copy, url):

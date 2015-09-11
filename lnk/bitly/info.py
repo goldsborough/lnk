@@ -24,10 +24,12 @@ class Info(Command):
 		sets = self.filter(only, hide)
 
 		result = []
+		threads = []
 		for url in urls:
 			self.queue.put(url.strip())
-			self.new_thread(self.get, sets.values(), result, hide_empty)
-		self.queue.join()
+			t = self.new_thread(self.request, sets.values(), result, hide_empty)
+			threads.append(t)
+		self.join(threads)
 
 		return result if self.raw else self.boxify(result)
 
@@ -43,8 +45,8 @@ class Info(Command):
 		data = {}
 		url = self.queue.get()
 
-		first = self.new_thread(lambda: data.update(self.get_info(url)))
-		second = self.new_thread(lambda: data.update(self.get_history(url)))
+		first = self.new_thread(lambda: data.update(self.request_info(url)))
+		second = self.new_thread(lambda: data.update(self.request_history(url)))
 
 		first.join(timeout=10)
 		second.join(timeout=10)
@@ -55,8 +57,6 @@ class Info(Command):
 		self.lock.acquire()
 		result.append(lines)
 		self.lock.release()
-
-		self.queue.task_done()
 
 	def request_info(self, url):
 		response = self.get(self.endpoints['info'], dict(shortUrl=url))

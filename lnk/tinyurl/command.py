@@ -17,12 +17,12 @@ class Command(AbstractCommand):
 	@staticmethod
 	def verify(response, what):
 		if not str(response.status_code).startswith('2'):
-			raise errors.HTTPError('Could not {0}.'.format(what),
+			raise errors.HTTPError('Could not {0}!'.format(what),
 								   response.status_code,
 						           response.reason)
 		data = response.json()
 		if data['state'] == 'error':
-			what = 'Could not {0}.'.format(what)
+			what = 'Could not {0}!'.format(what)
 			raise errors.APIError(what)
 
 		return data

@@ -27,7 +27,7 @@ class AbstractCommand(object):
 		self.http = re.compile(r'https?://')	
 		self.queue = Queue.Queue()
 		self.lock = threading.Lock()
-		self.errors = Queue.Queue()
+		self.error = None
 
 	def fetch(self, *args):
 		raise NotImplementedError
@@ -41,18 +41,17 @@ class AbstractCommand(object):
 
 		return requests.get(url, params=parameters)
 
-	def post(self, endpoint, authorization=None):
+	def post(self, endpoint, authorization=None, data=None):
 		url = '{0}/{1}'.format(self.url, endpoint)
 
-		return requests.post(url, auth=authorization)
+		return requests.post(url, auth=authorization, data=data)
 
 	def new_thread(self, function, *args, **kwargs):
 		def proxy(*args, **kwargs):
 			try:
 				function(*args, **kwargs)
 			except Exception:
-				_, error, _ = sys.exc_info()
-				self.errors.put(error)
+				_, self.error, _ = sys.exc_info()
 		thread = threading.Thread(target=proxy, args=args, kwargs=kwargs)
 		thread.daemon = True
 		thread.start()
@@ -61,24 +60,12 @@ class AbstractCommand(object):
 	def join(self, threads, timeout=10):
 		for thread in threads:
 			thread.join(timeout=timeout)
-		if not self.errors.empty():
-			raise self.errors.get()
+		if self.error:
+			raise self.error
 
 	@staticmethod
-	def verify(response, what, inner=None):
-		response = response.json()
-		if not str(response['status_code']).startswith('2'):
-			raise errors.HTTPError('Could not {0}.'.format(what),
-								   response['status_code'],
-						           response['status_txt'])
-		data = response['data']
-		if inner:
-			data = data[inner][0]
-		if 'error' in data:
-			what = 'Could not {0}.'.format(what)
-			raise errors.APIError(what, data['error'])
-
-		return data
+	def verify(response, what):
+		raise NotImplementedError
 
 	@staticmethod
 	def boxify(results):

@@ -1,7 +1,96 @@
 {
-    "commands": [
-    	"info",
-        "link",
-        "stats"
-    ]
+    "url": "https://www.googleapis.com/urlshortener", 
+    "commands": {
+        "info": {
+            "sets": {
+                "created": "created", 
+                "expanded": "longUrl"
+            }, 
+            "endpoints": {
+                "info": "/url/expand", 
+            }, 
+            "settings": {
+            }
+        }, 
+        "stats": {
+            "units": [
+                "minute", 
+                "hour", 
+                "day", 
+                "week", 
+                "month"
+            ], 
+            "endpoints": {
+                "referrers": "link/referrers", 
+            }, 
+            "settings": {
+                "info": "False", 
+                "span": 1, 
+                "limit": 10, 
+                "long-countries": true, 
+                "unit": "forever"
+            }, 
+            "sets": [
+                "clicks", 
+                "countries", 
+                "referrers"
+            ]
+        }, 
+        "link": {
+            "endpoints": {
+                "shorten": "url/shorten", 
+                "expand": "url/expand"
+            }, 
+            "settings": {
+                "pretty": true
+            }
+        }, 
+        "user": {
+            "endpoints": {
+                "info": "user/info"
+            }, 
+            "settings": {
+                "hide-empty": false, 
+                "history": false
+            }, 
+            "sets": {
+                "name": "full_name", 
+                "privacy": "default_link_privacy", 
+                "url": "profile_url", 
+                "image": "profile_image", 
+                "share": "share_accounts",
+                "date": "member_since", 
+                "login": "login", 
+                "display": "display_name"
+            }
+        }, 
+        "key": {
+            "endpoints": {
+                "oauth": "oauth/access_token"
+            }, 
+            "settings": {
+                "show": false
+            }
+        }, 
+        "history": {
+            "units": [
+                "minute", 
+                "hour", 
+                "day", 
+                "week", 
+                "month"
+            ], 
+            "endpoints": {
+                "history": "user/link_history"
+            }, 
+            "settings": {
+                "limit": 10, 
+                "display": "short", 
+                "pretty": true
+            }
+        }
+    }, 
+    "version": 1, 
+    "key": "", 
+    "settings": { }
 }

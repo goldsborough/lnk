@@ -89,6 +89,7 @@ class History(Command):
 		if unit.endswith('s'):
 			unit = unit[:-1]
 		offset = span * self.seconds[unit]
+
 		return time.time() - offset
 
 	def lineify(self, url, expanded, both, pretty):

@@ -47,14 +47,14 @@ class Stats(Command):
 				line = ecstasy.beautify(line, ecstasy.Color.Red)
 				header[n] = line
 
-			data = self.request(url, timespans, sets)
+			data = self.request_all(url, timespans, sets)
 			lines = self.lineify(data, full)
 
 			result.append(header + lines)
 
 		return result if self.raw else self.boxify(result)
 
-	def request(self, url, timespans, sets):
+	def request_all(self, url, timespans, sets):
 		parameters = {'link': url}
 		results = {}
 		for endpoint in sets:
@@ -70,17 +70,17 @@ class Stats(Command):
 				parameters['units'] = timespan.span
 
 				self.queue.put((url, endpoint, timespan, parameters))
-				self.new_thread(self.retrieve, results)
+				self.new_thread(self.request, results)
 
 		self.queue.join()
 
 		return results
 
-	def retrieve(self, results):
+	def request(self, results):
 		url, endpoint, timespan, parameters = self.queue.get()
 
-		response = self.request(self.endpoints[endpoint], parameters)
-		what = 'retrieve {0} for {1}'.format(endpoint, url)
+		response = self.get(self.endpoints[endpoint], parameters)
+		what = "retrieve {0} for '{1}'".format(endpoint, url)
 		response = self.verify(response, what)
 
 		# For 'clicks' the key has a different name than the endpoint
