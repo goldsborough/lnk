@@ -33,9 +33,9 @@ class Stats(Command):
 
 		sets = self.filter(only, hide)
 		timespans = self.get_timespans(times, forever)
-		info = self.info.fetch(only, hide, urls) if add_info else []
+		info = self.info.fetch(only, hide, False, urls) if add_info else []
 
-		result = []
+		results = []
 		for n, url in enumerate(urls):
 			header = info[n] if add_info else ['URL: {0}'.format(url)]
 
@@ -45,18 +45,19 @@ class Stats(Command):
 				line = ecstasy.beautify(line, ecstasy.Color.Red)
 				header[n] = line
 
-			data = self.request_all_times(url, timespans, sets)
+			data = self.request_all(url, timespans, sets)
 			lines = self.lineify(data, full)
 
-			result.append(header + lines)
+			results.append(header + lines)
 
-		return result if self.raw else self.boxify(result)
+		return results if self.raw else self.boxify(results)
 
-	def request_all_times(self, url, timespans, sets):
+	def request_all(self, url, timespans, sets):
 		parameters = {'link': url}
-		results = {}
+		result = {}
+		threads = []
 		for endpoint in sets:
-			results[endpoint] = []
+			result[endpoint] = []
 			for timespan in timespans:
 
 				parameters['unit'] = timespan.unit
@@ -68,11 +69,10 @@ class Stats(Command):
 				parameters['units'] = timespan.span
 
 				self.queue.put((url, endpoint, timespan, parameters))
-				self.new_thread(self.request, results)
+				threads.append(self.new_thread(self.request, result))
+		self.join(threads)
 
-		self.queue.join()
-
-		return results
+		return result
 
 	def request(self, results):
 		url, endpoint, timespan, parameters = self.queue.get()
@@ -84,13 +84,11 @@ class Stats(Command):
 		# For 'clicks' the key has a different name than the endpoint
 		e = endpoint if endpoint != 'clicks' else 'link_clicks'
 
-		data = {'timespan': timespan, 'data': response['data'][e]}
+		data = {'timespan': timespan, 'data': response[e]}
 
 		self.lock.acquire()
 		results[endpoint].append(data)
 		self.lock.release()
-
-		self.queue.task_done()
 
 	def filter(self, only, hide):
 		sets = self.sets
@@ -164,4 +162,4 @@ class Stats(Command):
 		elif key == 'direct':
 			key = key.title()
 
-		return '  - {0}: {1}'.format(key, value)
+		return '   - {0}: {1}'.format(key, value)

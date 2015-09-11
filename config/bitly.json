@@ -44,7 +44,7 @@
                 "info": "False", 
                 "limit": 10, 
                 "span": 1, 
-                "long-countries": true, 
+                "full-countries": true, 
                 "unit": "forever"
             }
         }, 

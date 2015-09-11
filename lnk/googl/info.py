@@ -46,10 +46,10 @@ class Info(Command):
 	def request(self, sets, result):
 		url = self.queue.get()
 		response = self.get(self.endpoints['info'], dict(shortUrl=url))
-		response = self.verify(response,
-							   "retrieve information for '{0}'".format(url))
+		data = self.verify(response,
+						   "retrieve information for '{0}'".format(url))
 
-		selection = {key : response[key] for key in response if key in sets}
+		selection = {key : data[key] for key in data if key in sets}
 		lines = self.lineify(url, selection)
 
 		self.lock.acquire()

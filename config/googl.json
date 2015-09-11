@@ -15,8 +15,7 @@
         }, 
         "stats": {
             "units": [
-                "minute", 
-                "hour", 
+                "two-hours", 
                 "day", 
                 "week", 
                 "month"
@@ -26,9 +25,8 @@
             }, 
             "settings": {
                 "info": "False", 
-                "span": 1,
                 "limit": 10,
-                "long-countries": true, 
+                "full-countries": true, 
                 "unit": "forever"
             }, 
             "sets": {

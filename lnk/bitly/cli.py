@@ -125,19 +125,19 @@ def info(only, hide, hide_empty, urls):
 @click.option('--limit',
 			  type=int,
 			  default=stats_config['settings']['limit'],
-			  help='Limit the amount of statistics retrieved per set.')
+			  help='Limit the amount of statistics retrieved per timespan.')
 @click.option('-i',
 			  '--info/--no-info',
 			  default=stats_config['settings']['info'],
 			  help='Also display information for each link.')
-@click.option('-l/-s',
-			  '--long/--short',
-			  default=stats_config['settings']['long-countries'],
-			  help='Whether to show long or short (abbreviated) country names.')
+@click.option('-f/-s',
+			  '--full/--short',
+			  default=stats_config['settings']['full-countries'],
+			  help='Whether to show full or short (abbreviated) country names.')
 @click.argument('urls', nargs=-1)
-def stats(only, hide, time, forever, limit, info, long, urls):
+def stats(only, hide, time, forever, limit, info, full, urls):
 	"""Statistics and metrics for links."""
-	bitly.stats.echo(only, hide, time, forever, limit, info, long, urls)
+	bitly.stats.echo(only, hide, time, forever, limit, info, full, urls)
 
 @main.command()
 @click.option('-o',

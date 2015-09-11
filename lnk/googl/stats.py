@@ -5,12 +5,8 @@ from __future__ import unicode_literals
 
 import click
 import ecstasy
-import time
-
-from collections import namedtuple
 
 import countries
-import bitly.info
 
 from googl.command import Command
 
@@ -19,151 +15,128 @@ def echo(*args):
 
 class Stats(Command):
 
-	Timespan = namedtuple('Timespan', ['span', 'unit'])
-
 	def __init__(self, raw=False):
 		super(Stats, self).__init__('stats')
 
 		self.raw = raw
-		self.info = googl.info.Info(raw=True)
 		self.parameters['projection'] = 'FULL'
 
-	def fetch(self, only, hide, times, forever, add_info, full, urls):
+	def fetch(self, only, hide, times, forever, limit, add_info, full, urls):
 		sets = self.filter(only, hide)
 		timespans = self.get_timespans(times, forever)
-		info = self.info.fetch(only, hide, urls) if add_info else []
 
-		result = []
-		for n, url in enumerate(urls):
-			header = info[n] if add_info else ['URL: {0}'.format(url)]
+		results = []
+		threads = []
+		for url in urls:
+			self.queue.put(url)
+			thread = self.new_thread(self.request,
+									 results,
+									 sets,
+									 timespans,
+									 add_info,
+									 full,
+									 limit)
+			threads.append(thread)
+		self.join(threads)
 
-			for n, line in enumerate(header):
-				colon = line.find(':')
-				line = '<{0}>{1}'.format(line[:colon], line[colon:])
-				line = ecstasy.beautify(line, ecstasy.Color.Red)
-				header[n] = line
+		return results if self.raw else self.boxify(results)
 
-			data = self.request_all_times(url, timespans, sets)
-			lines = self.lineify(data, full)
-
-			result.append(header + lines)
-
-		return result if self.raw else self.boxify(result)
-
-	def request_all_times(self, url, timespans, sets):
-		parameters = {'link': url}
-		results = {}
-		for endpoint in sets:
-			results[endpoint] = []
-			for timespan in timespans:
-
-				parameters['unit'] = timespan.unit
-
-				if timespan.unit.endswith('s'):
-					# Get rid of the plural s in e.g. 'weeks'
-					parameters['unit'] = timespan.unit[:-1]
-
-				parameters['units'] = timespan.span
-
-				self.queue.put((url, endpoint, timespan, parameters))
-				self.new_thread(self.request, results)
-
-		self.queue.join()
-
-		return results
-
-	def request(self, url, timespans, sets, results):
-
+	def request(self, results, sets, timespans, add_info, full, limit):
+		url = self.queue.get()
 		response = self.get(self.endpoints['stats'], dict(shortUrl=url))
-		what = "retrieve statistics for '{1}'".format(url)
-		response = self.verify(response, what)
+		what = "retrieve information for '{0}'".format(url)
+		data = self.verify(response, what)
 
-		statistics = response['analytics']
-		data = {}
-		for item in sets:
-			point = []
-			for timespan in statistics:
-				if timespan in timespans:
-					point.append({
-						'timespan': timespan,
-						'data': statistics[timespan].get(item)
-					})
+		del data['kind']
+		del data['id']
+		if not add_info:
+			for i in ['created', 'longUrl', 'status']:
+				del data[i]
+
+		data['URL'] = url
+		lines = self.lineify(data, sets, timespans, full, limit)
 
 		self.lock.acquire()
-		results[endpoint].append(data)
+		results.append(lines)
 		self.lock.release()
-
-		self.queue.task_done()
 
 	def filter(self, only, hide):
 		sets = self.sets
 		if only:
-			sets = [i for i in sets if i in only]
+			sets = {k:v for k,v in sets.items() if k in only}
 		for i in hide:
 			del sets[i]
+
 		return sets
 
-	def lineify(self, data, full): 
+	def lineify(self, data, sets, timespans, full, limit): 
+		anal = data.pop('analytics')
+		statistics = self.listify(anal, sets, timespans, full, limit)
+		header = [self.format(key, value) for key, value in data.items()]
+
+		return header + statistics
+
+	def listify(self, data, sets, timespans, full, limit):
 		lines = []
-		for subject, items in data.items():
-			lines.append('{0}:'.format(subject.title()))
-			lines += self.listify(subject, items, full)
+		for display, real in sets.items():
+			lines.append('{0}:'.format(display.title()))
+			for timespan, categories in data.items():
+
+				# ignore unwanted timespans
+				if timespan not in timespans:
+					continue
+				elif timespan == 'allTime':
+					lines.append(' + Since forever:')
+				else:
+					lines.append(' + Last {0}:'.format(timespan))
+
+				# The goo.gl API does not include categories with zero
+				# clicks thus we first have to determine whether the
+				# category is present at all
+				if real in categories:
+					if display == 'clicks':
+						lines[-1] += ' {0}'.format(categories[real])
+					else:
+						lines += self.sub_listify(display,
+												  categories[real],
+												  limit,
+												  full)
+				else:
+					lines[-1] += ' None'
 
 		return lines
 
-	def listify(self, subject, data, full):
+	def sub_listify(self, category, points, limit, full):
 		lines = []
-		for result in data:
-			timespan = result['timespan']
-			items = result['data']
-
-			if timespan.span == -1:
-				line = 'Since forever'
-			else:
-				line = 'Last {0} {1}'.format(timespan.span, timespan.unit)
-
-			lines.append(' + {0}:'.format(line))
-
-			if not items:
-				lines[-1] += ' None'
-				continue
-
-			if isinstance(items, list):
-				for item in items:
-					clicks = item.pop('clicks')
-					key = item.values()[0]
-					line = self.format(subject, key, clicks, full)
-					lines.append(line)
-			else:
-				# for clicks
-				lines[-1] += ' {0}'.format(items)
+		for n, point in enumerate(points):
+			if n == limit:
+				break
+			subject = point['id']
+			if subject == 'unknown':
+				subject = subject.title()
+			if category == 'countries' and full:
+				subject = countries.names[subject]
+			clicks = point['count']
+			lines.append('   - {0}: {1}'.format(subject, clicks))
 
 		return lines
 
 	def get_timespans(self, times, forever):
-		timespans = set()
-		if not times:
-			unit = self.settings['unit']
-			if unit == 'forever':
-				timespans.add(Stats.Timespan(-1, 'allTime'))
-			else:
-				timespans.add(Stats.Timespan(self.settings['span'], unit))
-		else:
-			if forever:
-				timespans.add(Stats.Timespan(-1, 'forever'))
-			for span, unit in times:
-				timespans.add(Stats.Timespan(span, unit))
+		timespans = set(times)
+		if not timespans and not forever:
+			default = self.settings['unit']
+			timespans.add(default if default != 'forever' else 'allTime')
+		if forever:
+			timespans.add('allTime')
+
 		return timespans
 
 	@staticmethod
-	def format(subject, key, value, full):
+	def format(key, value):
+		if key == 'shortUrlClicks':
+			key = 'clicks'
+		elif key == 'longUrl':
+			key = 'expanded'
+		key = '<{0}>: {1}'.format(key.title(), value)
 
-		if subject == 'countries':
-			if key == 'None':
-				key = 'Other'
-		 	elif full:
-				key = bitly.countries.names[key]
-		elif key == 'direct':
-			key = key.title()
-
-		return '  - {0}: {1}'.format(key, value)
+		return ecstasy.beautify(key, ecstasy.Color.Red)

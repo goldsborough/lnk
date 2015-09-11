@@ -23,9 +23,6 @@ user_config = googl_config['commands']['user']
 history_config = googl_config['commands']['history']
 key_config = googl_config['commands']['key']
 
-units = stats_config['units']
-units += ['{0}s'.format(i) for i in units]
-
 display = history_config['settings']['display']
 expanded_default = None if display == 'both' else display == 'expanded'
 
@@ -111,9 +108,9 @@ def info(only, hide, urls):
    			  help='Hide this/these set(s) of statistics.')
 @click.option('-t',
 			  '--time',
-		      nargs=2,
+		      nargs=1,
 		      multiple=True,
-		      type=(int, click.Choice(units)),
+		      type=click.Choice(stats_config['units']),
 		      help='Show statistics for this/these timespan(s).')
 @click.option('--forever',
 			  is_flag=True,
@@ -125,12 +122,13 @@ def info(only, hide, urls):
 @click.option('--limit',
 			  nargs=1,
 			  type=int,
-			  default=stats_config['settings']['limit'])
-@click.option('-l/-s',
-			  '--long/--short',
-			  default=stats_config['settings']['long-countries'],
-			  help='Whether to show long or short (abbreviated) country names.')
+			  default=stats_config['settings']['limit'],
+			  help='Limit the amount of statistics retrieved per timespan.')
+@click.option('-f/-s',
+			  '--full/--short',
+			  default=stats_config['settings']['full-countries'],
+			  help='Whether to show full or short (abbreviated) country names.')
 @click.argument('urls', nargs=-1)
-def stats(only, hide, time, forever, limit, info, long, urls):
+def stats(only, hide, time, forever, limit, info, full, urls):
 	"""Statistics and metrics for links."""
-	googl.stats.echo(only, hide, time, forever, limit, info, long, urls)
+	googl.stats.echo(only, hide, time, forever, limit, info, full, urls)

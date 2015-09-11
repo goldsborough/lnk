@@ -71,22 +71,22 @@ class Link(Command):
 
 	def get_long(self, url):
 		response = self.get(self.endpoints['expand'], dict(shortUrl=url))
-		response = self.verify(response, "expand url '{0}'".format(url))
+		data = self.verify(response, "expand url '{0}'".format(url))
 
-		if response['status'] in ['MALWARE', 'PHISHING']:
+		if data['status'] in ['MALWARE', 'PHISHING']:
 			errors.warn("Careful! goo.gl believes the url '{0}' is {1}"
-						"!".format(response['longUrl']),
-								   response['status'].lower())
-		elif response['status'] == 'REMOVED':
-			return '{0} (removed)'.format(response['longUrl'])
+						"!".format(data['longUrl']),
+								   data['status'].lower())
+		elif data['status'] == 'REMOVED':
+			return '{0} (removed)'.format(data['longUrl'])
 
-		return response['longUrl']
+		return data['longUrl']
 
 	def get_short(self, url):
 		response = self.post(self.endpoints['shorten'], dict(longUrl=url))
-		response = self.verify(response, "shorten url '{0}'".format(url))
+		data = self.verify(response, "shorten url '{0}'".format(url))
 
-		return response['id']
+		return data['id']
 
 	def copy(self, copy, url):
 		if copy and not self.already_copied:
