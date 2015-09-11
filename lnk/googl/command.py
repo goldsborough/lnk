@@ -13,6 +13,7 @@ class Command(AbstractCommand):
 		super(Command, self).__init__('googl', which)
 		with config.Manager('googl') as manager:
 			self.parameters = {'key': manager['key']}
+		#self.api = '{0}/url'.format(self.api)
 
 	@staticmethod
 	def verify(response, what):
@@ -26,6 +27,7 @@ class Command(AbstractCommand):
 
 	def post(self, endpoint, data=None):
 		url = '{0}/{1}'.format(self.api, endpoint)
+		print(url)
 		headers = {'content-type': 'application/json'}
 		return requests.post(url,
 							 params=self.parameters,

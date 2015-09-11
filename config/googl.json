@@ -4,10 +4,11 @@
         "info": {
             "sets": {
                 "created": "created", 
-                "expanded": "longUrl"
+                "expanded": "longUrl",
+                "status": "status"
             }, 
             "endpoints": {
-                "info": "/url/expand"
+                "info": "url"
             }, 
             "settings": {
             }
@@ -21,11 +22,12 @@
                 "month"
             ], 
             "endpoints": {
-               "stats": "/url/expand"
+               "stats": "url"
             }, 
             "settings": {
                 "info": "False", 
                 "span": 1,
+                "limit": 10,
                 "long-countries": true, 
                 "unit": "forever"
             }, 

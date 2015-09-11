@@ -19,6 +19,7 @@ class Info(Command):
 
 		self.raw = raw
 		self.sets = self.config['sets']
+		self.reverse = {value:key for key,value in self.sets.items()}
 		self.parameters['projection'] = 'FULL'
 
 	def fetch(self, only, hide, urls):
@@ -48,8 +49,8 @@ class Info(Command):
 		response = self.verify(response,
 							   "retrieve information for '{0}'".format(url))
 
-		selection = {key : data[key] for key in data if key in sets}
-		lines = self.lineify(url, selection, hide_empty)
+		selection = {key : response[key] for key in response if key in sets}
+		lines = self.lineify(url, selection)
 
 		self.lock.acquire()
 		result.append(lines)
@@ -58,7 +59,16 @@ class Info(Command):
 	def lineify(self, url, data): 
 		lines = ['URL: {0}'.format(url)]
 		for key, value in data.items():
-			if key == 'created':
-				value = datetime.strptime(t[:t.find('.')], '%Y-%m-%dT%H:%M:%S')
 			lines.append(self.format(key, value))
+
 		return lines
+
+	def format(self, key, value):
+		key = self.reverse[key]
+		if key == 'created':
+			# Ignore the irrelevant part of the ISO format
+			relevent = value[:value.find('.')]
+			parsed = datetime.strptime(relevent, '%Y-%m-%dT%H:%M:%S')
+			value = parsed.ctime()
+
+		return '{0}: {1}'.format(key.title(), value)

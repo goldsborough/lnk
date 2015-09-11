@@ -122,6 +122,10 @@ def info(only, hide, urls):
 			  '--info/--no-info',
 			  default=stats_config['settings']['info'],
 			  help='Also display information for each link.')
+@click.option('--limit',
+			  nargs=1,
+			  type=int,
+			  default=stats_config['settings']['limit'])
 @click.option('-l/-s',
 			  '--long/--short',
 			  default=stats_config['settings']['long-countries'],
@@ -129,4 +133,4 @@ def info(only, hide, urls):
 @click.argument('urls', nargs=-1)
 def stats(only, hide, time, forever, limit, info, long, urls):
 	"""Statistics and metrics for links."""
-	bitly.stats.echo(only, hide, time, forever, limit, info, long, urls)
+	googl.stats.echo(only, hide, time, forever, limit, info, long, urls)

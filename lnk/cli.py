@@ -21,7 +21,7 @@ class Main(click.MultiCommand):
 	def invoke(self, context):
 		escaped = context.args[0].replace('.', '')
 		if escaped not in self.commands.keys():
-			context.args.insert(0, self.default)
+			context.args.insert(0, self.default.replace('.', ''))
 		else:
 			context.args[0] = escaped
 		super(Main, self).invoke(context)
