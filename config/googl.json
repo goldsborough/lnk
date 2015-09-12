@@ -46,25 +46,6 @@
                 "pretty": true
             }
         }, 
-        "user": {
-            "endpoints": {
-                "info": "user/info"
-            }, 
-            "settings": {
-                "hide-empty": false, 
-                "history": false
-            }, 
-            "sets": {
-                "name": "full_name", 
-                "privacy": "default_link_privacy", 
-                "url": "profile_url", 
-                "image": "profile_image", 
-                "share": "share_accounts",
-                "date": "member_since", 
-                "login": "login", 
-                "display": "display_name"
-            }
-        }, 
         "key": {
             "endpoints": {
                 "oauth": "oauth/access_token"
@@ -82,7 +63,7 @@
                 "month"
             ], 
             "endpoints": {
-                "history": "user/link_history"
+                "history": "url/history"
             }, 
             "settings": {
                 "limit": 10, 
@@ -92,6 +73,6 @@
         }
     }, 
     "version": 1, 
-    "key": "AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc", 
+    "key": "AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc",
     "settings": { }
 }
