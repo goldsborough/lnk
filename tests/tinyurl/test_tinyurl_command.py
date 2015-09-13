@@ -6,8 +6,6 @@ import requests
 
 import tests.path
 
-tests.path.insert()
-
 import errors
 import tinyurl.command
 

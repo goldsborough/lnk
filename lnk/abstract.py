@@ -10,7 +10,6 @@ import threading
 import sys
 
 import config
-import errors
 
 class AbstractCommand(object):
 
@@ -26,6 +25,7 @@ class AbstractCommand(object):
 		self.queue = Queue.Queue()
 		self.lock = threading.Lock()
 		self.error = None
+		self.parameters = {}
 
 	def fetch(self, *args):
 		raise NotImplementedError

@@ -1,0 +1,18 @@
+{
+	"url": "https://abc.xyz",
+	"version": 69,
+	"commands": {
+		"do": {
+			"endpoints": [
+				"create",
+				"destroy"
+			],
+			"settings": {
+				"limit": 10,
+				"show": true
+			}
+		}
+	},
+	"settings": {
+	}
+}

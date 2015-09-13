@@ -4,9 +4,11 @@
 import os
 import sys
 
-def insert():
-	here = os.path.abspath(__file__)
-	root = os.path.dirname(os.path.dirname(here))
+_here = os.path.abspath(__file__)
 
-	sys.path.insert(0, root)
-	sys.path.insert(0, os.path.join(root, 'lnk'))
+ROOT_PATH = os.path.dirname(os.path.dirname(_here))
+CONFIG_PATH = os.path.join(ROOT_PATH, 'config')
+LNK_PATH = os.path.join(ROOT_PATH, 'lnk')
+
+sys.path.insert(0, ROOT_PATH)
+sys.path.insert(0, LNK_PATH)

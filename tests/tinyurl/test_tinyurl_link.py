@@ -9,8 +9,6 @@ import threading
 
 import tests.path
 
-tests.path.insert()
-
 from collections import namedtuple
 
 import tinyurl.link

@@ -4,26 +4,24 @@
 import os
 import json
 import pytest
-import sys
-
-here = os.path.dirname(os.path.abspath(__file__))
-root = os.path.dirname(os.path.dirname(here))
-
-sys.path.insert(0, root)
-sys.path.insert(0, os.path.join(root, 'lnk'))
 
 from collections import namedtuple
 
+import tests.path
+
 import config
 import errors
+
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 @pytest.fixture(scope='module')
 def fixture(request):
 	which = 'test'
 	filename = '{0}.json'.format(which)
-	path = os.path.join(root, 'config', filename)
+	path = os.path.join(tests.path.CONFIG_PATH, filename)
 
-	with open(os.path.join(here, filename)) as dummy:
+	with open(os.path.join(HERE, filename)) as dummy:
 		configuration = json.load(dummy)
 		with open(path, 'w') as test:
 			json.dump(configuration, test)
@@ -46,7 +44,7 @@ def fixture(request):
 
 @pytest.fixture(scope='module')
 def changed():
-	with open(os.path.join(here, 'changed.json')) as dummy:
+	with open(os.path.join(HERE, 'changed.json')) as dummy:
 		contents = dummy.read()
 		configuration = json.loads(contents)
 
