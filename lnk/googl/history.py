@@ -132,12 +132,7 @@ class History(Command):
 	def authorize(self):
 		credentials = self.credentials.get()
 		if not credentials:
-			logo = ecstasy.beautify('<lnk>', ecstasy.Style.Bold)
-			details = 'You have not yet authorized {0} to '.format(logo)
-			details += 'access your private goo.gl information. '
-			details += "Please run 'lnk goo.gl key --generate'."
-			raise errors.APIError('Missing authorization code!',
-							      Details=details)
+			raise errors.AuthorizationError('goo.gl')
 		http = httplib2.Http()
 		if credentials.access_token_expired:
 			credentials.refresh(http)

@@ -25,7 +25,7 @@ class Key(Command):
 
 	def fetch(self, _, login, password, show):
 		key = self.request(login, password)
-		print(key)
+
 		with config.Manager('bitly', write=True) as manager:
 			manager['key'] = key
 
@@ -37,7 +37,7 @@ class Key(Command):
 	def request(self, login, password):
 		response = self.post(self.endpoints['oauth'],
 							 authorization=(login, password))
-		print(response)
+
 		return self.verify(response, 'generate an API key')
 
 	@staticmethod

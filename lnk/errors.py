@@ -60,6 +60,19 @@ class ConnectionError(Error):
 	def __init__(self, what, **additional):
 		super(ConnectionError, self).__init__(what, **additional)
 
+class AuthorizationError(Error):
+	def __init__(self,
+				service,
+				what='Missing authorization code!',
+				**additional):
+		logo = ecstasy.beautify('<lnk>', ecstasy.Style.Bold)
+		details = 'You have not yet authorized {0} to '.format(logo)
+		details += 'access your private {0} information. '.format(service)
+		details += "Please run 'lnk {0} key --generate'.".format(service)
+		super(AuthorizationError, self).__init__(what,
+												 Details=details,
+												 **additional)
+
 class InternalError(Error):
 	"""
 	Raised when something went wrong internally, i.e.

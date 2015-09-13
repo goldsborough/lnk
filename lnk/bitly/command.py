@@ -10,6 +10,8 @@ class Command(AbstractCommand):
 	def __init__(self, which):
 		super(Command, self).__init__('bitly', which)
 		with config.Manager('bitly') as manager:
+			if not manager['key'] and which != 'key':
+				raise errors.AuthorizationError('bitly')
 			self.parameters = {'access_token': manager['key']}
 
 	@staticmethod
