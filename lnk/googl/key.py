@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import click
-import httplib2
 import oauth2client.file
 import oauth2client.tools
 import os.path
@@ -35,7 +34,7 @@ class Key(Command):
 		self.destination = os.path.join(config.CONFIG_PATH, 'credentials')
 
 
-	def fetch(self, _, show):
+	def fetch(self, _):
 
 		# First request an authorization token as part of the oauth handshake.
 		authorize_url = self.flow.step1_get_authorize_url()
@@ -56,4 +55,4 @@ class Key(Command):
 		storage = oauth2client.file.Storage(self.destination)
 		storage.put(credentials)
 
-		return credentials.access_token if show else ''
+		return ''

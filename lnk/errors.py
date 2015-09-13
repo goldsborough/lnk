@@ -38,24 +38,27 @@ class Error(Exception):
 		return ['\n'.join(level) for level in levels if level]
 
 class HTTPError(Error):
-	def __init__(self, what, code=None, status=None):
-		super(HTTPError, self).__init__(what, Code=code, Status=status)
+	def __init__(self, what, code=None, status=None, **additional):
+		super(HTTPError, self).__init__(what,
+										Code=code,
+										Status=status,
+										**additional)
 
 class APIError(Error):
-	def __init__(self, what, message=None):
-		super(APIError, self).__init__(what, Message=message)
+	def __init__(self, what, message=None, **additional):
+		super(APIError, self).__init__(what, Message=message, **additional)
 
 class UsageError(Error):
-	def __init__(self, what):
-		super(UsageError, self).__init__(what)
+	def __init__(self, what, **additional):
+		super(UsageError, self).__init__(what, **additional)
 
 class InvalidKeyError(Error):
-	def __init__(self, what):
-		super(InvalidKeyError, self).__init__(what)
+	def __init__(self, what, **additional):
+		super(InvalidKeyError, self).__init__(what, **additional)
 
 class ConnectionError(Error):
-	def __init__(self, what):
-		super(ConnectionError, self).__init__(what)
+	def __init__(self, what, **additional):
+		super(ConnectionError, self).__init__(what, **additional)
 
 class InternalError(Error):
 	"""
@@ -65,14 +68,14 @@ class InternalError(Error):
 	Basically get mad at the project creator.
 	"""
 
-	def __init__(self, what):
+	def __init__(self, what, **additional):
 		"""
 		Initializes the Error super-class.
 
 		Arguments:
 			what (str): A descriptive string regarding the cause of the error.
 		"""
-		super(InternalError, self).__init__(what)
+		super(InternalError, self).__init__(what, **additional)
 
 class Catch(object):
 

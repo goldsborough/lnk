@@ -60,7 +60,8 @@
                 "hour", 
                 "day", 
                 "week", 
-                "month"
+                "month",
+                "year"
             ], 
             "endpoints": {
                 "history": "url/history"

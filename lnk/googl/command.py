@@ -13,7 +13,6 @@ class Command(AbstractCommand):
 		super(Command, self).__init__('googl', which)
 		with config.Manager('googl') as manager:
 			self.parameters = {'key': manager['key']}
-		#self.api = '{0}/url'.format(self.api)
 
 	@staticmethod
 	def verify(response, what):

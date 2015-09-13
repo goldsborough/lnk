@@ -1,10 +1,20 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+import apiclient.discovery
 import click
-import time
+import ecstasy
+import httplib2
+import oauth2client.file
+import oauth2client.tools
+import os.path
 
-import googl.link
+from collections import namedtuple
+from datetime import datetime, timedelta
+from overrides import overrides
+
+import config
+import errors
 
 from googl.command import Command
 
@@ -13,95 +23,171 @@ def echo(*args):
 
 class History(Command):
 
+	Url = namedtuple('Url', ['short', 'long', 'created'])
+
 	def __init__(self, raw=False):
 		super(History, self).__init__('history')
+		credentials_path = os.path.join(config.CONFIG_PATH, 'credentials')
+		self.credentials = oauth2client.file.Storage(credentials_path)
 		self.raw = raw
-		self.link = bitly.link.Link(raw=True)
-		self.seconds = {
-			"minute": 60, 
-			"hour": 3600, 
-			"day": 86400,
-			"week": 604800, 
-			"month": 18446400
+		self.delta = {
+			"minute": timedelta(minutes=1), 
+			"hour": timedelta(hours=1), 
+			"day": timedelta(days=1),
+			"week": timedelta(weeks=1), 
+			"month": timedelta(weeks=4),
+			"year": timedelta(weeks=52)
 		}
 
 	def fetch(self, last, ranges, forever, limit, expanded, both, pretty):
-		self.parameters['limit'] = limit
+		data = self.request()
+		urls = self.process(data)
 
-		result = self.forever(expanded, both, pretty) if forever else []
-		result += self.ranges(set(ranges), expanded, both, pretty)
-		result += self.last(set(last), expanded, both, pretty)
+		if forever:
+			result = self.forever(urls, limit, expanded, both, pretty)
+		else:
+			result = []
+		result += self.ranges(urls, set(ranges), limit, expanded, both, pretty)
+		result += self.last(urls, set(last), limit, expanded, both, pretty)
 
 		# Remove last empty line
-		result = result[:-1]
+		if pretty:
+			result = result[:-1]
 
 		if self.raw:
 			return result
 		return self.boxify([result]) if pretty else '\n'.join(result)
 
-	def forever(self, expanded, both, pretty):
+	def forever(self, urls, limit, expanded, both, pretty):
 		lines = []
-		for url in self.request():
+		for n, url in enumerate(urls):
+			if n == limit:
+				break
 			line = self.lineify(url, expanded, both, pretty)
 			lines.append(line)
-		lines.append('')
 
-		return ['Since forever:'] + lines if pretty else lines
+		return ['Since forever:'] + lines + [''] if pretty else lines
 
-	def ranges(self, ranges, expanded, both, pretty):
+	def ranges(self, urls, ranges, limit, expanded, both, pretty):
 		lines = []
 		for timespan in ranges:
-			before = timespan[:2]
-			after = timespan[2:]
 			if pretty:
-				header = 'Between {0} {1}'.format(before[0], before[1])
-				header += ' and {0} {1} ago:'.format(after[0], after[1])
+				header = 'Between {0} {1}'.format(timespan[0], timespan[1])
+				header += ' and {0} {1} ago:'.format(timespan[2], timespan[3])
 				lines.append(header)
-			parameters = self.set_time(after, before)
-			for url in self.request(parameters):
-				line = self.lineify(url, expanded, both, pretty)
-				lines.append(line)
+			begin = self.get_date(timespan[:2])
+			end = self.get_date(timespan[2:])
+			if end < begin:
+				raise errors.UsageError("Illegal time range 'between {0} "
+										"and {1} and {2} {3} ago' (start must"
+										"precede end)"
+										"!".format(timespan[0], timespan[1],
+												   timespan[2], timespan[3]))
+			filtered = self.filter(urls, begin, end)
+			if filtered:
+				lines += self.listify(filtered, limit, expanded, both, pretty)
+			elif pretty:
+				lines[-1] += ' None'
 
-		return lines + [''] if lines else []
+		return lines + [''] if pretty else lines
 
-	def last(self, last, expanded, both, pretty):
+	def last(self, urls, last, limit, expanded, both, pretty):
 		lines = []
 		for timespan in last:
 			if pretty:
 				header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
 				lines.append(header)
-			parameters = self.set_time(timespan)
-			for url in self.request(parameters):
-				line = self.lineify(url, expanded, both, pretty)
-				lines.append(line)
+			begin = self.get_date(timespan)
+			filtered = self.filter(urls, begin, datetime.now())
+			if filtered:
+				lines += self.listify(filtered, limit, expanded, both, pretty)
+			elif pretty:
+				lines[-1] += ' None'
 
-		return lines + [''] if lines else []
+		return lines + [''] if pretty else lines
 
-	def set_time(self, after=None, before=None):
-		if before:
-			before = self.timestamp(before)
-		self.parameters['created_before'] = before
-		self.parameters['created_after'] = self.timestamp(after)
-
-	def timestamp(self, timespan):
-		span = timespan[0]
-		unit = timespan[1]
+	def get_date(self, time_range):
+		span = time_range[0]
+		unit = time_range[1]
 		if unit.endswith('s'):
 			unit = unit[:-1]
-		offset = span * self.seconds[unit]
+		offset = span * self.delta[unit]
 
-		return time.time() - offset
+		return datetime.now() - offset
 
-	def lineify(self, url, expanded, both, pretty):
-		if not pretty and both:
-			expanded = self.link.get_long(url)
-			return ' - {0} => {1}'.format(url, expanded)
-		if expanded:
-			url = self.link.get_long(url)
-		return '- {0}'.format(url) if pretty else url
+	def request(self):
+		http = self.authorize()
+		api = apiclient.discovery.build('urlshortener', 'v1', http=http)
+		request = api.url().list()
+		response = request.execute()
+		self.verify(response, 'retrieve history')
 
-	def request(self, parameters=None):
-		response = self.get(self.endpoints['history'], parameters)
-		response = self.verify(response, 'retrieve history')
+		return response
 
-		return [i['link'] for i in response['data']['link_history']]
+	def authorize(self):
+		credentials = self.credentials.get()
+		if not credentials:
+			logo = ecstasy.beautify('<lnk>',
+									ecstasy.Color.Red,
+									ecstasy.Style.Bold)
+			details = 'You have not yet authorized {0} to '.format(logo)
+			details += 'access your private goo.gl information. '
+			details += "Please run 'lnk goo.gl key --generate'."
+			raise errors.APIError('Missing authorization code!',
+							      Details=details)
+		if credentials.access_token_expired:
+			credentials.refresh()
+			self.credentials.put(credentials)
+		http = httplib2.Http()
+		credentials.authorize(http)
+
+		return http
+
+	def listify(self, urls, limit, expanded, both, pretty):
+		lines = []
+		for n, url in enumerate(urls):
+			if n == limit:
+				break
+			line = self.lineify(url, expanded, both, pretty)
+			lines.append(line)
+
+		return lines
+
+	@staticmethod
+	@overrides
+	def verify(response, what):
+		if 'error' in response:
+			raise errors.HTTPError('Could not {0}.'.format(what),
+								   response['error']['code'],
+						           response['error']['message'])
+
+	@staticmethod
+	def lineify(url, expanded, both, pretty):
+		if both:
+			line = '{0} => {1}'.format(url.short, url.long)
+		elif expanded:
+			line = url.long
+		else:
+			line = url.short
+
+		return ' + {0}'.format(line) if pretty else line
+
+	@staticmethod
+	def filter(urls, begin, end):
+		filtered = []
+		for url in urls:
+			if url.created >= begin and url.created <= end:
+				filtered.append(url)
+
+		return filtered
+
+	@staticmethod
+	def process(data):
+		urls = []
+		for item in data['items']:
+			relevant = item['created'].split('.')[0]
+			created = datetime.strptime(relevant, '%Y-%m-%dT%H:%M:%S')
+			url = History.Url(item['id'], item['longUrl'], created)
+			urls.append(url)
+
+		return urls

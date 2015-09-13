@@ -10,8 +10,7 @@ import googl.link
 import googl.info
 import googl.stats
 import googl.history
-#import googl.user
-#import googl.key
+import googl.key
 
 lnk_config = config.Manager('lnk')['settings']
 googl_config = config.Manager('googl')
@@ -19,12 +18,14 @@ googl_config = config.Manager('googl')
 link_config = googl_config['commands']['link']
 info_config = googl_config['commands']['info']
 stats_config = googl_config['commands']['stats']
-user_config = googl_config['commands']['user']
 history_config = googl_config['commands']['history']
 key_config = googl_config['commands']['key']
 
 display = history_config['settings']['display']
 expanded_default = None if display == 'both' else display == 'expanded'
+
+units = history_config['units']
+units += ['{0}s'.format(i) for i in units]
 
 @click.group(invoke_without_command=True,
 			 no_args_is_help=True,
@@ -132,3 +133,57 @@ def info(only, hide, urls):
 def stats(only, hide, time, forever, limit, info, full, urls):
 	"""Statistics and metrics for links."""
 	googl.stats.echo(only, hide, time, forever, limit, info, full, urls)
+
+@main.command()
+@click.option('-g',
+			 '--generate',
+			 is_flag=True,
+			 help='Initiates the authorization process.')
+def key(generate):
+	"""Generate an API key for user history."""
+	googl.key.echo(generate)
+
+@main.command()
+@click.option('-t',
+			  '--time',
+		      '--last',
+		      nargs=2,
+		      multiple=True,
+		      type=(int, click.Choice(units)),
+		      help='Display history of links from this time range, relative to now.')
+@click.option('-r',
+			  '--range',
+		      '--time-range',
+		      nargs=4,
+		      multiple=True,
+		      type=(int, click.Choice(units), int, click.Choice(units)),
+		      help='Display history of links from this time range.')
+@click.option('--forever',
+			  is_flag=True,
+			  help='Display history of links since forever.')
+@click.option('-l',
+			  '--limit',
+			  type=int,
+			  default=history_config['settings']['limit'],
+			  help='Limit the number of links shown per time range.')
+@click.option('-e/-s',
+			  '--expanded/--short',
+			  default=expanded_default,
+			  help='Whether to show expanded or shortened links.')
+@click.option('-b',
+			  '--both',
+			  is_flag=True,
+			  help='Whether to show expanded and shortened links.')
+@click.option('-p',
+			  '--plain/--pretty',
+			  default=history_config['settings']['pretty'],
+			  help='Whether to show the history in a pretty box or as a plain list.')
+def history(last, time_range, forever, limit, expanded, both, plain):
+	"""Retrieve link history."""
+	if not last and not time_range and not forever:
+		message = 'Please specify at least one time range (e.g. --forever)'
+		raise click.UsageError(message)
+	# Default case for both
+	if not both and expanded is None:
+		both = True
+	googl.history.echo(last, time_range, forever, limit, expanded, both, not plain)

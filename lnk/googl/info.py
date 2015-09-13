@@ -67,8 +67,8 @@ class Info(Command):
 		key = self.reverse[key]
 		if key == 'created':
 			# Ignore the irrelevant part of the ISO format
-			relevent = value[:value.find('.')]
-			parsed = datetime.strptime(relevent, '%Y-%m-%dT%H:%M:%S')
+			relevant = value[:value.find('.')]
+			parsed = datetime.strptime(relevant, '%Y-%m-%dT%H:%M:%S')
 			value = parsed.ctime()
 
 		return '{0}: {1}'.format(key.title(), value)

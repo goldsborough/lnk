@@ -33,7 +33,8 @@ class History(Command):
 		result += self.last(set(last), expanded, both, pretty)
 
 		# Remove last empty line
-		result = result[:-1]
+		if pretty:
+			result = result[:-1]
 
 		if self.raw:
 			return result
@@ -44,9 +45,8 @@ class History(Command):
 		for url in self.request():
 			line = self.lineify(url, expanded, both, pretty)
 			lines.append(line)
-		lines.append('')
 
-		return ['Since forever:'] + lines if pretty else lines
+		return ['Since forever:'] + lines + [''] if pretty else lines
 
 	def ranges(self, ranges, expanded, both, pretty):
 		lines = []
@@ -62,7 +62,7 @@ class History(Command):
 				line = self.lineify(url, expanded, both, pretty)
 				lines.append(line)
 
-		return lines + [''] if lines else []
+		return lines + [''] if pretty else lines
 
 	def last(self, last, expanded, both, pretty):
 		lines = []
@@ -75,7 +75,7 @@ class History(Command):
 				line = self.lineify(url, expanded, both, pretty)
 				lines.append(line)
 
-		return lines + [''] if lines else []
+		return lines + [''] if pretty else lines
 
 	def set_time(self, after=None, before=None):
 		if before:
@@ -93,12 +93,12 @@ class History(Command):
 		return time.time() - offset
 
 	def lineify(self, url, expanded, both, pretty):
-		if not pretty and both:
+		if both:
 			expanded = self.link.get_long(url)
-			return ' - {0} => {1}'.format(url, expanded)
-		if expanded:
+			url = '{0} => {1}'.format(url, expanded)
+		elif expanded:
 			url = self.link.get_long(url)
-		return '- {0}'.format(url) if pretty else url
+		return '+ {0}'.format(url) if pretty else url
 
 	def request(self, parameters=None):
 		response = self.get(self.endpoints['history'], parameters)
