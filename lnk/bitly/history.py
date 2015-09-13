@@ -102,7 +102,12 @@ class History(Command):
 			url = '{0} => {1}'.format(url, expanded)
 		elif expanded:
 			url = self.link.get_long(url)
-		return '+ {0}'.format(url) if pretty else url
+
+		if pretty:
+			marked = ' <+> {0}'.format(line)
+			line = ecstasy.beautify(marked, ecstasy.Color.Red)
+
+		return line
 
 	def request(self, parameters=None):
 		response = self.get(self.endpoints['history'], parameters)

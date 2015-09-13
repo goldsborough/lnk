@@ -137,10 +137,10 @@ class History(Command):
 			details += "Please run 'lnk goo.gl key --generate'."
 			raise errors.APIError('Missing authorization code!',
 							      Details=details)
-		if credentials.access_token_expired:
-			credentials.refresh()
-			self.credentials.put(credentials)
 		http = httplib2.Http()
+		if credentials.access_token_expired:
+			credentials.refresh(http)
+			self.credentials.put(credentials)
 		credentials.authorize(http)
 
 		return http
@@ -172,7 +172,11 @@ class History(Command):
 		else:
 			line = url.short
 
-		return ' + {0}'.format(line) if pretty else line
+		if pretty:
+			marked = ' <+> {0}'.format(line)
+			line = ecstasy.beautify(marked, ecstasy.Color.Red)
+
+		return line
 
 	@staticmethod
 	def filter(urls, begin, end):
