@@ -41,6 +41,7 @@ class AbstractCommand(object):
 
 	def post(self, endpoint, authorization=None, data=None):
 		url = '{0}/{1}'.format(self.url, endpoint)
+
 		return requests.post(url, auth=authorization, data=data)
 
 	def new_thread(self, function, *args, **kwargs):
@@ -52,6 +53,7 @@ class AbstractCommand(object):
 		thread = threading.Thread(target=proxy, args=args, kwargs=kwargs)
 		thread.daemon = True
 		thread.start()
+
 		return thread
 
 	def join(self, threads, timeout=10):

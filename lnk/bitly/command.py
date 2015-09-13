@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
-import overrides
+from overrides import overrides
 
 import config
 import errors

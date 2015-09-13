@@ -12,14 +12,13 @@ root = os.path.dirname(os.path.dirname(here))
 sys.path.insert(0, root)
 sys.path.insert(0, os.path.join(root, 'lnk'))
 
+from collections import namedtuple
+
 import config
 import errors
 
-from collections import namedtuple
-
 @pytest.fixture(scope='module')
 def fixture(request):
-	
 	which = 'test'
 	filename = '{0}.json'.format(which)
 	path = os.path.join(root, 'config', filename)
@@ -47,7 +46,6 @@ def fixture(request):
 
 @pytest.fixture(scope='module')
 def changed():
-
 	with open(os.path.join(here, 'changed.json')) as dummy:
 		contents = dummy.read()
 		configuration = json.loads(contents)
@@ -58,7 +56,6 @@ def changed():
 
 
 def test_config_manager_opens_correctly(fixture):
-
 	fixture.manager.open(fixture.which)
 
 	assert fixture.manager.file == fixture.file
@@ -78,7 +75,6 @@ def test_config_manager_throws_for_invalid_key(fixture):
 		fixture.manager['random'] = None
 
 def test_config_manager_context_syntax_works(fixture, changed):
-
 	with config.Manager(fixture.which) as manager:
 		assert manager['fucks'] == -1
 		manager['fucks'] = 0
@@ -90,7 +86,6 @@ def test_config_manager_context_syntax_works(fixture, changed):
 		assert json.load(test) == fixture.config
 
 def test_config_manager_closes_correctly(fixture):
-
 	fixture.manager.close()
 
 	assert fixture.manager.file is None

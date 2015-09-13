@@ -2,8 +2,9 @@
 #! -*- coding: utf-8 -*-
 
 import json
-import overrides
 import requests
+
+from overrides import overrides
 
 import config
 import errors

@@ -9,8 +9,9 @@ import textwrap
 
 from collections import namedtuple
 
-TERMINAL_WIDTH = int(os.popen('stty size').read().split()[1])
-MAX_WIDTH = 3 * TERMINAL_WIDTH // 4
+with os.popen('stty size', 'r') as process:
+	output = process.read()
+MAX_WIDTH = 3 * int(output.split()[1])//4 if output else 80
 
 def boxify(results):
 	results, width = get_escaped(results)

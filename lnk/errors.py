@@ -122,4 +122,5 @@ def catch(function, *args, **kwargs):
 
 def warn(what):
 	what = "\a<Warning>: {}".format(what)
-	click.echo(ecstasy.beautify(what, ecstasy.Color.Yellow))
+	formatted = ecstasy.beautify(what, ecstasy.Color.Yellow)
+	click.echo(formatted)
