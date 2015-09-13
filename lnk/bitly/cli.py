@@ -196,11 +196,10 @@ def user(only, hide, everything, history, hide_empty):
 			  '--both',
 			  is_flag=True,
 			  help='Whether to show expanded and shortened links.')
-@click.option('-p',
-			  '--plain/--pretty',
+@click.option('--pretty/--plain',
 			  default=history_config['settings']['pretty'],
 			  help='Whether to show the history in a pretty box or as a plain list.')
-def history(last, time_range, forever, limit, expanded, both, plain):
+def history(last, time_range, forever, limit, expanded, both, pretty):
 	"""Retrieve link history."""
 	if not last and not time_range and not forever:
 		message = 'Please specify at least one time range (e.g. --forever)'
@@ -208,7 +207,7 @@ def history(last, time_range, forever, limit, expanded, both, plain):
 	# Default case for both
 	if not both and expanded is None:
 		both = True
-	bitly.history.echo(last, time_range, forever, limit, expanded, both, not plain)
+	bitly.history.echo(last, time_range, forever, limit, expanded, both, pretty)
 
 @main.command()
 @click.option('-g',

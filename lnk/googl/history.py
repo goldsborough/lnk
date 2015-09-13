@@ -8,6 +8,7 @@ import httplib2
 import oauth2client.file
 import oauth2client.tools
 import os.path
+import warnings
 
 from collections import namedtuple
 from datetime import datetime, timedelta
@@ -17,6 +18,8 @@ import config
 import errors
 
 from googl.command import Command
+
+warnings.filterwarnings('ignore', module=r'ecstasy\.parser')
 
 def echo(*args):
 	click.echo(History().fetch(*args))
@@ -43,16 +46,17 @@ class History(Command):
 		data = self.request()
 		urls = self.process(data)
 
+		result = []
 		if forever:
-			result = self.forever(urls, limit, expanded, both, pretty)
-		else:
-			result = []
-		result += self.ranges(urls, set(ranges), limit, expanded, both, pretty)
-		result += self.last(urls, set(last), limit, expanded, both, pretty)
+			result += self.forever(urls, limit, expanded, both, pretty)
+		if ranges:
+			result += self.ranges(urls, set(ranges), limit, expanded, both, pretty)
+		if last:
+			result += self.last(urls, set(last), limit, expanded, both, pretty)
 
 		# Remove last empty line
 		if pretty:
-			result = result[:-1]
+			del result[-1]
 
 		if self.raw:
 			return result
@@ -127,9 +131,7 @@ class History(Command):
 	def authorize(self):
 		credentials = self.credentials.get()
 		if not credentials:
-			logo = ecstasy.beautify('<lnk>',
-									ecstasy.Color.Red,
-									ecstasy.Style.Bold)
+			logo = ecstasy.beautify('<lnk>', ecstasy.Style.Bold)
 			details = 'You have not yet authorized {0} to '.format(logo)
 			details += 'access your private goo.gl information. '
 			details += "Please run 'lnk goo.gl key --generate'."

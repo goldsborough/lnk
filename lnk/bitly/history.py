@@ -28,13 +28,17 @@ class History(Command):
 	def fetch(self, last, ranges, forever, limit, expanded, both, pretty):
 		self.parameters['limit'] = limit
 
-		result = self.forever(expanded, both, pretty) if forever else []
-		result += self.ranges(set(ranges), expanded, both, pretty)
-		result += self.last(set(last), expanded, both, pretty)
+		result = []
+		if forever:
+			result += self.forever(expanded, both, pretty) if forever else []
+		if ranges:
+			result += self.ranges(set(ranges), expanded, both, pretty)
+		if expanded:
+			result += self.last(set(last), expanded, both, pretty)
 
 		# Remove last empty line
 		if pretty:
-			result = result[:-1]
+			del result[-1]
 
 		if self.raw:
 			return result
