@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+import overrides
+
 import config
 import errors
 
@@ -15,6 +17,7 @@ class Command(AbstractCommand):
 			self.parameters = {'access_token': manager['key']}
 
 	@staticmethod
+	@overrides
 	def verify(response, what, inner=None):
 		response = response.json()
 		if not str(response['status_code']).startswith('2'):

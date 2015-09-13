@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+import json
+import overrides
+import requests
+
 import config
 import errors
-import json
-import requests
 
 from abstract import AbstractCommand
 
@@ -15,6 +17,7 @@ class Command(AbstractCommand):
 			self.parameters = {'key': manager['key']}
 
 	@staticmethod
+	@overrides
 	def verify(response, what):
 		response = response.json()
 		if 'error' in response:
@@ -24,6 +27,7 @@ class Command(AbstractCommand):
 
 		return response
 
+	@overrides
 	def post(self, endpoint, data=None):
 		url = '{0}/{1}'.format(self.api, endpoint)
 		print(url)

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+import overrides
+
 import config
 import errors
 
@@ -15,6 +17,7 @@ class Command(AbstractCommand):
 		self.parameters['provider'] = 'tinyurl_com'
 
 	@staticmethod
+	@overrides
 	def verify(response, what):
 		if not str(response.status_code).startswith('2'):
 			raise errors.HTTPError('Could not {0}!'.format(what),
