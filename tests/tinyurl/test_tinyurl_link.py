@@ -2,18 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import ecstasy
-import os
 import pyperclip
 import pytest
 import requests
-import sys
 import threading
 
-here = os.path.dirname(os.path.abspath(__file__))
-root = os.path.dirname(os.path.dirname(here))
+import tests.path
 
-sys.path.insert(0, root)
-sys.path.insert(0, os.path.join(root, 'lnk'))
+tests.path.insert()
 
 from collections import namedtuple
 
@@ -115,4 +111,3 @@ def test_tinyurl_link_fetch_correct_output_if_raw_false_pretty_false(fixture):
 	expected = '\n'.join([fixture.short, shorten(urls[1])])
 
 	return result == expected
-
