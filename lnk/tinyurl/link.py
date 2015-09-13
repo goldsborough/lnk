@@ -5,6 +5,7 @@ import click
 import ecstasy
 import pyperclip
 
+import beauty
 import errors
 
 from command import Command
@@ -29,7 +30,7 @@ class Link(Command):
 
 		if self.raw:
 			return result
-		return self.boxify([result]) if pretty else '\n'.join(result)
+		return beauty.boxify([result]) if pretty else '\n'.join(result)
 
 	def shorten(self, result, copy, quiet, pretty, url):
 		if not self.http.match(url):

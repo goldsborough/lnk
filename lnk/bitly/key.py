@@ -3,8 +3,9 @@
 
 import click
 
-import errors
+import beauty
 import config
+import errors
 
 from bitly.command import Command
 
@@ -29,7 +30,7 @@ class Key(Command):
 			manager['key'] = key
 
 		if show:
-			output = key if self.raw else self.boxify([[key]])
+			output = key if self.raw else beauty.boxify([[key]])
 			return output + '\n'
 		return ''
 

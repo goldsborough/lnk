@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import click
 import ecstasy
 
+import beauty
 import countries
 
 from googl.command import Command
@@ -39,7 +40,7 @@ class Stats(Command):
 			threads.append(thread)
 		self.join(threads)
 
-		return results if self.raw else self.boxify(results)
+		return results if self.raw else beauty.boxify(results)
 
 	def request(self, results, sets, timespans, add_info, full, limit):
 		url = self.queue.get()

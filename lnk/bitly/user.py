@@ -8,6 +8,7 @@ import time
 
 from collections import OrderedDict
 
+import beauty
 import bitly.history
 
 from bitly.command import Command
@@ -37,7 +38,7 @@ class User(Command):
 		if history:
 			result += self.history.fetch()
 
-		return result if self.raw else self.boxify([result])
+		return result if self.raw else beauty.boxify([result])
 
 	def filter(self, only, hide):
 		sets = self.sets

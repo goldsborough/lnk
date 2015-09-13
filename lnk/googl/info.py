@@ -7,6 +7,8 @@ import click
 
 from datetime import datetime
 
+import beauty
+
 from googl.command import Command
 
 def echo(*args):
@@ -33,7 +35,7 @@ class Info(Command):
 			threads.append(t)
 		self.join(threads)
 
-		return result if self.raw else self.boxify(result)
+		return result if self.raw else beauty.boxify(result)
 
 	def filter(self, only, hide):
 		sets = self.sets

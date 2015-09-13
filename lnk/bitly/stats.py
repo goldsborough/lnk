@@ -9,6 +9,7 @@ import time
 
 from collections import namedtuple
 
+import beauty
 import countries
 import bitly.info
 
@@ -50,7 +51,7 @@ class Stats(Command):
 
 			results.append(header + lines)
 
-		return results if self.raw else self.boxify(results)
+		return results if self.raw else beauty.boxify(results)
 
 	def request_all(self, url, timespans, sets):
 		parameters = {'link': url}

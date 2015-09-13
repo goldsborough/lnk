@@ -2,8 +2,10 @@
 #! -*- coding: utf-8 -*-
 
 import click
+import ecstasy
 import time
 
+import beauty
 import bitly.link
 
 from bitly.command import Command
@@ -30,10 +32,10 @@ class History(Command):
 
 		result = []
 		if forever:
-			result += self.forever(expanded, both, pretty) if forever else []
+			result += self.forever(expanded, both, pretty)
 		if ranges:
 			result += self.ranges(set(ranges), expanded, both, pretty)
-		if expanded:
+		if last:
 			result += self.last(set(last), expanded, both, pretty)
 
 		# Remove last empty line
@@ -42,7 +44,7 @@ class History(Command):
 
 		if self.raw:
 			return result
-		return self.boxify([result]) if pretty else '\n'.join(result)
+		return beauty.boxify([result]) if pretty else '\n'.join(result)
 
 	def forever(self, expanded, both, pretty):
 		lines = []
@@ -104,10 +106,10 @@ class History(Command):
 			url = self.link.get_long(url)
 
 		if pretty:
-			marked = ' <+> {0}'.format(line)
-			line = ecstasy.beautify(marked, ecstasy.Color.Red)
+			marked = ' <+> {0}'.format(url)
+			url = ecstasy.beautify(marked, ecstasy.Color.Red)
 
-		return line
+		return url
 
 	def request(self, parameters=None):
 		response = self.get(self.endpoints['history'], parameters)

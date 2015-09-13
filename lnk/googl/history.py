@@ -14,6 +14,7 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 from overrides import overrides
 
+import beauty
 import config
 import errors
 
@@ -60,7 +61,7 @@ class History(Command):
 
 		if self.raw:
 			return result
-		return self.boxify([result]) if pretty else '\n'.join(result)
+		return beauty.boxify([result]) if pretty else '\n'.join(result)
 
 	def forever(self, urls, limit, expanded, both, pretty):
 		lines = []
