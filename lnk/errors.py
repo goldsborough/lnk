@@ -6,6 +6,10 @@ import ecstasy
 import requests
 import sys
 
+from collections import namedtuple
+
+Message = namedtuple('Message', ['what', 'level'])
+
 class Error(Exception):
 
 	def __init__(self, what, **additional):
@@ -19,7 +23,7 @@ class Error(Exception):
 
 	@property
 	def what(self):
-		return self.levels[0][0]
+		return self.levels[0]
 
 	@staticmethod
 	def get_levels(additional):
@@ -35,7 +39,7 @@ class Error(Exception):
 				line = ecstasy.beautify(line, ecstasy.Color.Red)
 				levels[level].append(line)
 
-		return ['\n'.join(level) for level in levels if level]
+		return ['\n'.join(level) if level else None for level in levels]
 
 class HTTPError(Error):
 	def __init__(self, what, code=None, status=None, **additional):
@@ -112,12 +116,13 @@ class Catch(object):
 									  'to {0}server!'.format(self.service))
 		except Error:
 			_, error, _ = sys.exc_info()
-			click.echo('\n'.join(error.levels[:self.verbosity + 1]))
+			levels = error.levels[:self.verbosity + 1]
+			click.echo('\n'.join([i for i in levels if i]), nl=False)
 			if isinstance(error, UsageError) and self.usage:
 				click.echo(self.usage)
 
 def catch(function, *args, **kwargs):
-	"""Convenience function for a Catch object with default verbosity (0)."""
+	"""Convenience function for a Catch object with default settings."""
 	Catch().catch(function, *args, **kwargs)
 
 def warn(what):
