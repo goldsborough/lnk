@@ -7,7 +7,8 @@ import pytest
 import requests
 import threading
 
-import tests.path
+
+import tests.paths
 
 from collections import namedtuple
 

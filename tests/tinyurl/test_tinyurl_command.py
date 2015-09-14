@@ -4,7 +4,7 @@
 import pytest
 import requests
 
-import tests.path
+import tests.paths
 
 import errors
 import tinyurl.command

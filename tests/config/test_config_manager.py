@@ -7,7 +7,7 @@ import pytest
 
 from collections import namedtuple
 
-import tests.path
+import tests.paths
 
 import config
 import errors
@@ -19,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def fixture(request):
 	which = 'test'
 	filename = '{0}.json'.format(which)
-	path = os.path.join(tests.path.CONFIG_PATH, filename)
+	path = os.path.join(tests.paths.CONFIG_PATH, filename)
 
 	with open(os.path.join(HERE, filename)) as dummy:
 		configuration = json.load(dummy)

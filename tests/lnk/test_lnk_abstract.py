@@ -9,7 +9,7 @@ import threading
 
 from collections import namedtuple
 
-import tests.path
+import tests.paths
 
 from lnk.abstract import AbstractCommand
 
@@ -29,7 +29,7 @@ def fixture(request):
 		])
 
 	directory = os.path.dirname(os.path.abspath(__file__))
-	path = os.path.join(tests.path.CONFIG_PATH, 'test.json')
+	path = os.path.join(tests.paths.CONFIG_PATH, 'test.json')
 	with open(os.path.join(directory, 'test.json'), 'rt') as source:
 		config = json.load(source)
 		with open(path, 'wt') as destination:
