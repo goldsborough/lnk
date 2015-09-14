@@ -13,15 +13,19 @@ from collections import namedtuple
 
 import errors
 
-if sys.stdout.isatty():
+MAX_WIDTH = 60
+if sys.stdin.isatty():
 	with os.popen('stty size', 'r') as process:
-		MAX_WIDTH = 3 * int(process.read().split()[1])//4
-else:
-	MAX_WIDTH = 60
+		output = process.read()
+	if output:
+		MAX_WIDTH = 3 * int(output.split()[1])//4
 
 Line = namedtuple('Line', ['raw', 'escaped'])
 
 def boxify(results):
+	if not results:
+		raise errors.InternalError('Cannot boxify empty results!')
+
 	results, width = get_escaped(results)
 
 	border = '─' * (width + 2)

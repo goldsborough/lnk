@@ -7,6 +7,6 @@
     "settings": {
         "verbosity": 0, 
         "copy": "True", 
-        "service": "goo.gl"
+        "service": "bitly"
     }
 }

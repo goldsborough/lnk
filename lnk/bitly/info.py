@@ -36,11 +36,14 @@ class Info(Command):
 		return result if self.raw else beauty.boxify(result)
 
 	def filter(self, only, hide):
-		sets = self.sets
 		if only:
-			sets = {k:v for k,v in sets.items() if k in only}
+			sets = {k:v for k, v in self.sets.items() if k in only}
+		else:
+			sets = self.sets.copy()
 		for key in hide:
-			del sets[key]
+			if key in sets:
+				del sets[key]
+
 		return sets
 
 	def request(self, sets, result, hide_empty):
@@ -71,8 +74,10 @@ class Info(Command):
 	def request_history(self, url):
 		response = self.get(self.endpoints['history'], dict(link=url))
 		response = self.verify(response,
-				   			   "retrieve history for '{0}'".format(url))
-		return response['link_history'][0]
+				   			   "retrieve history for '{0}'".format(url),
+				   			   'link_history')
+
+		return response
 
 	def lineify(self, url, data, hide_empty): 
 		lines = ['URL: {0}'.format(url)]
@@ -81,9 +86,10 @@ class Info(Command):
 				continue
 			if isinstance(value, list):
 				lines.append(self.format(key, value))
-				lines += [' - {0}'.format(i) for i in value]
+				lines += [' + {0}'.format(i) for i in value]
 			else:
 				lines.append(self.format(key, value))
+
 		return lines
 
 	def format(self, key, value):
@@ -93,6 +99,8 @@ class Info(Command):
 		elif key == 'user' and value is None:
 			value = 'Not public'
 		elif key == 'privacy':
+			# the set is '--only privacy', but
+			# want to display 'Private: ...'
 			key = 'private'
 
 		if isinstance(value, bool):
