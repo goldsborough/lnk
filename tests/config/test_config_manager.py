@@ -72,9 +72,10 @@ def test_config_manager_throws_for_invalid_key(fixture):
 	with pytest.raises(errors.InvalidKeyError):
 		fixture.manager['random'] = None
 
-def test_config_manager_context_syntax_works(fixture, changed):
+def test_config_manager_context_syntax_closes_well(fixture):
 	with config.Manager(fixture.which) as manager:
 		assert manager['fucks'] == -1
+		assert manager['animal'] == 'unicorn'
 		manager['fucks'] = 0
 		manager['animal'] = 'cat'
 		assert manager.config == fixture.config
@@ -82,6 +83,25 @@ def test_config_manager_context_syntax_works(fixture, changed):
 
 	with open(fixture.file) as test:
 		assert json.load(test) == fixture.config
+
+def test_config_manager_context_syntax_writes_well(fixture, changed):
+	with config.Manager(fixture.which, write=True) as manager:
+		assert manager['fucks'] == 0
+		assert manager['animal'] == 'cat'
+		manager['fucks'] = -1
+		manager['animal'] = 'unicorn'
+		assert manager.config == changed.config
+
+	with open(fixture.file) as test:
+		assert json.load(test) == changed.config
+
+def test_config_manager_properties_are_accessible(fixture, changed):
+	assert fixture.manager.keys == changed.config.keys()
+	assert fixture.manager.values == changed.config.values()
+	assert fixture.manager.items == changed.config.items()
+
+def test_config_get_function_works(changed):
+	assert config.get('test', 'animal') == changed.config['animal']
 
 def test_config_manager_closes_correctly(fixture):
 	fixture.manager.close()
