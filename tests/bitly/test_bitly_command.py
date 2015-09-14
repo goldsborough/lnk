@@ -1,48 +1,66 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import pytest
 import requests
+
+import tests.paths
 
 import bitly.command
 import config
 import errors
-import tests.paths
 
-with open('token') as source:
+VERSION = 3
+API = 'https://api-ssl.bitly.com'
+with open(os.path.join(tests.paths.TEST_PATH, 'bitly', 'token')) as source:
 	ACCESS_TOKEN = source.read()
 
 @pytest.fixture(scope='module')
 def fixture():
 	return bitly.command.Command('link')
 
-def request(url='http://python.org', version=3):
-	api = 'https://api-ssl.bitly.com/v{0}/shorten'
-	return requests.get(api.format(version),
+def shorten(url='http://python.org', version=VERSION):
+	return requests.get('{0}/v{1}/shorten'.format(API, version),
 						params=dict(access_token=ACCESS_TOKEN,
 									longUrl=url))
 
+def expand(url):
+	return requests.get('{0}/v{1}/expand'.format(API, VERSION),
+						params=dict(access_token=ACCESS_TOKEN,
+									shortUrl=url))
+
 def test_bitly_command_throws_when_not_yet_authenticated():
-	with config.Manager('bitly') as manager:
+	with config.Manager('bitly', write=True) as manager:
+		old = manager['key']
 		manager['key'] = None
-		with pytest.raises(errors.AuthorizationError):
-			bitly.command.Command('link')
+	with pytest.raises(errors.AuthorizationError):
+		bitly.command.Command('link')
+	with config.Manager('bitly', write=True) as manager:
+		manager['key'] = old
 
 def test_bitly_command_initializes_well(fixture):
 	assert hasattr(fixture, 'parameters')
 
 def test_bitly_command_verify_works_for_healthy_response(fixture):
-	response = request()
+	response = shorten()
 	result = fixture.verify(response, 'even')
 
-	assert result == response.json()
+	assert result == response.json()['data']
 
 def test_bitly_command_verify_throws_for_http_error(fixture):
-	response = request(version=123)
+	response = shorten(version=123)
+
+	with pytest.raises(errors.HTTPError):
+		fixture.verify(response, 'even')
+
+	response = shorten('invalid_uri')
+
 	with pytest.raises(errors.HTTPError):
 		fixture.verify(response, 'even')
 
 def test_bitly_command_verify_throws_for_api_error(fixture):
-	response = request('invalid_url')
+	response = expand('google.com')
+
 	with pytest.raises(errors.APIError):
-		fixture.verify(response, 'even')
+		fixture.verify(response, 'even', 'expand')

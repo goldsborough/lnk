@@ -176,7 +176,7 @@ def test_bitly_link_expand_urls_works_for_many_urls(fixture):
 		'http://bit.ly/1NWAPWn',
 		'http://bit.ly/1Jjoc4B'
 	]
-	result = set(fixture.link.expand_urls(False, urls))
+	result = fixture.link.expand_urls(False, urls)
 	expected = set()
 	threads = []
 	for url in urls:
@@ -189,9 +189,9 @@ def test_bitly_link_expand_urls_works_for_many_urls(fixture):
 	for thread in threads:
 		thread.join(timeout=10)
 
-	print(urls, expected)
+	print(result, expected)
 
-	assert result == expected
+	assert set(result) == expected
 
 
 def test_bitly_link_shorten_urls_warns_about_url_without_protocol(fixture, capsys):

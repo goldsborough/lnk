@@ -20,7 +20,7 @@ class Info(Command):
 
 		self.raw = raw
 		self.sets = self.config['sets']
-		self.reverse = {value:key for key,value in self.sets.items()}
+		self.reverse = {value:key for key, value in self.sets.items()}
 
 	def fetch(self, only, hide, hide_empty, urls):
 		sets = self.filter(only, hide)

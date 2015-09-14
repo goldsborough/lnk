@@ -19,6 +19,10 @@ class Command(AbstractCommand):
 	@staticmethod
 	@overrides
 	def verify(response, what, inner=None):
+		if not str(response.status_code).startswith('2'):
+			raise errors.HTTPError('Could not {0}!'.format(what),
+								   response.status_code,
+						           response.reason)
 		response = response.json()
 		if not str(response['status_code']).startswith('2'):
 			raise errors.HTTPError('Could not {0}!'.format(what),
