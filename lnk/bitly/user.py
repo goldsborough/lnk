@@ -23,7 +23,7 @@ class User(Command):
 		self.history = bitly.history.History(raw=True)
 		self.raw = raw
 		self.keys = {}
-		for key,value in self.sets.items():
+		for key, value in self.sets.items():
 			if key == 'privacy':
 				self.keys[value] = 'Link privacy'
 			elif key == 'key':
@@ -37,16 +37,7 @@ class User(Command):
 		result = [self.lineify(data, hide_empty)]
 
 		if add_history:
-			links = self.history.fetch(None,
-									   None,
-									   True,
-									   None,
-									   False,
-									   False,
-									   False)
-			template = ecstasy.beautify('<+> {0}', ecstasy.Color.Red)
-			history = [template.format(link) for link in links]
-			result.append(history)
+			result.append(self.get_history())
 
 		return result[0] if self.raw else beauty.boxify(result)
 
@@ -64,18 +55,35 @@ class User(Command):
 	def lineify(self, data, hide_empty):
 		lines = []
 		for key, value in data.items():
-			if hide_empty and not value:
+			if hide_empty and (not value and value != 0):
 				continue
-			if isinstance(value, list):
+			if key == 'share_accounts':
+				lines += self.format_accounts(key, value)
+			elif isinstance(value, list):
 				lines.append(self.format(key))
-				lines += [' - {0}'.format(i) for i in value]
+				lines += [' + {0}'.format(i) for i in value]
 			else:
 				lines.append(self.format(key, value))
 
 		return lines
 
+	def format_accounts(self, key, value):
+		lines = [self.format(key)]
+		for account in value:
+			if account['account_type'] == 'twitter':
+				user = account['account_name']
+				line = 'Twitter: @{0}'.format(user)
+			elif account['account_type'] == 'facebook':
+				user = account['account_name']
+				line = 'Facebook: {0}'.format(user)
+			else:
+				line = account['account_type'].title()
+			lines.append(self.list_item.format(line))
+
+		return lines
+
 	def format(self, key, value=''):
-		if not value:
+		if not value and value != '':
 			value = 'None'
 		if key == 'member_since':
 			value = time.ctime(value)
@@ -102,3 +110,8 @@ class User(Command):
 				ordered[key] = value
 
 		return ordered
+
+	def get_history(self):
+		links = self.history.fetch(None, None, True, None, False, False, False)
+
+		return [self.list_item.format(link) for link in links]

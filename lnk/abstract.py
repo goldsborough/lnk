@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import ecstasy
 import Queue
 import re
 import requests
@@ -26,6 +27,7 @@ class AbstractCommand(object):
 		self.lock = threading.Lock()
 		self.error = None
 		self.parameters = {}
+		self.list_item = ecstasy.beautify(' <+> {0}', ecstasy.Color.Red)
 
 	def fetch(self, *args):
 		raise NotImplementedError
