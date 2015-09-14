@@ -4,9 +4,8 @@
 import os
 import sys
 
-_here = os.path.abspath(__file__)
-
-ROOT_PATH = os.path.dirname(os.path.dirname(_here))
+TEST_PATH = os.path.dirname(os.path.abspath(__file__))
+ROOT_PATH = os.path.dirname(TEST_PATH)
 CONFIG_PATH = os.path.join(ROOT_PATH, 'config')
 LNK_PATH = os.path.join(ROOT_PATH, 'lnk')
 

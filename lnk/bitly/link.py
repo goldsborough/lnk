@@ -28,16 +28,6 @@ class Link(Command):
 			return result
 		return beauty.boxify([result]) if pretty else '\n'.join(result)
 
-	def expand_urls(self, copy, urls):
-		lines = []
-		threads = []
-		for url in urls:
-			self.queue.put(url)
-			threads.append(self.new_thread(self.expand, lines, copy))
-		self.join(threads)
-
-		return lines
-
 	def shorten_urls(self, copy, quiet, urls):
 		lines = []
 		threads = []
@@ -49,17 +39,17 @@ class Link(Command):
 			self.queue.put(url)
 			threads.append(self.new_thread(self.shorten, lines, copy))
 		self.join(threads)
-
 		return lines
 
-	def expand(self, lines, copy):
-		url = self.queue.get()
-		expanded = self.get_long(url)
-		formatted = self.copy(copy, expanded)
+	def expand_urls(self, copy, urls):
+		lines = []
+		threads = []
+		for url in urls:
+			self.queue.put(url)
+			threads.append(self.new_thread(self.expand, lines, copy))
+		self.join(threads)
 
-		self.lock.acquire()
-		lines.append('{0} => {1}'.format(url, formatted))
-		self.lock.release()
+		return lines
 
 	def shorten(self, lines, copy):
 		url = self.queue.get()
@@ -70,6 +60,21 @@ class Link(Command):
 		lines.append('{0} => {1}'.format(url, formatted))
 		self.lock.release()
 
+	def expand(self, lines, copy):
+		url = self.queue.get()
+		expanded = self.get_long(url)
+		formatted = self.copy(copy, expanded)
+
+		self.lock.acquire()
+		lines.append('{0} => {1}'.format(url, formatted))
+		self.lock.release()
+
+	def get_short(self, url):
+		response = self.get(self.endpoints['shorten'], dict(longUrl=url))
+		response = self.verify(response, "shorten url '{0}'".format(url))
+		
+		return response['url']
+
 	def get_long(self, url):
 		response = self.get(self.endpoints['expand'], dict(shortUrl=url))
 		response = self.verify(response,
@@ -77,12 +82,6 @@ class Link(Command):
 							   'expand')
 
 		return response['long_url']
-
-	def get_short(self, url):
-		response = self.get(self.endpoints['shorten'], dict(longUrl=url))
-		response = self.verify(response, "shorten url '{0}'".format(url))
-		
-		return response['url']
 
 	def copy(self, copy, url):
 		if copy and not self.already_copied:

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import click
+import simplejson
 
 import beauty
 import config
@@ -30,8 +31,9 @@ class Key(Command):
 			manager['key'] = key
 
 		if show:
-			output = key if self.raw else beauty.boxify([[key]])
-			return output + '\n'
+			if self.raw:
+				return key
+			return beauty.boxify([[key]]) + '\n'
 		return ''
 
 	def request(self, login, password):
@@ -42,8 +44,16 @@ class Key(Command):
 
 	@staticmethod
 	def verify(response, what):
-		if not str(response.status_code).startswith('2'):
-			raise errors.HTTPError('Could not {}.'.format(what),
-								   response.status_code,
-						           response.reason)
-		return response.text
+		# If the request succeeded, the response is in
+		# text format, so the json decoding would fail,
+		# if there was an error we can retrieve it in json
+		try:
+			response = response.json()
+			if not str(response['status_code']).startswith('2'):
+				raise errors.HTTPError('Could not {}.'.format(what),
+									   response['status_code'],
+							           response['status_txt'])
+		except simplejson.scanner.JSONDecodeError:
+			pass
+
+		return str(response.text)

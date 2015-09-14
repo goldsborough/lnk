@@ -61,7 +61,7 @@ def test_lnk_errors_catch_shows_only_wanted_levels_for_verbosity_0(capsys):
 
 	assert captured
 
-	levels = captured[0].split('\n')
+	levels = [i for i in captured[0].split('\n') if i]
 
 	assert len(levels) == 1
 	assert 'Error' in levels[0]
@@ -78,7 +78,7 @@ def test_lnk_errors_catch_shows_all_levels_for_verbosity_4(capsys):
 
 	assert captured
 
-	levels = captured[0].split('\n')
+	levels = [i for i in captured[0].split('\n') if i]
 
 	assert len(levels) == 4
 	assert 'Error' in levels[0]
@@ -99,7 +99,7 @@ def test_lnk_erors_catch_catches_click_exception(capsys):
 
 	assert captured
 
-	levels = captured[0].split('\n')
+	levels = [i for i in captured[0].split('\n') if i]
 
 	assert 'Error' in levels[0]
 	assert 'Type' in levels[1]
@@ -114,7 +114,7 @@ def test_lnk_erors_catch_catches_requests_exception(capsys):
 
 	assert captured
 
-	levels = captured[0].split('\n')
+	levels = [i for i in captured[0].split('\n') if i]
 
 	assert 'Error' in levels[0]
 	assert 'Type' in levels[1]

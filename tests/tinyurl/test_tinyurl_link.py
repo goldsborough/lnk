@@ -7,11 +7,9 @@ import pytest
 import requests
 import threading
 
-
-import tests.paths
-
 from collections import namedtuple
 
+import tests.paths
 import tinyurl.link
 
 def shorten(url):

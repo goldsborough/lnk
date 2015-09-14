@@ -37,12 +37,15 @@ class AbstractCommand(object):
 		else:
 			parameters.update(self.parameters)
 
-		return requests.get(url, params=parameters)
+		return requests.get(url, params=parameters, timeout=60)
 
 	def post(self, endpoint, authorization=None, data=None):
 		url = '{0}/{1}'.format(self.url, endpoint)
 
-		return requests.post(url, auth=authorization, data=data)
+		return requests.post(url,
+							 auth=authorization,
+							 data=data,
+							 timeout=60)
 
 	def new_thread(self, function, *args, **kwargs):
 		def proxy(*args, **kwargs):

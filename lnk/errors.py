@@ -117,7 +117,7 @@ class Catch(object):
 		except Error:
 			_, error, _ = sys.exc_info()
 			levels = error.levels[:self.verbosity + 1]
-			click.echo('\n'.join([i for i in levels if i]), nl=False)
+			click.echo('\n'.join([i for i in levels if i]))
 			if isinstance(error, UsageError) and self.usage:
 				click.echo(self.usage)
 
