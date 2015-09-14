@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import click
+import ecstasy
 import time
 
 from collections import OrderedDict
@@ -30,22 +31,33 @@ class User(Command):
 			else:
 				self.keys[value] = value.replace('_', ' ').title()
 
-	def fetch(self, only, hide, _, history, hide_empty):
+	def fetch(self, only, hide, _, add_history, hide_empty):
 		sets = self.filter(only, hide)
 		data = self.request(sets.values())
-		result = self.lineify(data, hide_empty)
+		result = [self.lineify(data, hide_empty)]
 
-		if history:
-			result += self.history.fetch()
+		if add_history:
+			links = self.history.fetch(None,
+									   None,
+									   True,
+									   None,
+									   False,
+									   False,
+									   False)
+			template = ecstasy.beautify('<+> {0}', ecstasy.Color.Red)
+			history = [template.format(link) for link in links]
+			result.append(history)
 
-		return result if self.raw else beauty.boxify([result])
+		return result[0] if self.raw else beauty.boxify(result)
 
 	def filter(self, only, hide):
-		sets = self.sets
 		if only:
-			sets = {k:v for k,v in sets.items() if k in only}
+			sets = {k:v for k, v in self.sets.items() if k in only}
+		else:
+			sets = self.sets.copy()
 		for key in hide:
-			del sets[key]
+			if key in sets:
+				del sets[key]
 
 		return sets
 
@@ -67,10 +79,11 @@ class User(Command):
 			value = 'None'
 		if key == 'member_since':
 			value = time.ctime(value)
+
 		return '{0}: {1}'.format(self.keys[key], value)
 
 	def request(self, sets):
-		response = self.get(self.endpoints['info'])
+		response = self.get(self.endpoints['user'])
 		data = self.verify(response, 'retrieve user info')
 
 		return self.order(data, sets)
