@@ -6,9 +6,10 @@ from __future__ import unicode_literals
 import click
 import time
 
+import abstract
 import beauty
 
-from bitly.command import Command, filter_sets
+from bitly.command import Command
 
 def echo(*args):
 	click.echo(Info().fetch(*args))
@@ -23,7 +24,7 @@ class Info(Command):
 		self.reverse = {value:key for key, value in self.sets.items()}
 
 	def fetch(self, only, hide, hide_empty, urls):
-		sets = filter_sets(self.sets, only, hide)
+		sets = abstract.filter_sets(self.sets, only, hide)
 
 		result = []
 		threads = []

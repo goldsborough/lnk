@@ -8,10 +8,11 @@ import time
 
 from collections import OrderedDict
 
+import abstract
 import beauty
 import bitly.history
 
-from bitly.command import Command, filter_sets
+from bitly.command import Command
 
 def echo(*args):
 	click.echo(User().fetch(*args))
@@ -31,7 +32,7 @@ class User(Command):
 				self.keys[value] = value.replace('_', ' ').title()
 
 	def fetch(self, only, hide, _, add_history, hide_empty):
-		sets = filter_sets(self.sets, only, hide)
+		sets = abstract.filter_sets(self.sets, only, hide)
 		data = self.request(sets.values())
 		result = [self.lineify(data, hide_empty)]
 

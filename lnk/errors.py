@@ -3,6 +3,8 @@
 
 import click
 import ecstasy
+import googleapiclient.errors
+import re
 import requests
 import sys
 
@@ -106,10 +108,15 @@ class Catch(object):
 		try:
 			try:
 				function(*args, **kwargs)
+			# Re-raise as an error we can handle (and format)
 			except click.ClickException:
 				_, error, _ = sys.exc_info()
-				# Re-raise as an error we can handle (and format)
 				raise UsageError(error.message)
+			except googleapiclient.errors.HttpError:
+				_, error, _ = sys.exc_info()
+				what = re.search(r'<HttpError.+returned "([\w\s]+)">$',
+								 str(error))
+				raise HTTPError('{0}.'.format(what.group(1)))
 			except requests.exceptions.ConnectionError:
 				_, error, _ = sys.exc_info()
 				raise ConnectionError('Could not establish connection '

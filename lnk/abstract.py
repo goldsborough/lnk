@@ -70,3 +70,14 @@ class AbstractCommand(object):
 	@staticmethod
 	def verify(response, what):
 		raise NotImplementedError
+
+def filter_sets(all_sets, only, hide):
+	if only:
+		sets = {k:v for k, v in all_sets.items() if k in only}
+	else:
+		sets = all_sets.copy()
+	for key in hide:
+		if key in sets:
+			del sets[key]
+
+	return sets

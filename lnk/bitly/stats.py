@@ -9,12 +9,13 @@ import time
 
 from collections import namedtuple
 
+import abstract
 import beauty
 import bitly.info
 import countries
 import errors
 
-from bitly.command import Command, filter_sets
+from bitly.command import Command
 
 def echo(*args):
 	click.echo(Stats().fetch(*args))
@@ -33,7 +34,7 @@ class Stats(Command):
 	def fetch(self, only, hide, times, forever, limit, add_info, full, urls):
 		self.parameters['limit'] = limit
 
-		sets = filter_sets(self.sets, only, hide)
+		sets = abstract.filter_sets(self.sets, only, hide)
 		timespans = self.get_timespans(times, forever)
 		info = self.info.fetch([], [], False, urls) if add_info else []
 

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import click
 import ecstasy
 
+import abstract
 import beauty
 import countries
 
@@ -18,12 +19,10 @@ class Stats(Command):
 
 	def __init__(self, raw=False):
 		super(Stats, self).__init__('stats')
-
 		self.raw = raw
-		self.parameters['projection'] = 'FULL'
 
 	def fetch(self, only, hide, times, forever, limit, add_info, full, urls):
-		sets = self.filter(only, hide)
+		sets = abstract.filter_sets(self.sets, only, hide)
 		timespans = self.get_timespans(times, forever)
 
 		results = []
@@ -44,31 +43,21 @@ class Stats(Command):
 
 	def request(self, results, sets, timespans, add_info, full, limit):
 		url = self.queue.get()
-		response = self.get(self.endpoints['stats'], dict(shortUrl=url))
-		what = "retrieve information for '{0}'".format(url)
-		data = self.verify(response, what)
+		response = self.get(url, 'FULL')
+		self.verify(response, "get information for '{0}'".format(url))
 
-		del data['kind']
-		del data['id']
+		del response['kind']
+		del response['id']
 		if not add_info:
 			for i in ['created', 'longUrl', 'status']:
-				del data[i]
+				del response[i]
 
-		data['URL'] = url
-		lines = self.lineify(data, sets, timespans, full, limit)
+		response['URL'] = url
+		lines = self.lineify(response, sets, timespans, full, limit)
 
 		self.lock.acquire()
 		results.append(lines)
 		self.lock.release()
-
-	def filter(self, only, hide):
-		sets = self.sets
-		if only:
-			sets = {k:v for k,v in sets.items() if k in only}
-		for i in hide:
-			del sets[i]
-
-		return sets
 
 	def lineify(self, data, sets, timespans, full, limit): 
 		anal = data.pop('analytics')

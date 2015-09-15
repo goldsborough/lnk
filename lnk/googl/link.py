@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+import apiclient.discovery
 import click
 import ecstasy
 import pyperclip
@@ -71,23 +72,25 @@ class Link(Command):
 		self.lock.release()
 
 	def get_long(self, url):
-		response = self.get(self.endpoints['expand'], dict(shortUrl=url))
-		data = self.verify(response, "expand url '{0}'".format(url))
+		response = self.get(url)
+		self.verify(response, "expand url '{0}'".format(url))
 
-		if data['status'] in ['MALWARE', 'PHISHING']:
+		if response['status'] in ['MALWARE', 'PHISHING']:
 			errors.warn("Careful! goo.gl believes the url '{0}' is {1}"
-						"!".format(data['longUrl']),
-								   data['status'].lower())
-		elif data['status'] == 'REMOVED':
-			return '{0} (removed)'.format(data['longUrl'])
+						"!".format(response['longUrl']),
+								   response['status'].lower())
+		elif response['status'] == 'REMOVED':
+			return '{0} (removed)'.format(response['longUrl'])
 
-		return data['longUrl']
+		return response['longUrl']
 
 	def get_short(self, url):
-		response = self.post(self.endpoints['shorten'], dict(longUrl=url))
-		data = self.verify(response, "shorten url '{0}'".format(url))
+		api = self.get_api()
+		request = api.insert(body=dict(shortUrl=url))
+		response = request.execute()
+		self.verify(response, "shorten url '{0}'".format(url))
 
-		return data['id']
+		return response['id']
 
 	def copy(self, copy, url):
 		if copy and not self.already_copied:

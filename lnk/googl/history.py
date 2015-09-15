@@ -4,10 +4,6 @@
 import apiclient.discovery
 import click
 import ecstasy
-import httplib2
-import oauth2client.file
-import oauth2client.tools
-import os.path
 import warnings
 
 from collections import namedtuple
@@ -31,8 +27,6 @@ class History(Command):
 
 	def __init__(self, raw=False):
 		super(History, self).__init__('history')
-		credentials_path = os.path.join(config.CONFIG_PATH, 'credentials')
-		self.credentials = oauth2client.file.Storage(credentials_path)
 		self.raw = raw
 		self.delta = {
 			"minute": timedelta(minutes=1), 
@@ -121,25 +115,12 @@ class History(Command):
 		return datetime.now() - offset
 
 	def request(self):
-		http = self.authorize()
-		api = apiclient.discovery.build('urlshortener', 'v1', http=http)
-		request = api.url().list()
+		api = self.get_api()
+		request = api.list()
 		response = request.execute()
 		self.verify(response, 'retrieve history')
 
 		return response
-
-	def authorize(self):
-		credentials = self.credentials.get()
-		if not credentials:
-			raise errors.AuthorizationError('goo.gl')
-		http = httplib2.Http()
-		if credentials.access_token_expired:
-			credentials.refresh(http)
-			self.credentials.put(credentials)
-		credentials.authorize(http)
-
-		return http
 
 	def listify(self, urls, limit, expanded, both, pretty):
 		lines = []
@@ -150,14 +131,6 @@ class History(Command):
 			lines.append(line)
 
 		return lines
-
-	@staticmethod
-	@overrides
-	def verify(response, what):
-		if 'error' in response:
-			raise errors.HTTPError('Could not {0}.'.format(what),
-								   response['error']['code'],
-						           response['error']['message'])
 
 	@staticmethod
 	def lineify(url, expanded, both, pretty):
