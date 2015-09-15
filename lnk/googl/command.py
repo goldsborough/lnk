@@ -20,20 +20,23 @@ class Command(AbstractCommand):
 	@staticmethod
 	@overrides
 	def verify(response, what):
+		if not str(response.status_code).startswith('2'):
+			raise errors.HTTPError('Could not {0}.'.format(what),
+								   response.status_code,
+						           response.reason)
 		response = response.json()
 		if 'error' in response:
 			raise errors.HTTPError('Could not {0}.'.format(what),
 								   response['error']['code'],
 						           response['error']['message'])
-
 		return response
 
 	@overrides
 	def post(self, endpoint, data=None):
 		url = '{0}/{1}'.format(self.api, endpoint)
-		print(url)
 		headers = {'content-type': 'application/json'}
-		return requests.post(url,
+		response = requests.post(url,
 							 params=self.parameters,
 							 data=json.dumps(data),
 							 headers=headers)
+		return response
