@@ -119,7 +119,8 @@ def info(only, hide, hide_empty, urls):
 		      multiple=True,
 		      type=(int, click.Choice(units)),
 		      help='Show statistics for this/these timespan(s).')
-@click.option('--forever',
+@click.option('-a',
+			  '--forever/--all',
 			  is_flag=True,
 			  help='Show statistics for all timespans (since forever).')
 @click.option('--limit',
@@ -180,7 +181,8 @@ def user(only, hide, everything, add_history, hide_empty):
 		      multiple=True,
 		      type=(int, click.Choice(units), int, click.Choice(units)),
 		      help='Display history of links from this time range.')
-@click.option('--forever',
+@click.option('-a',
+			  '--forever/--all',
 			  is_flag=True,
 			  help='Display history of links since forever.')
 @click.option('-l',

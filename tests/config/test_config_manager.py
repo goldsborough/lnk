@@ -53,13 +53,13 @@ def changed():
 	return Fixture(contents, configuration)
 
 
-def test_config_manager_opens_correctly(fixture):
+def test_opens_correctly(fixture):
 	fixture.manager.open(fixture.which)
 
 	assert fixture.manager.file == fixture.file
 	assert fixture.manager.config == fixture.config
 
-def test_config_manager_writes_correctly(fixture, changed):
+def test_writes_correctly(fixture, changed):
 	fixture.manager['fucks'] = -1
 	fixture.manager['animal'] = 'unicorn'
 
@@ -68,11 +68,11 @@ def test_config_manager_writes_correctly(fixture, changed):
 	with open(fixture.file) as test:
 		assert json.load(test) == changed.config
 
-def test_config_manager_throws_for_invalid_key(fixture):
+def test_throws_for_invalid_key(fixture):
 	with pytest.raises(errors.InvalidKeyError):
 		fixture.manager['random'] = None
 
-def test_config_manager_context_syntax_closes_well(fixture):
+def test_context_syntax_closes_well(fixture):
 	with config.Manager(fixture.which) as manager:
 		assert manager['fucks'] == -1
 		assert manager['animal'] == 'unicorn'
@@ -84,7 +84,7 @@ def test_config_manager_context_syntax_closes_well(fixture):
 	with open(fixture.file) as test:
 		assert json.load(test) == fixture.config
 
-def test_config_manager_context_syntax_writes_well(fixture, changed):
+def test_context_syntax_writes_well(fixture, changed):
 	with config.Manager(fixture.which, write=True) as manager:
 		assert manager['fucks'] == 0
 		assert manager['animal'] == 'cat'
@@ -95,24 +95,24 @@ def test_config_manager_context_syntax_writes_well(fixture, changed):
 	with open(fixture.file) as test:
 		assert json.load(test) == changed.config
 
-def test_config_manager_properties_are_accessible(fixture, changed):
+def test_properties_are_accessible(fixture, changed):
 	assert fixture.manager.keys == changed.config.keys()
 	assert fixture.manager.values == changed.config.values()
 	assert fixture.manager.items == changed.config.items()
 
-def test_config_get_function_works(changed):
+def test_function_works(changed):
 	assert config.get('test', 'animal') == changed.config['animal']
 
-def test_config_manager_closes_correctly(fixture):
+def test_closes_correctly(fixture):
 	fixture.manager.close()
 
 	assert fixture.manager.file is None
 	assert fixture.manager.config is None
 
-def test_config_manager_throws_for_write_when_no_file_open(fixture):
+def test_throws_for_write_when_no_file_open(fixture):
 	with pytest.raises(errors.InternalError):
 		fixture.manager.write()
 
-def test_config_manager_throws_for_close_when_no_file_open(fixture):
+def test_throws_for_close_when_no_file_open(fixture):
 	with pytest.raises(errors.InternalError):
 		fixture.manager.close()

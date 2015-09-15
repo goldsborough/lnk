@@ -96,46 +96,46 @@ def fixture():
 				   expanded)
 
 
-def test_bitly_history_initializes_well(fixture):
+def test_initializes_well(fixture):
 	assert hasattr(fixture.history, 'raw')
 	assert hasattr(fixture.history, 'link')
 	assert hasattr(fixture.history, 'seconds')
 	assert isinstance(fixture.history.seconds, dict)
 
-def test_bitly_history_request_works(fixture):
+def test_request_works(fixture):
 	expected = request_history()
 	result = fixture.history.request()
 
 	assert result == expected
 
 
-def test_bitly_history_lineify_does_nothing_if_pretty_false(fixture):
+def test_lineify_does_nothing_if_pretty_false(fixture):
 	result = fixture.history.lineify('cat', False, False, False)
 
 	assert result == 'cat'
 
 
-def test_bitly_history_lineify_prettifies_if_pretty_true(fixture):
+def test_lineify_prettifies_if_pretty_true(fixture):
 	result = fixture.history.lineify('cat', False, False, True)
 	expected = fixture.template.format('cat')
 
 	assert result == expected
 
 
-def test_bitly_history_lineify_returns_only_expanded_if_expanded_true(fixture):
+def test_lineify_returns_only_expanded_if_expanded_true(fixture):
 	result = fixture.history.lineify(fixture.url, True, False, False)
 
 	assert result == fixture.expanded
 
 
-def test_bitly_history_lineify_returns_both_if_both_true(fixture):
+def test_lineify_returns_both_if_both_true(fixture):
 	result = fixture.history.lineify(fixture.url, False, True, False)
 	expected = '{0} => {1}'.format(fixture.url, fixture.expanded)
 
 	assert result == expected
 
 
-def test_bitly_history_timestamp_works(fixture):
+def test_timestamp_works(fixture):
 	now = time.time()
 	result = fixture.history.timestamp((1, 'minute'), now)
 	expected = now - 60
@@ -143,7 +143,7 @@ def test_bitly_history_timestamp_works(fixture):
 	assert result == expected
 
 
-def test_bitly_history_timestamp_works_if_endswith_s(fixture):
+def test_timestamp_works_if_endswith_s(fixture):
 	now = time.time()
 	result = fixture.history.timestamp((1, 'minutes'), now)
 	expected = now - 60
@@ -151,7 +151,7 @@ def test_bitly_history_timestamp_works_if_endswith_s(fixture):
 	assert result == expected	
 
 
-def test_bitly_history_set_time_works_without_upper_bound(fixture):
+def test_set_time_works_without_upper_bound(fixture):
 	now = time.time()
 	fixture.history.parameters['created_after'] = None
 	fixture.history.parameters['created_before'] = None
@@ -162,7 +162,7 @@ def test_bitly_history_set_time_works_without_upper_bound(fixture):
 	assert fixture.history.parameters['created_before'] is None
 
 
-def test_bitly_history_set_time_works_with_upper_bound(fixture):
+def test_set_time_works_with_upper_bound(fixture):
 	now = time.time()
 	fixture.history.parameters['created_after'] = None
 	fixture.history.parameters['created_before'] = None
@@ -172,47 +172,47 @@ def test_bitly_history_set_time_works_with_upper_bound(fixture):
 	assert fixture.history.parameters['created_before'] == now - 60
 
 
-def test_bitly_history_last_works_for_single_range(fixture):
+def test_last_works_for_single_range(fixture):
 	result = fixture.history.last((fixture.last[0],), False, False, False)
 	expected = fixture.last_data[0]
 
 	assert result == expected
 
-def test_bitly_history_last_works_for_many_ranges(fixture):
+def test_last_works_for_many_ranges(fixture):
 	result = fixture.history.last(fixture.last, False, False, False)
 	expected = fixture.last_data[0] + fixture.last_data[1]
 
 	assert result == expected
 
-def test_bitly_history_ranges_works_for_single_range(fixture):
+def test_ranges_works_for_single_range(fixture):
 	result = fixture.history.last((fixture.ranges[0],), False, False, False)
 	expected = fixture.ranges_data[0]
 
 	assert result == expected
 
 
-def test_bitly_history_ranges_works_for_many_ranges(fixture):
+def test_ranges_works_for_many_ranges(fixture):
 	result = fixture.history.last(fixture.ranges, False, False, False)
 	expected = fixture.ranges_data[0] + fixture.ranges_data[1]
 
 	assert result == expected
 
 
-def test_bitly_history_forever_works(fixture):
+def test_forever_works(fixture):
 	result = fixture.history.forever(False, False, False)
 	expected = fixture.forever_data
 
 	assert result == expected
 
 
-def test_bitly_history_pretty_works_for_forever(fixture):
+def test_pretty_works_for_forever(fixture):
 	result = fixture.history.forever(False, False, True)
 	expected = ['Since forever:']
 	expected += [fixture.template.format(i) for i in fixture.forever_data]
 
 	assert result == expected + ['']
 
-def test_bitly_history_pretty_works_for_last(fixture):
+def test_pretty_works_for_last(fixture):
 	result = fixture.history.last(fixture.last, False, False, True)
 	expected = []
 	for i in fixture.last:
@@ -222,7 +222,7 @@ def test_bitly_history_pretty_works_for_last(fixture):
 
 	assert result == expected + ['']
 
-def test_bitly_history_pretty_works_for_ranges(fixture):
+def test_pretty_works_for_ranges(fixture):
 	result = fixture.history.ranges(fixture.ranges, False, False, True)
 	expected = []
 	for i in fixture.ranges:
@@ -235,14 +235,14 @@ def test_bitly_history_pretty_works_for_ranges(fixture):
 	assert result == expected + ['']
 
 
-def test_bitly_history_fetch_works_only_for_forever(fixture):
+def test_fetch_works_only_for_forever(fixture):
 	result = fixture.history.fetch(None, None, True, None, False, False, False)
 	expected = fixture.forever_data
 
 	assert result == expected
 
 
-def test_bitly_history_fetch_removes_last_line(fixture):
+def test_fetch_removes_last_line(fixture):
 	result = fixture.history.fetch(None, None, True, None, False, False, True)
 	expected = len(['Since forever:'] + fixture.forever_data)
 
@@ -250,7 +250,7 @@ def test_bitly_history_fetch_removes_last_line(fixture):
 	assert result[-1] != ''
 
 
-def test_bitly_history_fetch_works_for_all_ranges(fixture):
+def test_fetch_works_for_all_ranges(fixture):
 	result = fixture.history.fetch(fixture.last,
 								   fixture.ranges,
 								   True,
@@ -264,7 +264,7 @@ def test_bitly_history_fetch_works_for_all_ranges(fixture):
 	assert result == expected
 
 
-def test_bitly_history_fetch_limits_well(fixture):
+def test_fetch_limits_well(fixture):
 	result = fixture.history.fetch(None, None, True, 3, False, False, False)
 	expected = fixture.forever_data[:3]
 

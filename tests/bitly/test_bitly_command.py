@@ -34,7 +34,7 @@ def expand(url):
 									shortUrl=url))
 
 
-def test_bitly_command_throws_when_not_yet_authenticated():
+def test_throws_when_not_yet_authenticated():
 	with config.Manager('bitly', write=True) as manager:
 		old = manager['key']
 		manager['key'] = None
@@ -44,18 +44,18 @@ def test_bitly_command_throws_when_not_yet_authenticated():
 		manager['key'] = old
 
 
-def test_bitly_command_initializes_well(fixture):
+def test_initializes_well(fixture):
 	assert hasattr(fixture, 'parameters')
 
 
-def test_bitly_command_verify_works_for_healthy_response(fixture):
+def test_verify_works_for_healthy_response(fixture):
 	response = shorten()
 	result = fixture.verify(response, 'even')
 
 	assert result == response.json()['data']
 
 
-def test_bitly_command_verify_throws_for_http_error(fixture):
+def test_verify_throws_for_http_error(fixture):
 	response = shorten(version=123)
 
 	with pytest.raises(errors.HTTPError):
@@ -67,14 +67,14 @@ def test_bitly_command_verify_throws_for_http_error(fixture):
 		fixture.verify(response, 'even')
 
 
-def test_bitly_command_verify_throws_for_api_error(fixture):
+def test_verify_throws_for_api_error(fixture):
 	response = expand('google.com')
 
 	with pytest.raises(errors.APIError):
 		fixture.verify(response, 'even', 'expand')
 
 
-def test_bitly_command_filter_sets_filters_well(fixture):
+def test_filter_sets_filters_well(fixture):
 	base = {i:None for i in 'abcde'}
 	only = ['a', 'c', 'e']
 	result = bitly.command.filter_sets(base, only, [])
@@ -82,7 +82,7 @@ def test_bitly_command_filter_sets_filters_well(fixture):
 	assert result.keys() == only
 
 
-def test_bitly_command_filter_sets_hides_well(fixture):
+def test_filter_sets_hides_well(fixture):
 	base = {i:None for i in 'abcde'}
 	hide = ['a', 'c', 'e']
 	result = bitly.command.filter_sets(base, [], hide)

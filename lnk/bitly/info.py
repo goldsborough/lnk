@@ -75,7 +75,7 @@ class Info(Command):
 				continue
 			if isinstance(value, list):
 				lines.append(self.format(key, value))
-				lines += [' + {0}'.format(i) for i in value]
+				lines += [self.list_item.format(i) for i in value]
 			else:
 				lines.append(self.format(key, value))
 

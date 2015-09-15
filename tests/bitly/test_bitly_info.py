@@ -76,7 +76,7 @@ def fixture():
 					selected,
 					formatted)
 
-def test_bitly_info_initializes_well(fixture):
+def test_initializes_well(fixture):
 
 	assert hasattr(fixture.info, 'sets')
 	assert hasattr(fixture.info, 'reverse')
@@ -87,56 +87,56 @@ def test_bitly_info_initializes_well(fixture):
 
 	assert all(i in fixture.info.sets for i in fixture.only)
 
-def test_bitly_info_requests_info_well(fixture):
+def test_requests_info_well(fixture):
 	expected = request_info(fixture.urls[0])
 	result = fixture.info.request_info(fixture.urls[0])
 
 	assert result == expected
 
-def test_bitly_info_requests_history_well(fixture):
+def test_requests_history_well(fixture):
 	expected = request_history(fixture.urls[0])
 	result = fixture.info.request_history(fixture.urls[0])
 
 	assert result == expected
 
-def test_bitly_info_format_setss_keys_well(fixture):
+def test_format_setss_keys_well(fixture):
 	result = fixture.info.format(fixture.sets['user'], 'Borat')
 	expected = 'User: Borat'
 
 	assert result == expected
 
-def test_bitly_info_format_parses_times_well(fixture):
+def test_format_parses_times_well(fixture):
 	now = time.time()
 	result = fixture.info.format(fixture.sets['created'], now)
 	expected = 'Created: {0}'.format(time.ctime(now))
 
 	assert result == expected
 
-def test_bitly_info_format_handles_privacy_well(fixture):
+def test_format_handles_privacy_well(fixture):
 	result = fixture.info.format('private', 'Yes')
 	expected = 'Private: Yes'
 
 	assert result == expected
 
-def test_bitly_info_format_handles_booleans_well(fixture):
+def test_format_handles_booleans_well(fixture):
 	result = fixture.info.format('private', False)
 	expected = 'Private: No'
 
 	assert result == expected
 
-def test_bitly_info_format_handles_None_values_well(fixture):
+def test_format_handles_None_values_well(fixture):
 	result = fixture.info.format(fixture.sets['expanded'], None)
 	expected = 'Expanded: None'
 
 	assert result == expected
 
-def test_bitly_info_format_does_not_format_value_if_list(fixture):
+def test_format_does_not_format_value_if_list(fixture):
 	result = fixture.info.format('tags', ['a', 'b', 'c'])
 	expected = 'Tags: '
 
 	assert result == expected
 
-def test_bitly_info_lineify_works_without_lists(fixture):
+def test_lineify_works_without_lists(fixture):
 	data = {k:v for k, v in fixture.data.items() if k != 'tags'}
 	expected = [fixture.formatted[0]]
 	expected += [fixture.info.format(k, v) for k, v in data.items()]
@@ -144,28 +144,28 @@ def test_bitly_info_lineify_works_without_lists(fixture):
 
 	assert result == expected
 
-def test_bitly_info_lineify_works_with_lists(fixture):
+def test_lineify_works_with_lists(fixture):
 	result = fixture.info.lineify(fixture.urls[0],
 								  fixture.data,
 								  False)
 
 	assert result == fixture.formatted
 
-def test_bitly_info_lineify_hides_empty_if_wanted(fixture):
+def test_lineify_hides_empty_if_wanted(fixture):
 	result = fixture.info.lineify(fixture.urls[0],
 								  {'Thing': None},
 								  True)
 
 	assert result == [fixture.formatted[0]]
 
-def test_bitly_info_requests_well(fixture):
+def test_requests_well(fixture):
 	fixture.info.queue.put(fixture.urls[0])
 	result = []
 	fixture.info.request(fixture.sets.values(), result, False)
 
 	assert result[0] == fixture.formatted
 
-def test_bitly_info_fetches_well(fixture):
+def test_fetches_well(fixture):
 	result = fixture.info.fetch(fixture.only,
 								fixture.hide,
 								False,

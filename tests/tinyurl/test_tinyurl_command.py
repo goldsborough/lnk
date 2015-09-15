@@ -20,18 +20,18 @@ def request(url='http://python.org', response_format='json', version=1):
 									 provider='tinyurl_com',
 									 url=url))
 
-def test_tinyurl_command_verify_works_for_healthy_response(fixture):
+def test_verify_works_for_healthy_response(fixture):
 	response = request()
 	data = fixture.verify(response, 'even')
 
 	assert data == response.json()
 
-def test_tinyurl_command_verify_throws_for_http_error(fixture):
+def test_verify_throws_for_http_error(fixture):
 	response = request(version=123)
 	with pytest.raises(errors.HTTPError):
 		fixture.verify(response, 'even')
 
-def test_tinyurl_command_verify_throws_for_api_error(fixture):
+def test_verify_throws_for_api_error(fixture):
 	response = request('telegram')
 	with pytest.raises(errors.APIError):
 		fixture.verify(response, 'even')

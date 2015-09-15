@@ -39,13 +39,6 @@ class Stats(Command):
 		results = []
 		for n, url in enumerate(urls):
 			header = info[n] if add_info else ['URL: {0}'.format(url)]
-
-			for n, line in enumerate(header):
-				colon = line.find(':')
-				line = '<{0}>{1}'.format(line[:colon], line[colon:])
-				line = ecstasy.beautify(line, ecstasy.Color.Red)
-				header[n] = line
-
 			data = self.request_all(url, timespans, sets)
 			lines = self.lineify(data, full)
 
@@ -154,7 +147,6 @@ class Stats(Command):
 
 	@staticmethod
 	def format(subject, key, value, full):
-
 		if subject == 'countries':
 			if key == 'None':
 				key = 'Other'

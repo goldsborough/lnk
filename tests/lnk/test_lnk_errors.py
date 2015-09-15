@@ -9,7 +9,7 @@ import requests
 import tests.paths
 import lnk.errors
 
-def test_lnk_errors_verbosity_system_works_without_additional():
+def test_verbosity_system_works_without_additional():
 	error = lnk.errors.Error('something happened')
 	what = ecstasy.beautify('<Error>: \asomething happened',
 							ecstasy.Color.Red)
@@ -19,7 +19,7 @@ def test_lnk_errors_verbosity_system_works_without_additional():
 	assert error.what == what
 	assert error.levels[2] == typ
 
-def test_lnk_errors_get_levels_works():
+def test_get_levels_works():
 	error = lnk.errors.Error('something happened')
 
 	assert len(error.levels) == 4
@@ -29,7 +29,7 @@ def test_lnk_errors_get_levels_works():
 	assert 'Error' in error.levels[0]
 	assert 'Type' in error.levels[2]
 
-def test_lnk_errors_verbosity_system_works_with_additional():
+def test_verbosity_system_works_with_additional():
 	error = lnk.errors.Error('something happened',
 							  Foo=lnk.errors.Message(what='foo?', level=1),
 							  Bar=lnk.errors.Message(what='bar!', level=3))
@@ -42,7 +42,7 @@ def test_lnk_errors_verbosity_system_works_with_additional():
 	assert 'bar!' in error.levels[3]
 	assert 'Error' in error.what
 
-def test_lnk_errors_catch_catches_lnk_error(capsys):
+def test_catch_catches_lnk_error(capsys):
 	def throws():
 		raise lnk.errors.Error('oops')
 	lnk.errors.catch(throws)
@@ -52,7 +52,7 @@ def test_lnk_errors_catch_catches_lnk_error(capsys):
 	assert 'Error' in captured[0]
 	assert 'oops' in captured[0]
 
-def test_lnk_errors_catch_shows_only_wanted_levels_for_verbosity_0(capsys):
+def test_catch_shows_only_wanted_levels_for_verbosity_0(capsys):
 	catch = lnk.errors.Catch()
 	def throws():
 		raise lnk.errors.Error('oops')
@@ -67,7 +67,7 @@ def test_lnk_errors_catch_shows_only_wanted_levels_for_verbosity_0(capsys):
 	assert 'Error' in levels[0]
 	assert 'oops' in levels[0]
 
-def test_lnk_errors_catch_shows_all_levels_for_verbosity_4(capsys):
+def test_catch_shows_all_levels_for_verbosity_4(capsys):
 	catch = lnk.errors.Catch(3)
 	def throws():
 		raise lnk.errors.InternalError('oops',
@@ -90,7 +90,7 @@ def test_lnk_errors_catch_shows_all_levels_for_verbosity_4(capsys):
 	assert 'Bar' in levels[3]
 	assert 'bar!' in levels[3]
 
-def test_lnk_erors_catch_catches_click_exception(capsys):
+def test_catch_catches_click_exception(capsys):
 	catch = lnk.errors.Catch(2)
 	def throws():
 		raise click.ClickException('')
@@ -105,7 +105,7 @@ def test_lnk_erors_catch_catches_click_exception(capsys):
 	assert 'Type' in levels[1]
 	assert 'UsageError' in levels[1]
 
-def test_lnk_erors_catch_catches_requests_exception(capsys):
+def test_catch_catches_requests_exception(capsys):
 	catch = lnk.errors.Catch(2)
 	def throws():
 		raise requests.exceptions.ConnectionError
@@ -120,7 +120,7 @@ def test_lnk_erors_catch_catches_requests_exception(capsys):
 	assert 'Type' in levels[1]
 	assert 'ConnectionError' in levels[1]
 
-def test_lnk_errors_catch_bubbles_up_other_exceptions():
+def test_catch_bubbles_up_other_exceptions():
 	catch = lnk.errors.Catch()
 	def throws():
 		raise RuntimeError
@@ -128,7 +128,7 @@ def test_lnk_errors_catch_bubbles_up_other_exceptions():
 	with pytest.raises(RuntimeError):
 		catch.catch(throws)
 
-def test_lnk_errors_warn_works(capsys):
+def test_warn_works(capsys):
 	lnk.errors.warn('Sauron is coming')
 	captured = capsys.readouterr()
 

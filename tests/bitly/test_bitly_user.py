@@ -85,7 +85,7 @@ def fixture():
 				   history)
 
 
-def test_bitly_user_initializes_well(fixture):
+def test_initializes_well(fixture):
 	
 	assert hasattr(fixture.user, 'history')
 	assert hasattr(fixture.user, 'keys')
@@ -95,7 +95,7 @@ def test_bitly_user_initializes_well(fixture):
 	assert fixture.user.keys['full_name'] == 'Full Name'
 
 
-def test_bitly_user_order_works(fixture):
+def test_order_works(fixture):
 	expected = [
 		'full_name',
 		'member_since',
@@ -110,13 +110,13 @@ def test_bitly_user_order_works(fixture):
 	assert result.keys() == expected
 
 
-def test_bitly_user_request_works(fixture):
+def test_request_works(fixture):
 	result = fixture.user.request(fixture.sets)
 	expected = fixture.user.order(fixture.selected, fixture.sets)
 
 	assert result == expected
 
-def test_bitly_user_format_maps_keys_well(fixture):
+def test_format_maps_keys_well(fixture):
 	result = fixture.user.format('full_name', 'Satan')
 	expected = 'Full Name: Satan'
 	assert result == expected
@@ -126,21 +126,21 @@ def test_bitly_user_format_maps_keys_well(fixture):
 	assert result == expected
 
 
-def test_bitly_user_format_handles_None_well(fixture):
+def test_format_handles_None_well(fixture):
 	result = fixture.user.format('full_name', None)
 	expected = 'Full Name: None'
 
 	assert result == expected
 
 
-def test_bitly_user_format_parses_times_well(fixture):
+def test_format_parses_times_well(fixture):
 	now = time.time()
 	result = fixture.user.format('member_since', now)
 	expected = 'Member Since: {0}'.format(time.ctime(now))
 
 	assert result == expected
 
-def test_bitly_user_format_accounts_works(fixture):
+def test_format_accounts_works(fixture):
 	accounts = [
 		dict(account_type='twitter', account_name='batman'),
 		dict(account_type='facebook', account_name='Bat Man')
@@ -154,13 +154,13 @@ def test_bitly_user_format_accounts_works(fixture):
 
 	assert result == expected
 
-def test_bitly_user_lineify_works_without_lists(fixture):
+def test_lineify_works_without_lists(fixture):
 	result = fixture.user.lineify(fixture.selected, False)
 	expected = [fixture.user.format(k, v) for k, v in fixture.selected.items()]	
 
 	assert result == expected
 
-def test_bitly_info_lineify_works_with_lists(fixture):
+def test_lineify_works_with_lists(fixture):
 	data = fixture.selected.copy()
 	data['full_name'] = ['a', 'b', 'c']
 	result = fixture.user.lineify(data, False)
@@ -174,14 +174,14 @@ def test_bitly_info_lineify_works_with_lists(fixture):
 
 	assert result == expected
 
-def test_bitly_info_lineify_hides_empty_if_wanted(fixture):
+def test_lineify_hides_empty_if_wanted(fixture):
 	result = fixture.user.lineify({'login': None}, True)
 
 	# better than isinstance(..., list) + 'assert result'
 	assert result == []
 
 
-def test_bitly_user_get_history_works(fixture):
+def test_get_history_works(fixture):
 	expected = [fixture.template.format(i) for i in fixture.history]
 	result = fixture.user.get_history()
 	result.sort()
@@ -189,7 +189,7 @@ def test_bitly_user_get_history_works(fixture):
 	assert result == expected
 
 
-def test_bitly_user_fetch_works_without_history(fixture):
+def test_fetch_works_without_history(fixture):
 	result = fixture.user.fetch(fixture.only,
 								fixture.hide,
 								True,
@@ -200,7 +200,7 @@ def test_bitly_user_fetch_works_without_history(fixture):
 	assert result == fixture.formatted
 
 
-def test_bitly_user_fetch_works_with_history(fixture):
+def test_fetch_works_with_history(fixture):
 	result = fixture.user.fetch(fixture.only,
 								fixture.hide,
 								True,

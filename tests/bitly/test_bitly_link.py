@@ -76,13 +76,13 @@ def fixture():
 	return Fixture(link, url, short, bold, long_to_short, short_to_long)
 
 
-def test_bitly_link_copy_copies_to_clipboard_if_copy_true(fixture):
+def test_copy_copies_to_clipboard_if_copy_true(fixture):
 	fixture.link.copy(True, fixture.short)
 
 	assert pyperclip.paste() == fixture.short
 
 
-def test_bitly_link_copy_copies_only_first_url(fixture):
+def test_copy_copies_only_first_url(fixture):
 	assert fixture.link.already_copied
 
 	fixture.link.copy(True, 'a')
@@ -92,27 +92,27 @@ def test_bitly_link_copy_copies_only_first_url(fixture):
 	assert pyperclip.paste() == fixture.short
 
 
-def test_bitly_link_copy_copies_to_clipboard_if_copy_false(fixture):
+def test_copy_copies_to_clipboard_if_copy_false(fixture):
 	pyperclip.copy('original')
 	fixture.link.copy(False, fixture.short)
 
 	assert pyperclip.paste() == 'original'
 
 
-def test_bitly_link_copy_makes_copied_url_bold(fixture):
+def test_copy_makes_copied_url_bold(fixture):
 	fixture.link.already_copied = False
 	returned_url = fixture.link.copy(True, fixture.short)
 
 	assert returned_url == fixture.bold
 
 
-def test_bitly_link_get_short_shortens_well(fixture):
+def test_get_short_shortens_well(fixture):
 	result = fixture.link.get_short(fixture.long)
 
 	assert result == fixture.short
 
 
-def test_bitly_link_shorten_formats_well(fixture):
+def test_shorten_formats_well(fixture):
 	result = []
 	fixture.link.queue.put(fixture.long)
 	fixture.link.shorten(result, False)
@@ -120,13 +120,13 @@ def test_bitly_link_shorten_formats_well(fixture):
 	assert result[0] == fixture.long_to_short
 
 
-def test_bitly_link_get_long_expands_well(fixture):
+def test_get_long_expands_well(fixture):
 	result = fixture.link.get_long(fixture.short)
 
 	assert result == fixture.long
 
 
-def test_bitly_link_expand_formats_well(fixture):
+def test_expand_formats_well(fixture):
 	result = []
 	fixture.link.queue.put(fixture.short)
 	fixture.link.expand(result, False)
@@ -134,13 +134,13 @@ def test_bitly_link_expand_formats_well(fixture):
 	assert result[0] == fixture.short_to_long
 
 
-def test_bitly_link_shorten_urls_works_for_single_url(fixture):
+def test_shorten_urls_works_for_single_url(fixture):
 	result = fixture.link.shorten_urls(False, True, [fixture.long])
 
 	assert result[0] == fixture.long_to_short
 
 
-def test_bitly_link_shorten_urls_works_for_many_urls(fixture):
+def test_shorten_urls_works_for_many_urls(fixture):
 	urls = [
 		'http://facebook.com',
 		'http://google.com',
@@ -164,13 +164,13 @@ def test_bitly_link_shorten_urls_works_for_many_urls(fixture):
 	assert result == expected
 
 
-def test_bitly_link_expand_urls_works_for_single_url(fixture):
+def test_expand_urls_works_for_single_url(fixture):
 	result = fixture.link.expand_urls(False, [fixture.short])
 
 	assert result[0] == fixture.short_to_long
 
 
-def test_bitly_link_expand_urls_works_for_many_urls(fixture):
+def test_expand_urls_works_for_many_urls(fixture):
 	urls = [
 		'http://bit.ly/1O5MWni',
 		'http://bit.ly/1NWAPWn',
@@ -194,7 +194,7 @@ def test_bitly_link_expand_urls_works_for_many_urls(fixture):
 	assert set(result) == expected
 
 
-def test_bitly_link_shorten_urls_warns_about_url_without_protocol(fixture, capsys):
+def test_shorten_urls_warns_about_url_without_protocol(fixture, capsys):
 	fixture.link.shorten_urls(False, False, ['google.com'])
 	out = capsys.readouterr()
 
@@ -202,7 +202,7 @@ def test_bitly_link_shorten_urls_warns_about_url_without_protocol(fixture, capsy
 	assert out[0].startswith("\aWarning: Prepending 'http://' to")
 
 
-def test_bitly_link_fetch_works(fixture):
+def test_fetch_works(fixture):
 	result = fixture.link.fetch(False,
 								True,
 								[fixture.short],
@@ -212,7 +212,7 @@ def test_bitly_link_fetch_works(fixture):
 	assert result == [fixture.long_to_short, fixture.short_to_long]
 
 
-def test_bitly_link_fetch_correct_output_if_raw_false_pretty_false(fixture):
+def test_fetch_correct_output_if_raw_false_pretty_false(fixture):
 	fixture.link.raw = False
 	result = fixture.link.fetch(False,
 								True,
