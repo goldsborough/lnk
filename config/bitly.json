@@ -38,7 +38,7 @@
             }, 
             "settings": {
                 "info": "False", 
-                "span": 1, 
+                "span": -1, 
                 "limit": 10, 
                 "unit": "forever", 
                 "full-countries": true

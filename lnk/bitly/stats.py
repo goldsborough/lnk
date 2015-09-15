@@ -10,8 +10,9 @@ import time
 from collections import namedtuple
 
 import beauty
-import countries
 import bitly.info
+import countries
+import errors
 
 from bitly.command import Command, filter_sets
 
@@ -34,7 +35,7 @@ class Stats(Command):
 
 		sets = filter_sets(self.sets, only, hide)
 		timespans = self.get_timespans(times, forever)
-		info = self.info.fetch(only, hide, False, urls) if add_info else []
+		info = self.info.fetch([], [], False, urls) if add_info else []
 
 		results = []
 		for n, url in enumerate(urls):
@@ -77,7 +78,6 @@ class Stats(Command):
 
 		# For 'clicks' the key has a different name than the endpoint
 		e = endpoint if endpoint != 'clicks' else 'link_clicks'
-
 		data = {'timespan': timespan, 'data': response[e]}
 
 		self.lock.acquire()
@@ -86,7 +86,16 @@ class Stats(Command):
 
 	def get_timespans(self, times, forever):
 		timespans = set()
-		if not times:
+		if forever:
+			# -1 = since forever (unit could be any)
+			timespans.add(Stats.Timespan(-1, 'day'))
+		if times:
+			for span, unit in times:
+				if 'year' in unit:
+					span *= 12
+					unit = 'months'
+				timespans.add(Stats.Timespan(span, unit))
+		elif not forever:
 			unit = self.settings['unit']
 			span = self.settings['span']
 			if unit == 'forever':
@@ -95,15 +104,7 @@ class Stats(Command):
 				timespans.add(Stats.Timespan(span * 12, 'months'))
 			else:
 				timespans.add(Stats.Timespan(span, unit))
-		else:
-			if forever:
-				# -1 = since forever (unit could be any)
-				timespans.add(Stats.Timespan(-1, 'day'))
-			for span, unit in times:
-				if 'year' in unit:
-					span *= 12
-					unit = 'months'
-				timespans.add(Stats.Timespan(span, unit))
+			
 
 		return timespans
 
