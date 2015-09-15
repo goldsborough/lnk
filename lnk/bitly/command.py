@@ -36,3 +36,14 @@ class Command(AbstractCommand):
 			raise errors.APIError(what, data['error'])
 
 		return data
+
+def filter_sets(all_sets, only, hide):
+	if only:
+		sets = {k:v for k, v in all_sets.items() if k in only}
+	else:
+		sets = all_sets.copy()
+	for key in hide:
+		if key in sets:
+			del sets[key]
+
+	return sets

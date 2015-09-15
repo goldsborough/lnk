@@ -13,7 +13,7 @@ import beauty
 import countries
 import bitly.info
 
-from bitly.command import Command
+from bitly.command import Command, filter_sets
 
 def echo(*args):
 	click.echo(Stats().fetch(*args))
@@ -32,7 +32,7 @@ class Stats(Command):
 	def fetch(self, only, hide, times, forever, limit, add_info, full, urls):
 		self.parameters['limit'] = limit
 
-		sets = self.filter(only, hide)
+		sets = filter_sets(self.sets, only, hide)
 		timespans = self.get_timespans(times, forever)
 		info = self.info.fetch(only, hide, False, urls) if add_info else []
 
@@ -91,28 +91,27 @@ class Stats(Command):
 		results[endpoint].append(data)
 		self.lock.release()
 
-	def filter(self, only, hide):
-		sets = self.sets
-		if only:
-			sets = [i for i in sets if i in only]
-		for i in hide:
-			del sets[i]
-		return sets
-
 	def get_timespans(self, times, forever):
 		timespans = set()
 		if not times:
 			unit = self.settings['unit']
+			span = self.settings['span']
 			if unit == 'forever':
 				timespans.add(Stats.Timespan(-1, 'day'))
+			elif 'year' in unit:
+				timespans.add(Stats.Timespan(span * 12, 'months'))
 			else:
-				timespans.add(Stats.Timespan(self.settings['span'], unit))
+				timespans.add(Stats.Timespan(span, unit))
 		else:
 			if forever:
 				# -1 = since forever (unit could be any)
 				timespans.add(Stats.Timespan(-1, 'day'))
 			for span, unit in times:
+				if 'year' in unit:
+					span *= 12
+					unit = 'months'
 				timespans.add(Stats.Timespan(span, unit))
+
 		return timespans
 
 	def lineify(self, data, full): 
@@ -134,7 +133,8 @@ class Stats(Command):
 			else:
 				line = 'Last {0} {1}'.format(timespan.span, timespan.unit)
 
-			lines.append(' + {0}:'.format(line))
+			line = '{0}:'.format(self.list_item.format(line))
+			lines.append(line)
 
 			if not items:
 				lines[-1] += ' None'
@@ -159,8 +159,10 @@ class Stats(Command):
 			if key == 'None':
 				key = 'Other'
 		 	elif full:
-				key = bitly.countries.names[key]
+				key = countries.names[key]
 		elif key == 'direct':
 			key = key.title()
+		line = '   <-> {0}: {1}'.format(key, value)
+		pretty = ecstasy.beautify(line, ecstasy.Color.Yellow)
 
-		return '   - {0}: {1}'.format(key, value)
+		return pretty

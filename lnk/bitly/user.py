@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import click
-import ecstasy
 import time
 
 from collections import OrderedDict
@@ -12,7 +11,7 @@ from collections import OrderedDict
 import beauty
 import bitly.history
 
-from bitly.command import Command
+from bitly.command import Command, filter_sets
 
 def echo(*args):
 	click.echo(User().fetch(*args))
@@ -32,7 +31,7 @@ class User(Command):
 				self.keys[value] = value.replace('_', ' ').title()
 
 	def fetch(self, only, hide, _, add_history, hide_empty):
-		sets = self.filter(only, hide)
+		sets = filter_sets(self.sets, only, hide)
 		data = self.request(sets.values())
 		result = [self.lineify(data, hide_empty)]
 
@@ -42,17 +41,6 @@ class User(Command):
 			return result[0]
 
 		return result if self.raw else beauty.boxify(result)
-
-	def filter(self, only, hide):
-		if only:
-			sets = {k:v for k, v in self.sets.items() if k in only}
-		else:
-			sets = self.sets.copy()
-		for key in hide:
-			if key in sets:
-				del sets[key]
-
-		return sets
 
 	def lineify(self, data, hide_empty):
 		lines = []

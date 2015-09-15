@@ -24,7 +24,8 @@ class History(Command):
 			"hour": 3600, 
 			"day": 86400,
 			"week": 604800, 
-			"month": 18446400
+			"month": 18446400,
+			"year": 221356800
 		}
 
 	def fetch(self, last, ranges, forever, limit, expanded, both, pretty):
@@ -83,20 +84,21 @@ class History(Command):
 
 		return lines + [''] if pretty else lines
 
-	def set_time(self, after=None, before=None):
+	def set_time(self, after=None, before=None, base=None):
 		if before:
-			before = self.timestamp(before)
+			before = self.timestamp(before, base)
 		self.parameters['created_before'] = before
-		self.parameters['created_after'] = self.timestamp(after)
+		self.parameters['created_after'] = self.timestamp(after, base)
 
-	def timestamp(self, timespan):
+	def timestamp(self, timespan, base=None):
 		span = timespan[0]
 		unit = timespan[1]
 		if unit.endswith('s'):
 			unit = unit[:-1]
 		offset = span * self.seconds[unit]
+		base = base or time.time()
 
-		return time.time() - offset
+		return base - offset
 
 	def lineify(self, url, expanded, both, pretty):
 		if both:
@@ -106,8 +108,7 @@ class History(Command):
 			url = self.link.get_long(url)
 
 		if pretty:
-			marked = ' <+> {0}'.format(url)
-			url = ecstasy.beautify(marked, ecstasy.Color.Red)
+			url = self.list_item.format(url)
 
 		return url
 

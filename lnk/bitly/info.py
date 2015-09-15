@@ -8,7 +8,7 @@ import time
 
 import beauty
 
-from bitly.command import Command
+from bitly.command import Command, filter_sets
 
 def echo(*args):
 	click.echo(Info().fetch(*args))
@@ -23,7 +23,7 @@ class Info(Command):
 		self.reverse = {value:key for key, value in self.sets.items()}
 
 	def fetch(self, only, hide, hide_empty, urls):
-		sets = self.filter(only, hide)
+		sets = filter_sets(self.sets, only, hide)
 
 		result = []
 		threads = []
@@ -34,17 +34,6 @@ class Info(Command):
 		self.join(threads)
 
 		return result if self.raw else beauty.boxify(result)
-
-	def filter(self, only, hide):
-		if only:
-			sets = {k:v for k, v in self.sets.items() if k in only}
-		else:
-			sets = self.sets.copy()
-		for key in hide:
-			if key in sets:
-				del sets[key]
-
-		return sets
 
 	def request(self, sets, result, hide_empty):
 		data = {}
