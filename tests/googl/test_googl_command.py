@@ -20,17 +20,20 @@ def fixture():
 
 
 def get(url='http://goo.gl/Euc5', version=VERSION):
-	return requests.get('{0}/v{1}/url'.format(API, version),
+	response = requests.get('{0}/v{1}/url'.format(API, version),
 						params=dict(shortUrl=url, key=KEY))
+
+	return response
 
 def post(url='http://python.org'):
 	headers = {'content-type': 'application/json'}
 	data = '{{"longUrl": "{0}"}}'.format(url)
 	params = dict(key=KEY)
-	return requests.post('{0}/v{1}/url'.format(API, VERSION),
-						 headers=headers,
-						 data=data,
-						 params=params)
+	response = requests.post('{0}/v{1}/url'.format(API, VERSION),
+							 headers=headers,
+							 data=data,
+							 params=params)
+	return response
 
 
 def test_initializes_well(fixture):

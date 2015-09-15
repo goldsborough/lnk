@@ -94,4 +94,5 @@ class Link(Command):
 			self.already_copied = True
 			pyperclip.copy(url)
 			url = ecstasy.beautify('<{0}>'.format(url), ecstasy.Style.Bold)
+
 		return url

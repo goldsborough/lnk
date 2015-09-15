@@ -20,7 +20,7 @@ SCOPE = 'https://www.googleapis.com/auth/urlshortener'
 REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
 
 def echo(*args):
-	click.echo(Key().fetch(*args), nl=False)
+	Key().fetch(*args)
 
 class Key(Command):
 
@@ -54,5 +54,3 @@ class Key(Command):
 
 		storage = oauth2client.file.Storage(self.destination)
 		storage.put(credentials)
-
-		return ''
