@@ -2,6 +2,13 @@
     "url": "https://api-ssl.bitly.com", 
     "commands": {
         "info": {
+            "endpoints": {
+                "info": "info", 
+                "history": "user/link_history"
+            }, 
+            "settings": {
+                "hide-empty": false
+            }, 
             "sets": {
                 "archived": "archived", 
                 "created": "created_at", 
@@ -13,13 +20,6 @@
                 "user": "created_by", 
                 "title": "title", 
                 "tags": "tags"
-            }, 
-            "endpoints": {
-                "info": "info", 
-                "history": "user/link_history"
-            }, 
-            "settings": {
-                "hide-empty": false
             }
         }, 
         "stats": {
@@ -30,6 +30,11 @@
                 "week", 
                 "month"
             ], 
+            "sets": [
+                "clicks", 
+                "countries", 
+                "referrers"
+            ], 
             "endpoints": {
                 "referrers": "link/referrers", 
                 "clicks": "link/clicks", 
@@ -37,16 +42,11 @@
             }, 
             "settings": {
                 "info": "False", 
-                "span": 1, 
                 "limit": 10, 
+                "span": 1, 
                 "unit": "forever", 
                 "full-countries": true
-            }, 
-            "sets": [
-                "clicks", 
-                "countries", 
-                "referrers"
-            ]
+            }
         }, 
         "link": {
             "endpoints": {
@@ -58,13 +58,6 @@
             }
         }, 
         "user": {
-            "endpoints": {
-                "info": "user/info"
-            }, 
-            "settings": {
-                "hide-empty": false, 
-                "history": false
-            }, 
             "sets": {
                 "name": "full_name", 
                 "privacy": "default_link_privacy", 
@@ -74,6 +67,13 @@
                 "date": "member_since", 
                 "login": "login", 
                 "display": "display_name"
+            }, 
+            "endpoints": {
+                "user": "user/info"
+            }, 
+            "settings": {
+                "hide-empty": false, 
+                "history": false
             }
         }, 
         "key": {

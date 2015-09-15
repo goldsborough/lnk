@@ -5,9 +5,7 @@ from __future__ import unicode_literals
 
 import os
 import pytest
-import Queue
 import requests
-import threading
 import time
 
 from collections import namedtuple
@@ -19,9 +17,6 @@ VERSION = 3
 API = 'https://api-ssl.bitly.com/v{0}'.format(VERSION)
 with open(os.path.join(tests.paths.TEST_PATH, 'bitly', 'token')) as source:
 	ACCESS_TOKEN = source.read()
-
-LOCK = threading.Lock()
-QUEUE = Queue.Queue()
 
 def request_info(url):
 	response = requests.get('{0}/info'.format(API),
@@ -66,8 +61,8 @@ def fixture():
 	selected = {k:v for k, v in data.items() if k in sets.values()}
 	formatted = ['URL: {0}'.format(urls[0])]
 	for key, value in selected.items():
-		if key == 'tags':
-			formatted.append('Tags: ')
+		if isinstance(value, list):
+			formatted.append('{0}: '.format(key.title()))
 			formatted += [' + {0}'.format(t) for t in value]
 		else:
 			formatted.append(info.format(key, value))
@@ -110,7 +105,7 @@ def test_bitly_info_format_setss_keys_well(fixture):
 
 	assert result == expected
 
-def test_bitly_info_format_parses_times(fixture):
+def test_bitly_info_format_parses_times_well(fixture):
 	now = time.time()
 	result = fixture.info.format(fixture.sets['created'], now)
 	expected = 'Created: {0}'.format(time.ctime(now))

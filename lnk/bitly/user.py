@@ -38,8 +38,10 @@ class User(Command):
 
 		if add_history:
 			result.append(self.get_history())
+		elif self.raw:
+			return result[0]
 
-		return result[0] if self.raw else beauty.boxify(result)
+		return result if self.raw else beauty.boxify(result)
 
 	def filter(self, only, hide):
 		if only:
@@ -58,17 +60,17 @@ class User(Command):
 			if hide_empty and (not value and value != 0):
 				continue
 			if key == 'share_accounts':
-				lines += self.format_accounts(key, value)
+				lines += self.format_accounts(value)
 			elif isinstance(value, list):
 				lines.append(self.format(key))
-				lines += [' + {0}'.format(i) for i in value]
+				lines += [self.list_item.format(i) for i in value]
 			else:
 				lines.append(self.format(key, value))
 
 		return lines
 
-	def format_accounts(self, key, value):
-		lines = [self.format(key)]
+	def format_accounts(self, value):
+		lines = ['Share Accounts:']
 		for account in value:
 			if account['account_type'] == 'twitter':
 				user = account['account_name']
