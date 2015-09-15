@@ -116,22 +116,6 @@ def test_bitly_user_request_works(fixture):
 
 	assert result == expected
 
-
-def test_bitly_user_filter_filters_well(fixture):
-	result = fixture.user.filter(fixture.only, [])
-
-	assert result == fixture.sets
-
-
-def test_bitly_user_filter_hides_well(fixture):
-	expected = fixture.user.sets.copy()
-	for i in fixture.hide:
-		del expected[i]
-	result = fixture.user.filter(None, fixture.hide)
-
-	assert result == expected
-
-
 def test_bitly_user_format_maps_keys_well(fixture):
 	result = fixture.user.format('full_name', 'Satan')
 	expected = 'Full Name: Satan'

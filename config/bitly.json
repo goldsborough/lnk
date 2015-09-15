@@ -2,13 +2,6 @@
     "url": "https://api-ssl.bitly.com", 
     "commands": {
         "info": {
-            "endpoints": {
-                "info": "info", 
-                "history": "user/link_history"
-            }, 
-            "settings": {
-                "hide-empty": false
-            }, 
             "sets": {
                 "archived": "archived", 
                 "created": "created_at", 
@@ -20,6 +13,13 @@
                 "user": "created_by", 
                 "title": "title", 
                 "tags": "tags"
+            }, 
+            "endpoints": {
+                "info": "info", 
+                "history": "user/link_history"
+            }, 
+            "settings": {
+                "hide-empty": false
             }
         }, 
         "stats": {
@@ -28,12 +28,8 @@
                 "hour", 
                 "day", 
                 "week", 
-                "month"
-            ], 
-            "sets": [
-                "clicks", 
-                "countries", 
-                "referrers"
+                "month", 
+                "year"
             ], 
             "endpoints": {
                 "referrers": "link/referrers", 
@@ -42,10 +38,15 @@
             }, 
             "settings": {
                 "info": "False", 
-                "limit": 10, 
                 "span": 1, 
+                "limit": 10, 
                 "unit": "forever", 
                 "full-countries": true
+            }, 
+            "sets": {
+                "referrers": "referrers", 
+                "clicks": "clicks", 
+                "countries": "countries"
             }
         }, 
         "link": {
@@ -58,6 +59,13 @@
             }
         }, 
         "user": {
+            "endpoints": {
+                "user": "user/info"
+            }, 
+            "settings": {
+                "hide-empty": false, 
+                "history": false
+            }, 
             "sets": {
                 "name": "full_name", 
                 "privacy": "default_link_privacy", 
@@ -67,13 +75,6 @@
                 "date": "member_since", 
                 "login": "login", 
                 "display": "display_name"
-            }, 
-            "endpoints": {
-                "user": "user/info"
-            }, 
-            "settings": {
-                "hide-empty": false, 
-                "history": false
             }
         }, 
         "key": {
@@ -90,7 +91,8 @@
                 "hour", 
                 "day", 
                 "week", 
-                "month"
+                "month", 
+                "year"
             ], 
             "endpoints": {
                 "history": "user/link_history"

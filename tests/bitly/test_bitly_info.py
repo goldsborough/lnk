@@ -165,19 +165,6 @@ def test_bitly_info_requests_well(fixture):
 
 	assert result[0] == fixture.formatted
 
-def test_bitly_info_filter_filters_well(fixture):
-	result = fixture.info.filter(fixture.only, [])
-
-	assert result == fixture.sets
-
-def test_bitly_info_filter_hides_well(fixture):
-	expected = fixture.info.sets.copy()
-	for i in fixture.hide:
-		del expected[i]
-	result = fixture.info.filter(None, fixture.hide)
-
-	assert result == expected
-
 def test_bitly_info_fetches_well(fixture):
 	result = fixture.info.fetch(fixture.only,
 								fixture.hide,
