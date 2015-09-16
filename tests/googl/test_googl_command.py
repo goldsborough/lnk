@@ -3,6 +3,7 @@
 
 import apiclient.discovery
 import datetime
+import googleapiclient.discovery
 import httplib2
 import oauth2client.file
 import os
@@ -41,7 +42,7 @@ def fixture():
 				   credentials_path)
 
 
-def get(url, projection='FULL'):
+def get(url, projection=None):
 	request = API.get(shortUrl=url, projection=projection)
 	response = request.execute()
 
@@ -51,25 +52,47 @@ def get(url, projection='FULL'):
 def test_initializes_well(fixture):
 	assert hasattr(fixture.command, 'credentials')
 
+def test_get_api_works(fixture):
+	result = fixture.command.get_api()
 
-def test_verify_works_for_healthy_response(fixture):
-	response = get(fixture.url)
+	assert isinstance(result, googleapiclient.discovery.Resource)
+	assert all(hasattr(result, i) for i in ['get', 'insert', 'list'])
+
+def test_execute_works_for_healthy_request(fixture):
+	request = API.get(shortUrl=fixture.url)
 	try:
-		fixture.command.verify(response, 'even')
+		response = fixture.command.execute(request)
 	except errors.HTTPError:
-		pytest.fail('googl.command.verify did not'
-					'work for a healthy response!')
+		pytest.fail('googl.command.execute threw '
+					'an HTTPError for a healthy request!')
+
+	assert isinstance(response, dict)
+
+def test_execute_fails_for_bad_request(fixture):
+	request = API.get(shortUrl='banana')
+
+	with pytest.raises(errors.HTTPError):
+		fixture.command.execute(request)
+
+def test_execute_throws_error_with_correct_message(fixture):
+	request = API.get(shortUrl='banana')
+
+	with pytest.raises(errors.HTTPError) as error:
+		fixture.command.execute(request, 'badness')
+
+		assert error.value.what == 'badness'
 
 def test_get_works(fixture):
-	pass
+	result = fixture.command.get(fixture.url)
+	expected = get(fixture.url)
 
-def tes_get_api_works(fixture):
-	pass
+	assert isinstance(result, dict)
+	assert result == expected
 
 def test_authorize_works(fixture):
 	result = fixture.command.authorize()
 
-	assert isinstance(result, httplib2.Http())
+	assert isinstance(result, httplib2.Http)
 
 def test_authorize_refreshes_well(fixture):
 	storage = oauth2client.file.Storage(fixture.credentials_path)

@@ -15,19 +15,15 @@ Message = namedtuple('Message', ['what', 'level'])
 class Error(Exception):
 
 	def __init__(self, what, **additional):
-		what = what or 'Something bad happened.'
+		self.what = what or 'Something bad happened.'
 
 		#\a is the bell character (makes a 'beep' sound)
-		additional['Error'] = ('\a{0}'.format(what), 0)
+		additional['Error'] = ('\a{0}'.format(self.what), 0)
 		additional['Type'] = (type(self).__name__, 2)
 
 		self.levels = self.get_levels(additional)
 
 		super(Error, self).__init__(self.what)
-
-	@property
-	def what(self):
-		return self.levels[0]
 
 	@staticmethod
 	def get_levels(additional):
