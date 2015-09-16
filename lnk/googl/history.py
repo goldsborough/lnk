@@ -94,7 +94,8 @@ class History(Command):
 		lines = []
 		for timespan in last:
 			if pretty:
-				header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
+				span = timespan[0] + ' ' if timespan[0] > 1 else ''
+				header = 'Last {0}{1}:'.format(span, timespan[1])
 				lines.append(header)
 			begin = self.get_date(timespan)
 			filtered = self.filter(urls, begin, datetime.now())
@@ -105,14 +106,15 @@ class History(Command):
 
 		return lines + [''] if pretty else lines
 
-	def get_date(self, time_range):
+	def get_date(self, time_range, base=None):
 		span = time_range[0]
 		unit = time_range[1]
 		if unit.endswith('s'):
 			unit = unit[:-1]
 		offset = span * self.delta[unit]
+		base = base or datetime.now()
 
-		return datetime.now() - offset
+		return base - offset
 
 	def request(self):
 		api = self.get_api()
@@ -131,8 +133,7 @@ class History(Command):
 
 		return lines
 
-	@staticmethod
-	def lineify(url, expanded, both, pretty):
+	def lineify(self, url, expanded, both, pretty):
 		if both:
 			line = '{0} => {1}'.format(url.short, url.long)
 		elif expanded:
@@ -141,7 +142,7 @@ class History(Command):
 			line = url.short
 
 		if pretty:
-			marked = ' <+> {0}'.format(line)
+			marked = self.list_item.format(line)
 			line = ecstasy.beautify(marked, ecstasy.Color.Red)
 
 		return line

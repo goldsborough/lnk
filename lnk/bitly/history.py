@@ -32,7 +32,6 @@ class History(Command):
 
 	def fetch(self, last, ranges, forever, limit, expanded, both, pretty):
 		self.parameters['limit'] = limit
-
 		result = []
 		if forever:
 			result += self.forever(expanded, both, pretty)
@@ -60,8 +59,8 @@ class History(Command):
 	def ranges(self, ranges, expanded, both, pretty):
 		lines = []
 		for timespan in ranges:
-			before = timespan[:2]
-			after = timespan[2:]
+			before = timespan[2:]
+			after = timespan[:2]
 			if pretty:
 				header = 'Between {0} {1}'.format(before[0], before[1])
 				header += ' and {0} {1} ago:'.format(after[0], after[1])
@@ -77,10 +76,14 @@ class History(Command):
 		lines = []
 		for timespan in last:
 			if pretty:
-				header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
+				span = timespan[0] + ' ' if timespan[0] > 1 else ''
+				header = 'Last {0}{1}:'.format(span, timespan[1])
 				lines.append(header)
 			parameters = self.set_time(timespan)
-			for url in self.request(parameters):
+			urls = self.request(parameters)
+			if not urls:
+				lines[-1] += ' None'
+			for url in urls:
 				line = self.lineify(url, expanded, both, pretty)
 				lines.append(line)
 
@@ -89,8 +92,12 @@ class History(Command):
 	def set_time(self, after=None, before=None, base=None):
 		if before:
 			before = self.timestamp(before, base)
-		self.parameters['created_before'] = before
-		self.parameters['created_after'] = self.timestamp(after, base)
+		parameters = {
+			'created_before': before,
+			'created_after': self.timestamp(after, base)
+		}
+
+		return parameters
 
 	def timestamp(self, timespan, base=None):
 		span = timespan[0]
@@ -100,7 +107,7 @@ class History(Command):
 		offset = span * self.seconds[unit]
 		base = base or time.time()
 
-		return base - offset
+		return int(base - offset)
 
 	def lineify(self, url, expanded, both, pretty):
 		if both:
