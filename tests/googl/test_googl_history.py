@@ -3,121 +3,153 @@
 
 from __future__ import unicode_literals
 
+import datetime
 import ecstasy
-import os
+import httplib2
+import oauth2client.file
+import os.path
 import pytest
 import requests
-import time
 
 from collections import namedtuple
 
+import errors
 import tests.paths
-import bitly.history
+import googl.history
 
-VERSION = 3
-API = 'https://api-ssl.bitly.com/v{0}'.format(VERSION)
-with open(os.path.join(tests.paths.TEST_PATH, 'bitly', 'token')) as source:
-	ACCESS_TOKEN = source.read()
+VERSION = 1
+API = 'https://www.googleapis.com/urlshortener'
+CREDENTIALS_PATH = os.path.join(tests.paths.CONFIG_PATH, 'credentials')
 
-
-def timestamp(time_range):
-	seconds = {
-		"minute": 60, 
-		"hour": 3600, 
-		"day": 86400,
-		"week": 604800, 
-		"month": 18446400,
-		"year": 221356800
+def timestamp(time_range, base=None):
+	delta = {
+		"minute": datetime.timedelta(minutes=1), 
+		"hour": datetime.timedelta(hours=1), 
+		"day": datetime.timedelta(days=1),
+		"week": datetime.timedelta(weeks=1), 
+		"month": datetime.timedelta(weeks=4),
+		"year": datetime.timedelta(weeks=52)
 	}
-	offset = time_range[0] * seconds[time_range[1]]
+	offset = time_range[0] * delta[time_range[1]]
+	base = base or datetime.datetime.now()
 
-	return time.time() - offset
+	return base - offset
 
-def request_history(start=None, end=None, limit=None):
+
+def get_token():
+	storage = oauth2client.file.Storage(CREDENTIALS_PATH)
+	credentials = storage.get()
+	if credentials.access_token_expired:
+		credentials.refresh(httplib2.Http())
+	token = credentials.access_token
+	storage.put(credentials)
+
+	return token
+
+
+def request():
+	token = get_token()
+	url = '{0}/v{1}/url/history'.format(API, VERSION)
+	response = requests.get(url, params=dict(access_token=token))
+
+	return response.json()
+
+def process(urls):
+	return googl.history.History.process(urls)
+
+def filter_urls(urls, start=None, end=None):
 	if start:
 		start = timestamp(start)
+	else:
+		start = datetime.datetime.min
 	if end:
 		end = timestamp(end)
-	response = requests.get('{0}/user/link_history'.format(API),
-							params=dict(access_token=ACCESS_TOKEN,
-										created_after=start,
-										created_before=end,
-										limit=limit))
-	data = response.json()['data']
+	else:
+		end = datetime.datetime.now()
+	filtered = []
+	for url in urls:
+		if url.created >= start and url.created <= end:
+			filtered.append(url)
 
-	return [i['link'] for i in data['link_history']]
+	return filtered
 
-
-def request_expansion(url):
-	response = requests.get('{0}/expand'.format(API),
-							params=dict(access_token=ACCESS_TOKEN,
-										shortUrl=url))
-	data = response.json()['data']
-
-	return data['expand'][0]['long_url']
 
 @pytest.fixture(scope='module')
-
 def fixture():
 	
 	Fixture = namedtuple('Fixture', [
 		'history',
-		'forever_data',
+		'all_urls',
 		'last',
-		'last_data',
+		'last_urls',
 		'ranges',
-		'ranges_data',
+		'ranges_urls',
 		'template',
 		'url',
-		'expanded'
+		'dummies',
+		'short_dummies'
 		])
 
-	history = bitly.history.History(raw=True)
-	forever_data = request_history()
+	urls = process(request())
+
+	history = googl.history.History(raw=True)
 
 	last = [(4, 'week'), (5, 'month')]
-	last_data = [request_history(i) for i in last]
+	last_urls = [filter_urls(urls, i) for i in last]
 
-	ranges = [(5, 'month', 4, 'week'), (7, 'year', 3, 'month')]
-	ranges_data = [request_history(i[:2], i[2:]) for i in last]
+	ranges = [(5, 'month', 4, 'week'), (7, 'year', 1, 'day')]
+	ranges_urls = [filter_urls(urls, i[:2], i[2:]) for i in ranges]
 
 	template = ecstasy.beautify(' <+> {0}', ecstasy.Color.Red)
-	url = 'http://bit.ly/1OQM9nA'
-	expanded = request_expansion(url)
+	short = 'http://goo.gl/fDwgtb'
+	expanded = 'http://python.org/'
+	url = history.Url(short, expanded, datetime.datetime.now())
+
+	short_dummies = ['a', 'b', 'c', 'd', 'e']
+	dummies = [
+		history.Url('a', 'aa', datetime.datetime(1997, 7, 26)),
+		history.Url('b', 'bb', datetime.datetime(2009, 5, 23)),
+		history.Url('c', 'cc', datetime.datetime(2012, 12, 21)),
+		history.Url('d', 'dd', datetime.datetime(2015, 6, 3)),
+		history.Url('e', 'ee', datetime.datetime(2015, 9, 15))
+	]
+
 
 	return Fixture(history,
-				   forever_data,
+				   urls,
 				   last,
-				   last_data,
+				   last_urls,
 				   ranges,
-				   ranges_data,
+				   ranges_urls,
 				   template,
 				   url,
-				   expanded)
+				   dummies,
+				   short_dummies)
 
 
 def test_initializes_well(fixture):
 	assert hasattr(fixture.history, 'raw')
-	assert hasattr(fixture.history, 'link')
-	assert hasattr(fixture.history, 'seconds')
-	assert isinstance(fixture.history.seconds, dict)
+	assert hasattr(fixture.history, 'delta')
+	assert isinstance(fixture.history.delta, dict)
+	values = fixture.history.delta.values()
+	assert all(isinstance(i, datetime.timedelta) for i in values)
 
 def test_request_works(fixture):
-	expected = request_history()
+	expected = request()
 	result = fixture.history.request()
 
 	assert result == expected
 
 
-def test_lineify_does_nothing_if_pretty_false(fixture):
-	result = fixture.history.lineify('cat', False, False, False)
+def test_lineify_picks_short_if_pretty_false(fixture):
+	result = fixture.history.lineify(fixture.url, False, False, False)
 
-	assert result == 'cat'
+	assert result == fixture.url.short
 
 
 def test_lineify_prettifies_if_pretty_true(fixture):
-	result = fixture.history.lineify('cat', False, False, True)
-	expected = fixture.template.format('cat')
+	result = fixture.history.lineify(fixture.url, False, False, True)
+	expected = fixture.template.format(fixture.url.short)
 
 	assert result == expected
 
@@ -125,126 +157,214 @@ def test_lineify_prettifies_if_pretty_true(fixture):
 def test_lineify_returns_only_expanded_if_expanded_true(fixture):
 	result = fixture.history.lineify(fixture.url, True, False, False)
 
-	assert result == fixture.expanded
+	assert result == fixture.url.long
 
 
 def test_lineify_returns_both_if_both_true(fixture):
 	result = fixture.history.lineify(fixture.url, False, True, False)
-	expected = '{0} => {1}'.format(fixture.url, fixture.expanded)
+	expected = '{0} => {1}'.format(fixture.url.short, fixture.url.long)
 
 	assert result == expected
 
 
-def test_timestamp_works(fixture):
-	now = time.time()
-	result = fixture.history.timestamp((1, 'minute'), now)
-	expected = now - 60
+def test_listify_works(fixture):
+	result = fixture.history.listify([fixture.url],
+									 None,
+									 True,
+									 False,
+									 False)
+	expected = [fixture.url.long]
+
+	assert result == expected
+
+def test_listify_limits_well(fixture):
+	urls = [fixture.url] + fixture.dummies
+	result = fixture.history.listify(urls,
+									 1,
+									 False,
+									 False,
+									 False)
+	expected = [fixture.url.short]
 
 	assert result == expected
 
 
-def test_timestamp_works_if_endswith_s(fixture):
-	now = time.time()
-	result = fixture.history.timestamp((1, 'minutes'), now)
-	expected = now - 60
+def test_filter_works(fixture):
+	begin = datetime.datetime(2008, 1, 3)
+	end = datetime.datetime(2013, 4, 7)
+	result = fixture.history.filter(fixture.dummies, begin, end)
+	expected = fixture.dummies[1:3]
 
-	assert result == expected	
-
-
-def test_set_time_works_without_upper_bound(fixture):
-	now = time.time()
-	fixture.history.parameters['created_after'] = None
-	fixture.history.parameters['created_before'] = None
-	fixture.history.set_time((1, 'minute'), base=now)
-	expected = now - 60
-
-	assert fixture.history.parameters['created_after'] == expected
-	assert fixture.history.parameters['created_before'] is None
+	assert result == expected
 
 
-def test_set_time_works_with_upper_bound(fixture):
-	now = time.time()
-	fixture.history.parameters['created_after'] = None
-	fixture.history.parameters['created_before'] = None
-	fixture.history.set_time((2, 'minute'), (1, 'minute'), now)
+def test_get_date_works(fixture):
+	now = datetime.datetime.now()
+	result = fixture.history.get_date((1, 'minute'), now)
+	expected = now - datetime.timedelta(minutes=1)
 
-	assert fixture.history.parameters['created_after'] == now - 120
-	assert fixture.history.parameters['created_before'] == now - 60
+	assert result == expected
+
+
+def test_get_date_works_works_if_endswith_s(fixture):
+	now = datetime.datetime.now()
+	result = fixture.history.get_date((1, 'minutes'), now)
+	expected = now - datetime.timedelta(minutes=1)
+
+	assert result == expected
+
+
+def test_get_boundaries_works(fixture):
+	base = datetime.datetime.now()
+	result = fixture.history.get_boundaries(fixture.ranges[0], base)
+	expected = (timestamp(fixture.ranges[0][:2], base),
+				timestamp(fixture.ranges[0][2:], base))
+
+	assert result == expected
+
+
+def test_get_boundaries_throws_for_invalid_range(fixture):
+	base = datetime.datetime.now()
+	invalid_range = (4, 'days', 10, 'weeks')
+
+	with pytest.raises(errors.UsageError):
+		fixture.history.get_boundaries(invalid_range, base)
 
 
 def test_last_works_for_single_range(fixture):
-	result = fixture.history.last((fixture.last[0],), False, False, False)
-	expected = fixture.last_data[0]
+	result = fixture.history.last(fixture.dummies,
+								  [fixture.last[1]],
+								  None,
+								  False,
+								  False,
+								  False)
+	expected = fixture.short_dummies[3:]
 
 	assert result == expected
 
 def test_last_works_for_many_ranges(fixture):
-	result = fixture.history.last(fixture.last, False, False, False)
-	expected = fixture.last_data[0] + fixture.last_data[1]
+	result = fixture.history.last(fixture.dummies,
+								  fixture.last,
+								  None,
+								  False,
+								  False,
+								  False)
+	expected = [fixture.short_dummies[4]]
+	expected += fixture.short_dummies[3:]
 
 	assert result == expected
 
 def test_ranges_works_for_single_range(fixture):
-	result = fixture.history.last((fixture.ranges[0],), False, False, False)
-	expected = fixture.ranges_data[0]
+	result = fixture.history.ranges(fixture.dummies,
+									[fixture.ranges[0]],
+									None,
+									False,
+									False,
+									False)
+	expected = [fixture.short_dummies[3]]
 
 	assert result == expected
 
-
 def test_ranges_works_for_many_ranges(fixture):
-	result = fixture.history.last(fixture.ranges, False, False, False)
-	expected = fixture.ranges_data[0] + fixture.ranges_data[1]
+	result = fixture.history.ranges(fixture.dummies,
+									fixture.ranges,
+									None,
+									False,
+									False,
+									False)
+	expected = [fixture.dummies[3].short]
+	expected += fixture.short_dummies[1:]
 
 	assert result == expected
 
 
 def test_forever_works(fixture):
-	result = fixture.history.forever(False, False, False)
-	expected = fixture.forever_data
+	result = fixture.history.forever(fixture.dummies,
+									 None,
+									 False,
+									 False,
+									 False)
+	expected = fixture.short_dummies
 
 	assert result == expected
 
 
 def test_pretty_works_for_forever(fixture):
-	result = fixture.history.forever(False, False, True)
+	result = fixture.history.forever(fixture.dummies,
+									 None,
+									 False,
+									 False,
+									 True)
 	expected = ['Since forever:']
-	expected += [fixture.template.format(i) for i in fixture.forever_data]
+	expected += [fixture.template.format(i) for i in fixture.short_dummies]
 
 	assert result == expected + ['']
 
 def test_pretty_works_for_last(fixture):
-	result = fixture.history.last(fixture.last, False, False, True)
+	result = fixture.history.last(fixture.all_urls,
+								  fixture.last,
+								  None,
+								  False,
+								  False,
+								  True)
 	expected = []
-	for i in fixture.last:
-		expected.append('Last {0} {1}:'.format(i[0], i[1]))
-		for item in fixture.forever_data:
-			expected.append(fixture.template.format(item))
+	for timespan, urls in zip(fixture.last, fixture.last_urls):
+		span = '{0} '.format(timespan[0]) if timespan[0] > 1 else ''
+		header = 'Last {0}{1}:'.format(span, timespan[1])
+		if not urls:
+			header += ' None'
+		expected.append(header)
+		for item in urls:
+			expected.append(fixture.template.format(item.short))
 
 	assert result == expected + ['']
 
 def test_pretty_works_for_ranges(fixture):
-	result = fixture.history.ranges(fixture.ranges, False, False, True)
+	result = fixture.history.ranges(fixture.all_urls,
+									fixture.ranges,
+									None,
+									False,
+									False,
+									True)
 	expected = []
-	for i in fixture.ranges:
-		header = 'Between {0} {1} '.format(i[0], i[1])
-		header += 'and {0} {1} ago:'.format(i[2], i[3])
+	for timespan, urls in zip(fixture.ranges, fixture.ranges_urls):
+		header = 'Between {0} {1} '.format(timespan[0], timespan[1])
+		header += 'and {0} {1} ago:'.format(timespan[2], timespan[3])
+		if not urls:
+			header += ' None'
 		expected.append(header)
-		for item in fixture.forever_data:
-			expected.append(fixture.template.format(item))
+		for item in urls:
+			expected.append(fixture.template.format(item.short))
 
 	assert result == expected + ['']
 
 
+def test_ranges_handles_empty_results_well(fixture):
+	timespan = fixture.ranges[0]
+	result = fixture.history.ranges([],
+									[timespan],
+									None,
+									False,
+									False,
+									True)
+	header = 'Between {0} {1} '.format(timespan[0], timespan[1])
+	header += 'and {0} {1} ago:'.format(timespan[2], timespan[3])
+	header += ' None'
+	expected = [header] + ['']
+
+	assert result == expected
+
+
 def test_fetch_works_only_for_forever(fixture):
 	result = fixture.history.fetch(None, None, True, None, False, False, False)
-	expected = fixture.forever_data
+	expected = [i.short for i in fixture.all_urls]
 
 	assert result == expected
 
 
 def test_fetch_removes_last_line(fixture):
 	result = fixture.history.fetch(None, None, True, None, False, False, True)
-	expected = len(['Since forever:'] + fixture.forever_data)
+	expected = len(['Since forever:'] + [i.short for i in fixture.all_urls])
 
 	assert len(result) == expected
 	assert result[-1] != ''
@@ -258,15 +378,16 @@ def test_fetch_works_for_all_ranges(fixture):
 								   False,
 								   False,
 								   False)
-	expected = [fixture.forever_data] + fixture.last_data + fixture.ranges_data
-	expected = [j for i in expected for j in i]
+	expected = [fixture.all_urls] + fixture.ranges_urls + fixture.last_urls
+	expected = [j.short for i in expected for j in i]
 
-	assert result == expected
+	assert len(result) == len(expected)
+	assert sorted(result) == sorted(expected)
 
 
 def test_fetch_limits_well(fixture):
 	result = fixture.history.fetch(None, None, True, 3, False, False, False)
-	expected = fixture.forever_data[:3]
+	expected = [i.short for i in fixture.all_urls[:3]]
 
 	assert len(result) == 3
 	assert result == expected

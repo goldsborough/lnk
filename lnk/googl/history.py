@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import apiclient.discovery
 import click
 import ecstasy
@@ -8,7 +10,6 @@ import warnings
 
 from collections import namedtuple
 from datetime import datetime, timedelta
-from overrides import overrides
 
 import beauty
 import config
@@ -70,39 +71,30 @@ class History(Command):
 	def ranges(self, urls, ranges, limit, expanded, both, pretty):
 		lines = []
 		for timespan in ranges:
+			begin, end = self.get_boundaries(timespan)
+			filtered = self.filter(urls, begin, end)
 			if pretty:
 				header = 'Between {0} {1}'.format(timespan[0], timespan[1])
 				header += ' and {0} {1} ago:'.format(timespan[2], timespan[3])
+				if not filtered:
+					header += ' None'
 				lines.append(header)
-			begin = self.get_date(timespan[:2])
-			end = self.get_date(timespan[2:])
-			if end < begin:
-				raise errors.UsageError("Illegal time range 'between {0} "
-										"and {1} and {2} {3} ago' (start must"
-										"precede end)"
-										"!".format(timespan[0], timespan[1],
-												   timespan[2], timespan[3]))
-			filtered = self.filter(urls, begin, end)
-			if filtered:
-				lines += self.listify(filtered, limit, expanded, both, pretty)
-			elif pretty:
-				lines[-1] += ' None'
+			lines += self.listify(filtered, limit, expanded, both, pretty)
 
 		return lines + [''] if pretty else lines
 
 	def last(self, urls, last, limit, expanded, both, pretty):
 		lines = []
 		for timespan in last:
-			if pretty:
-				span = timespan[0] + ' ' if timespan[0] > 1 else ''
-				header = 'Last {0}{1}:'.format(span, timespan[1])
-				lines.append(header)
 			begin = self.get_date(timespan)
 			filtered = self.filter(urls, begin, datetime.now())
-			if filtered:
-				lines += self.listify(filtered, limit, expanded, both, pretty)
-			elif pretty:
-				lines[-1] += ' None'
+			if pretty:
+				span = '{0} '.format(timespan[0]) if timespan[0] > 1 else ''
+				header = 'Last {0}{1}:'.format(span, timespan[1])
+				if not filtered:
+					header += ' None'
+				lines.append(header)
+			lines += self.listify(filtered, limit, expanded, both, pretty)
 
 		return lines + [''] if pretty else lines
 
@@ -115,6 +107,17 @@ class History(Command):
 		base = base or datetime.now()
 
 		return base - offset
+
+	def get_boundaries(self, timespan, base=None):
+		begin = self.get_date(timespan[:2], base)
+		end = self.get_date(timespan[2:], base)
+		if end < begin:
+			raise errors.UsageError("Illegal time range 'between {0} "
+									"and {1} and {2} {3} ago' (start must"
+									"precede end)"
+									"!".format(timespan[0], timespan[1],
+											   timespan[2], timespan[3]))
+		return begin, end
 
 	def request(self):
 		api = self.get_api()

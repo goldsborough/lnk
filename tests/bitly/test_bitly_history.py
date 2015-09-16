@@ -185,7 +185,7 @@ def test_last_works_for_many_ranges(fixture):
 	assert result == expected
 
 def test_ranges_works_for_single_range(fixture):
-	result = fixture.history.last((fixture.ranges[0],), False, False, False)
+	result = fixture.history.ranges((fixture.ranges[0],), False, False, False)
 	expected = fixture.ranges_data[0]
 
 	assert result == expected

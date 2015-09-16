@@ -75,14 +75,14 @@ class History(Command):
 	def last(self, last, expanded, both, pretty):
 		lines = []
 		for timespan in last:
+			parameters = self.set_time(timespan)
+			urls = self.request(parameters)
 			if pretty:
 				span = timespan[0] + ' ' if timespan[0] > 1 else ''
 				header = 'Last {0}{1}:'.format(span, timespan[1])
+				if not urls:
+					header += ' None'
 				lines.append(header)
-			parameters = self.set_time(timespan)
-			urls = self.request(parameters)
-			if not urls:
-				lines[-1] += ' None'
 			for url in urls:
 				line = self.lineify(url, expanded, both, pretty)
 				lines.append(line)
