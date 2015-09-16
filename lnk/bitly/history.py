@@ -112,11 +112,11 @@ class History(Command):
 
 	def ranges(self, ranges, expanded, both, pretty):
 		"""
-		Fetches and formats history certain time ranges.
+		Fetches and formats history for certain time ranges.
 
 		Arguments:
-			ranges (tuple): The time-ranges of schema ((span, unit), (span, unit)).
-			expanded (bool): Whether to show exapanded or short links.
+			ranges (tuple): The time-ranges of schema (span1, unit1, span2, unit2).
+			expanded (bool): Whether to show expanded or short links.
 			both (bool): Whether to show both expanded and short links.
 			pretty (bool): Whether to prettify the output.
 
