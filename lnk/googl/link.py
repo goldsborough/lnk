@@ -72,8 +72,7 @@ class Link(Command):
 		self.lock.release()
 
 	def get_long(self, url):
-		response = self.get(url)
-		self.verify(response, "expand url '{0}'".format(url))
+		response = self.get(url, what="expand url '{0}'".format(url))
 
 		if response['status'] in ['MALWARE', 'PHISHING']:
 			errors.warn("Careful! goo.gl believes the url '{0}' is {1}"
@@ -87,8 +86,8 @@ class Link(Command):
 	def get_short(self, url):
 		api = self.get_api()
 		request = api.insert(body=dict(shortUrl=url))
-		response = request.execute()
-		self.verify(response, "shorten url '{0}'".format(url))
+		what = "shorten url '{0}'".format(url)
+		response = self.execute(request, what)
 
 		return response['id']
 

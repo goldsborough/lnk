@@ -2,6 +2,7 @@
 #! -*- coding: utf-8 -*-
 
 import apiclient.discovery
+import googleapiclient.errors
 import httplib2
 import oauth2client.file
 import os
@@ -19,24 +20,16 @@ class Command(AbstractCommand):
 		credentials_path = os.path.join(config.CONFIG_PATH, 'credentials')
 		self.credentials = oauth2client.file.Storage(credentials_path)
 
-	@staticmethod
-	@overrides
-	def verify(response, what):
-		if 'error' in response:
-			raise errors.HTTPError('Could not {0}.'.format(what),
-								   response['error']['code'],
-						           response['error']['message'])
-
 	def get_api(self):
 		http = self.authorize()
 		api = apiclient.discovery.build('urlshortener', 'v1', http=http)
 
 		return api.url()
 
-	def get(self, url, projection=None):
+	def get(self, url, projection=None, what=None):
 		api = self.get_api()
 		request = api.get(shortUrl=url, projection=projection)
-		response = request.execute()
+		response = self.execute(request, what)
 
 		return response
 
@@ -51,3 +44,13 @@ class Command(AbstractCommand):
 		credentials.authorize(http)
 
 		return http
+
+	@staticmethod
+	def execute(request, what=None):
+		try:
+			response = request.execute()
+		except googleapiclient.errors.HttpError:
+			raise errors.HTTPError('Could not {0}.'.format(what))
+
+		return response
+

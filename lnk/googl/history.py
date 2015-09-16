@@ -117,8 +117,7 @@ class History(Command):
 	def request(self):
 		api = self.get_api()
 		request = api.list()
-		response = request.execute()
-		self.verify(response, 'retrieve history')
+		response = self.execute(request, 'retrieve history')
 
 		return response
 

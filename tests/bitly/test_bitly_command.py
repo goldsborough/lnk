@@ -57,12 +57,10 @@ def test_verify_works_for_healthy_response(fixture):
 
 def test_verify_throws_for_http_error(fixture):
 	response = shorten(version=123)
-
 	with pytest.raises(errors.HTTPError):
 		fixture.verify(response, 'even')
 
 	response = shorten('invalid_uri')
-
 	with pytest.raises(errors.HTTPError):
 		fixture.verify(response, 'even')
 
@@ -72,19 +70,3 @@ def test_verify_throws_for_api_error(fixture):
 
 	with pytest.raises(errors.APIError):
 		fixture.verify(response, 'even', 'expand')
-
-
-def test_filter_sets_filters_well(fixture):
-	base = {i:None for i in 'abcde'}
-	only = ['a', 'c', 'e']
-	result = bitly.command.filter_sets(base, only, [])
-
-	assert result.keys() == only
-
-
-def test_filter_sets_hides_well(fixture):
-	base = {i:None for i in 'abcde'}
-	hide = ['a', 'c', 'e']
-	result = bitly.command.filter_sets(base, [], hide)
-
-	assert result.keys() == ['b', 'd']

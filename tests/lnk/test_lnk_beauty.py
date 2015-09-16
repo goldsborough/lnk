@@ -11,15 +11,18 @@ import tests.paths
 import lnk.beauty
 
 @pytest.fixture(scope='module')
+
 def fixture():
 	leg = ecstasy.beautify('<leg>', ecstasy.Style.Blink | ecstasy.Color.Blue)
 	return [[leg, 'grapefruit'], ['hippopotamus']]
+
 
 def test_max_width_60_if_no_terminal():
 	assert lnk.beauty.MAX_WIDTH == 60
 
 	# What we'll use for testing
 	lnk.beauty.MAX_WIDTH = 10
+
 
 def test_escape_escapes_well(fixture):
 	result = lnk.beauty.escape(fixture[0][0])
@@ -28,6 +31,7 @@ def test_escape_escapes_well(fixture):
 	assert result.raw == fixture[0][0]
 	assert result.escaped == 'leg'
 
+
 def test_escape_leaves_strings_w_o_escape_codes_alone(fixture):
 	result = lnk.beauty.escape(fixture[0][1])
 
@@ -35,21 +39,25 @@ def test_escape_leaves_strings_w_o_escape_codes_alone(fixture):
 	assert result.raw == fixture[0][1]
 	assert result.escaped == fixture[0][1]
 
+
 def test_get_escaped_escapes_results_well(fixture):
 	result, _ = lnk.beauty.get_escaped(fixture)
 	expected = [[lnk.beauty.escape(j) for j in i] for i in fixture]
 
 	assert result == expected
 
+
 def test_get_escaped_picks_correct_width(fixture):
 	_, width = lnk.beauty.get_escaped([fixture[0]])
 
 	assert width == len('grapefruit')
 
+
 def test_get_escaped_truncates_to_max_width(fixture):
 	_, width = lnk.beauty.get_escaped(fixture)
 
 	assert width == lnk.beauty.MAX_WIDTH
+
 
 def test_ljust_works_well(fixture):
 	line = lnk.beauty.escape(fixture[0][0])
@@ -58,6 +66,7 @@ def test_ljust_works_well(fixture):
 
 	assert adjusted == expected
 
+
 def test_wrap_works_well(fixture):
 	line = lnk.beauty.escape(fixture[0][0])
 	wrapped = [i.escaped for i in lnk.beauty.wrap(line, 2)]
@@ -65,6 +74,7 @@ def test_wrap_works_well(fixture):
 	assert len(wrapped) == 2
 	assert not any(len(i) > 10 for i in wrapped)
 	assert wrapped == ['le', ' g']
+
 
 def test_boxify_works_well(fixture):
 	lines = [lnk.beauty.escape(j) for i in fixture for j in i]

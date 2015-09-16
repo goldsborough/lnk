@@ -18,6 +18,7 @@ class Command(AbstractCommand):
 		super(Command, self).__init__('test', 'do')
 
 @pytest.fixture(scope='module')
+
 def fixture(request):
 	Fixture = namedtuple('Fixture', [
 		'command',
@@ -47,6 +48,7 @@ def fixture(request):
 				   config['commands']['do']['endpoints'],
 				   config['commands']['do']['settings'])
 
+
 def test_has_all_attributes(fixture):
 	assert hasattr(fixture.command, 'url')
 	assert hasattr(fixture.command, 'api')
@@ -54,11 +56,13 @@ def test_has_all_attributes(fixture):
 	assert hasattr(fixture.command, 'endpoints')
 	assert hasattr(fixture.command, 'settings')
 
+
 def test_attributes_are_correctly_set(fixture):
 	assert fixture.command.url == fixture.url
 	assert fixture.command.api == fixture.api
 	assert fixture.command.endpoints == fixture.endpoints
 	assert fixture.command.settings == fixture.settings
+
 
 def test_default_GET_works_well(fixture):
 	endpoint = fixture.endpoints[0]
@@ -76,6 +80,7 @@ def test_default_GET_works_well(fixture):
 	assert isinstance(response, requests.Response)
 	assert response.request.method == 'GET'
 	assert response.url == '{0}?cats=awesome'.format(url)
+
 
 def test_default_POST_works_well(fixture):
 	endpoint = fixture.endpoints[1]
@@ -95,6 +100,7 @@ def test_default_POST_works_well(fixture):
 
 	assert response.request.body == 'cats=awesome'
 
+
 def test_new_thread_sets_up_thread_well(fixture):
 	def endless():
 		while True:
@@ -106,6 +112,7 @@ def test_new_thread_sets_up_thread_well(fixture):
 	assert thread.daemon
 
 	thread.join(0.1)
+
 
 def test_exception_handling_for_threads_works(fixture):
 	def throws():
@@ -122,11 +129,13 @@ def test_exception_handling_for_threads_works(fixture):
 
 	fixture.command.error = None
 
+
 def test_join_method_works(fixture):
 	threads = [fixture.command.new_thread(lambda: 1) for _ in range(10)]
 	fixture.command.join(threads)
 
 	assert not any(thread.is_alive() for thread in threads)
+
 
 def test_join_method_re_raises_thread_exceptions(fixture):
 	def throws():
@@ -136,10 +145,28 @@ def test_join_method_re_raises_thread_exceptions(fixture):
 	with pytest.raises(RuntimeError):
 		fixture.command.join([thread])
 
+
 def test_fetch_not_implemented(fixture):
 	with pytest.raises(NotImplementedError):
 		fixture.command.fetch()
 
+
 def test_verify_not_implemented(fixture):
 	with pytest.raises(NotImplementedError):
 		fixture.command.verify(None, None)
+
+
+def test_filter_sets_filters_well(fixture):
+	base = {i:None for i in 'abcde'}
+	only = ['a', 'c', 'e']
+	result = bitly.command.filter_sets(base, only, [])
+
+	assert result.keys() == only
+
+
+def test_filter_sets_hides_well(fixture):
+	base = {i:None for i in 'abcde'}
+	hide = ['a', 'c', 'e']
+	result = bitly.command.filter_sets(base, [], hide)
+
+	assert result.keys() == ['b', 'd']

@@ -47,8 +47,8 @@ class Info(Command):
 		self.lock.release()
 
 	def request(self, url):
-		response = self.get(url, 'FULL')
-		self.verify(response, "get information for '{0}'".format(url))
+		what = "get information for '{0}'".format(url)
+		response = self.get(url, 'FULL', what)
 
 		return response
 

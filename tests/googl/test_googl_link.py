@@ -175,7 +175,7 @@ def test_expand_urls_works_for_single_url(fixture):
 def test_expand_urls_works_for_many_urls(fixture):
 	urls = [
 		'http://goo.gl/9RJxHk',
-		'https://goo.gl/IpUmJn ',
+		'https://goo.gl/IpUmJn',
 		'https://goo.gl/maps/HZqGm'
 	]
 	result = fixture.link.expand_urls(False, urls)

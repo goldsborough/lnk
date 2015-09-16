@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import apiclient.discovery
+import datetime
+import httplib2
+import oauth2client.file
+import os
 import pytest
 import requests
+
+from collections import namedtuple
 
 import tests.paths
 
@@ -11,54 +18,79 @@ import errors
 
 VERSION = 1
 KEY = 'AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc'
-API = 'https://www.googleapis.com/urlshortener'
+URL = 'https://www.googleapis.com/urlshortener'
+API = apiclient.discovery.build('urlshortener',
+								'v{0}'.format(VERSION),
+								developerKey=KEY).url()
 
 @pytest.fixture(scope='module')
 
 def fixture():
-	return googl.command.Command('link')
+	Fixture = namedtuple('Fixture', [
+		'command',
+		'url',
+		'credentials_path'
+		])
+
+	command = googl.command.Command('link')
+	url = 'http://goo.gl/Euc5'
+	credentials_path = os.path.join(tests.paths.CONFIG_PATH, 'credentials')
+
+	return Fixture(command,
+				   url,
+				   credentials_path)
 
 
-def get(url='http://goo.gl/Euc5', version=VERSION):
-	response = requests.get('{0}/v{1}/url'.format(API, version),
-						params=dict(shortUrl=url, key=KEY))
+def get(url, projection='FULL'):
+	request = API.get(shortUrl=url, projection=projection)
+	response = request.execute()
 
-	return response
-
-def post(url='http://python.org'):
-	headers = {'content-type': 'application/json'}
-	data = '{{"longUrl": "{0}"}}'.format(url)
-	params = dict(key=KEY)
-	response = requests.post('{0}/v{1}/url'.format(API, VERSION),
-							 headers=headers,
-							 data=data,
-							 params=params)
 	return response
 
 
 def test_initializes_well(fixture):
-	assert hasattr(fixture, 'parameters')
+	assert hasattr(fixture.command, 'credentials')
 
 
 def test_verify_works_for_healthy_response(fixture):
-	response = get()
-	result = fixture.verify(response, 'even')
+	response = get(fixture.url)
+	try:
+		fixture.command.verify(response, 'even')
+	except errors.HTTPError:
+		pytest.fail('googl.command.verify did not'
+					'work for a healthy response!')
 
-	assert result == response.json()
+def test_get_works(fixture):
+	pass
+
+def tes_get_api_works(fixture):
+	pass
+
+def test_authorize_works(fixture):
+	result = fixture.command.authorize()
+
+	assert isinstance(result, httplib2.Http())
+
+def test_authorize_refreshes_well(fixture):
+	storage = oauth2client.file.Storage(fixture.credentials_path)
+	credentials = storage.get()
+	now = datetime.datetime.now()
+	credentials.token_expiry = now
+	storage.put(credentials)
+
+	fixture.command.authorize()
+
+	credentials = storage.get()
+
+	assert credentials.token_expiry != now
 
 
-def test_verify_throws_for_http_error(fixture):
-	response = get(version=123)
-	with pytest.raises(errors.HTTPError):
-		fixture.verify(response, 'even')
+def test_authorize_throws_if_no_credentials(fixture):
+	storage = oauth2client.file.Storage(fixture.credentials_path)
+	credentials = storage.get()
+	os.remove(fixture.credentials_path)
 
-	response = get('invalid_uri')
-	with pytest.raises(errors.HTTPError):
-		fixture.verify(response, 'even')
+	with pytest.raises(errors.AuthorizationError):
+		fixture.command.authorize()
 
-
-def test_post_works(fixture):
-	response = fixture.post('url', dict(longUrl='http://python.org'))
-	expected = post()
-
-	assert response.text == expected.text
+	storage.put(credentials)

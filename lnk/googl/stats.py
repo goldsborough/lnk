@@ -43,8 +43,8 @@ class Stats(Command):
 
 	def request(self, results, sets, timespans, add_info, full, limit):
 		url = self.queue.get()
-		response = self.get(url, 'FULL')
-		self.verify(response, "get information for '{0}'".format(url))
+		what = "get information for '{0}'".format(url)
+		response = self.get(url, 'FULL', what)
 
 		del response['kind']
 		del response['id']

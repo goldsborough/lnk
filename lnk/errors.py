@@ -15,6 +15,8 @@ Message = namedtuple('Message', ['what', 'level'])
 class Error(Exception):
 
 	def __init__(self, what, **additional):
+		what = what or 'Something bad happened.'
+
 		#\a is the bell character (makes a 'beep' sound)
 		additional['Error'] = ('\a{0}'.format(what), 0)
 		additional['Type'] = (type(self).__name__, 2)
@@ -113,20 +115,31 @@ class Catch(object):
 				_, error, _ = sys.exc_info()
 				raise UsageError(error.message)
 			except googleapiclient.errors.HttpError:
-				_, error, _ = sys.exc_info()
-				what = re.search(r'<HttpError.+returned "([\w\s]+)">$',
-								 str(error))
-				raise HTTPError('{0}.'.format(what.group(1)))
+				self.handle_google()
 			except requests.exceptions.ConnectionError:
 				_, error, _ = sys.exc_info()
 				raise ConnectionError('Could not establish connection '
 									  'to {0}server!'.format(self.service))
 		except Error:
-			_, error, _ = sys.exc_info()
-			levels = error.levels[:self.verbosity + 1]
-			click.echo('\n'.join([i for i in levels if i]))
-			if isinstance(error, UsageError) and self.usage:
-				click.echo(self.usage)
+			self.handle_error()
+
+	def handle_error(self):
+		_, error, _ = sys.exc_info()
+		levels = error.levels[:self.verbosity + 1]
+		click.echo('\n'.join([i for i in levels if i]))
+		if isinstance(error, UsageError) and self.usage:
+			click.echo(self.usage)
+
+	@staticmethod
+	def handle_google():
+		_, error, _ = sys.exc_info()
+		match = re.search(r'<HttpError.+returned "([\w\s]+)">$',
+						  str(error))
+		what = '{0}.'.format(match.group(1))
+		if what == 'Required.':
+			what = 'Invalid link.'
+
+		raise HTTPError(what)
 
 def catch(function, *args, **kwargs):
 	"""Convenience function for a Catch object with default settings."""
