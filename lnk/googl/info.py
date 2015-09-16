@@ -41,10 +41,8 @@ class Info(Command):
 		data = self.request(url)
 		selection = {key : data[key] for key in data if key in sets}
 		lines = self.lineify(url, selection)
-
-		self.lock.acquire()
-		result.append(lines)
-		self.lock.release()
+		with self.lock:
+			result.append(lines)
 
 	def request(self, url):
 		what = "get information for '{0}'".format(url)

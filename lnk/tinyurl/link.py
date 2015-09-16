@@ -41,10 +41,8 @@ class Link(Command):
 		formatted = self.copy(copy, short)
 		if pretty:
 			formatted = '{0} => {1}'.format(url, formatted)
-
-		self.lock.acquire()
-		result.append(formatted)
-		self.lock.release()
+		with self.lock:
+			result.append(formatted)
 
 	def request(self, url):
 		response = self.get(self.endpoints['create'], dict(url=url))

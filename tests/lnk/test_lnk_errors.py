@@ -11,11 +11,9 @@ import lnk.errors
 
 
 def test_verbosity_system_works_without_additional():
-	error = lnk.errors.Error('something happened')
-	what = ecstasy.beautify('<Error>: \asomething happened',
-							ecstasy.Color.Red)
-	typ = ecstasy.beautify('<Type>: Error',
-							ecstasy.Color.Red)
+	what = 'something happened'
+	error = lnk.errors.Error(what)
+	typ = ecstasy.beautify('<Type>: Error', ecstasy.Color.Red)
 
 	assert error.what == what
 	assert error.levels[2] == typ
@@ -33,9 +31,9 @@ def test_get_levels_works():
 
 
 def test_verbosity_system_works_with_additional():
-	error = lnk.errors.Error('something happened',
-							  Foo=lnk.errors.Message(what='foo?', level=1),
-							  Bar=lnk.errors.Message(what='bar!', level=3))
+	foo = lnk.errors.Error.Message(what='foo?', level=1)
+	bar = lnk.errors.Error.Message(what='bar!', level=3)
+	error = lnk.errors.Error('something happened', Foo=foo, Bar=bar)
 
 	assert len(error.levels) == 4
 	assert all(error.levels)
@@ -43,7 +41,6 @@ def test_verbosity_system_works_with_additional():
 	assert 'foo?' in error.levels[1]
 	assert 'Bar' in error.levels[3]
 	assert 'bar!' in error.levels[3]
-	assert 'Error' in error.what
 
 
 def test_catch_catches_lnk_error(capsys):
@@ -76,9 +73,9 @@ def test_catch_shows_only_wanted_levels_for_verbosity_0(capsys):
 def test_catch_shows_all_levels_for_verbosity_4(capsys):
 	catch = lnk.errors.Catch(3)
 	def throws():
-		raise lnk.errors.InternalError('oops',
-							   Foo=lnk.errors.Message(what='foo?', level=1),
-							   Bar=lnk.errors.Message(what='bar!', level=3))
+		foo = lnk.errors.Error.Message(what='foo?', level=1)
+		bar = lnk.errors.Error.Message(what='bar!', level=3)
+		raise lnk.errors.InternalError('oops', Foo=foo, Bar=bar)
 	catch.catch(throws)
 	captured = capsys.readouterr()
 
@@ -125,8 +122,8 @@ def test_catch_catches_requests_exception(capsys):
 	levels = [i for i in captured[0].split('\n') if i]
 
 	assert 'Error' in levels[0]
-	assert 'Type' in levels[1]
-	assert 'ConnectionError' in levels[1]
+	assert 'Type' in levels[2]
+	assert 'ConnectionError' in levels[2]
 
 
 def test_catch_bubbles_up_other_exceptions():

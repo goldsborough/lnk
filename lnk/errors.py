@@ -64,7 +64,7 @@ class Error(Exception):
 		Transforms and formats error levels.
 
 		Each additional level passed to the constructor of
-		Error is either the error string, in which case its level 
+		Error is either the error string, in which case its level
 		is 1 or a Error.Message tuple consisting of that same
 		error string and additionally an integer specifying the
 		level. This information is parsed here, such that the

@@ -5,446 +5,425 @@ from __future__ import unicode_literals
 
 import copy
 import ecstasy
-import os
 import pytest
 import requests
 
 from collections import namedtuple
 
 import tests.paths
-import bitly.stats
-import bitly.info
+import googl.stats
+import googl.info
 import lnk.config
 
-VERSION = 3
-API = 'https://api-ssl.bitly.com/v{0}'.format(VERSION)
-with open(os.path.join(tests.paths.TEST_PATH, 'bitly', 'token')) as source:
-	ACCESS_TOKEN = source.read()
+VERSION = 1
+API = 'https://www.googleapis.com/urlshortener'
+KEY = 'AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc'
 
-def request_stats(url, endpoint, timespan):
-	response = requests.get('{0}/link/{1}'.format(API, endpoint),
-							params=dict(units=timespan.span,
-										unit=timespan.unit,
-										access_token=ACCESS_TOKEN,
-										link=url))
+def request_stats(url):
+	response = requests.get('{0}/v{1}/url'.format(API, VERSION),
+							params=dict(projection='FULL',
+										shortUrl=url,
+										key=KEY))
+	data = response.json()
+	data['URL'] = url
+	del data['kind']
+	del data['id']
 
-	e = endpoint if endpoint != 'clicks' else 'link_clicks'
-	data = response.json()['data'][e]
-
-	return {'timespan': timespan, 'data': data}
+	return data
 
 @pytest.fixture(scope='module')
 def fixture(request):
 	Fixture = namedtuple('Fixture', [
 		'stats',
 		'info',
-		'endpoint',
+		'category',
 		'url',
-		'timespan_tuples',
 		'timespans',
-		'forever',
+		'full',
+		'analytics',
 		'first_level',
 		'second_level',
 		'forever_data',
+		'category_data',
 		'timespans_data',
-		'default_timespan'
+		'template'
 		])
 
-	endpoint = 'countries'
-	url = 'http://bit.ly/1OQM9nA'
-	timespan_tuples = [(4, 'month'), (3, 'week')]
-	timespans = [bitly.stats.Stats.Timespan(s, u) for s, u in timespan_tuples]
+	category = {'browsers': 'browsers'}
+	url = 'http://goo.gl/3U9mIa'
+	timespans = ['month', 'day']
 	first_level = ecstasy.beautify(' <+> {0}', ecstasy.Color.Red)
 	second_level = ecstasy.beautify('   <-> {0}: {1}', ecstasy.Color.Yellow)
-	forever = bitly.stats.Stats.Timespan(-1, 'day')
-	forever_data = request_stats(url, endpoint, forever)
-	timespans_data = [request_stats(url, endpoint, i) for i in timespans]
+	full = request_stats(url)
+	analytics = full['analytics']
+	forever_data = analytics['allTime']
+	category_data = forever_data['browsers']
+	timespans = ['month', 'week']
+	timespans_data = [analytics[i] for i in timespans]
+	template = ecstasy.beautify('<{0}>: {1}', ecstasy.Color.Red)
 
-	default_timespan = bitly.stats.Stats.Timespan(1, 'month')
-	with lnk.config.Manager('bitly', write=True) as manager:
+	with lnk.config.Manager('googl', write=True) as manager:
 		settings = manager['commands']['stats']['settings']
-		old = (settings['span'], settings['unit'])
-		settings['span'] = default_timespan.span
-		settings['unit'] = default_timespan.unit
+		old = settings['timespan']
 
-	stats = bitly.stats.Stats(raw=True)
-	info = bitly.info.Info(raw=True)
+	stats = googl.stats.Stats(raw=True)
+	info = googl.info.Info(raw=True)
 
 	def finalize():
-		with lnk.config.Manager('bitly', write=True) as manager:
+		with lnk.config.Manager('googl', write=True) as manager:
 			settings = manager['commands']['stats']['settings']
-			settings['span'] = old[0]
-			settings['unit'] = old[1]
+			settings['span'] = old
 
 	request.addfinalizer(finalize)
 
 	return Fixture(stats,
 				   info,
-				   endpoint,
+				   category,
 				   url,
-				   timespan_tuples,
 				   timespans,
-				   forever,
+				   full,
+				   analytics,
 				   first_level,
 				   second_level,
 				   forever_data,
+				   category_data,
 				   timespans_data,
-				   default_timespan)
+				   template)
 
 
 def test_format_makes_lines_pretty(fixture):
-	result = fixture.stats.format(None, 'foo', 'bar', None)
-	expected = fixture.second_level.format('foo', 'bar')
+	result = fixture.stats.format('foo', 'bar')
+	expected = fixture.template.format('Foo', 'bar')
 
 	assert result == expected
 
 
-def test_countries_leaves_countries_short(fixture):
-	result = fixture.stats.format('countries', 'DE', 123, False)
-	expected = fixture.second_level.format('DE', '123')
+def test_format_handles_special_keys_wells(fixture):
+	result = fixture.stats.format('shortUrlClicks', 'foo')
+	expected = fixture.template.format('Clicks', 'foo')
+
+	assert result == expected
+
+	result = fixture.stats.format('longUrl', 'foo')
+	expected = fixture.template.format('Expanded', 'foo')
 
 	assert result == expected
 
 
-def test_format_expands_countries(fixture):
-	result = fixture.stats.format('countries', 'DE', 123, True)
-	expected = fixture.second_level.format('Germany', '123')
-
-	assert result == expected
-
-def test_format_handles_unknown_countries(fixture):
-	result = fixture.stats.format('countries', 'None', 123, True)
-	expected = fixture.second_level.format('Other', '123')
+def test_get_timespans_removes_duplicates(fixture):
+	things = [1, 4, 2, 3, 4, 1, 3, 3]
+	result = fixture.stats.get_timespans(things, False)
+	expected = set(things)
 
 	assert result == expected
 
 
-def test_format_title_cases_direct(fixture):
-	result = fixture.stats.format(None, 'direct', 666, None)
-	expected = fixture.second_level.format('Direct', '666')
+def test_get_timespans_picks_default_timespan_if_no_times():
+	with lnk.config.Manager('googl', write=True) as manager:
+		settings = manager['commands']['stats']['settings']
+		settings['timespan'] = 'day'
+	stats = googl.stats.Stats(raw=True)
+	result = stats.get_timespans([], False)
 
-	assert result == expected
+	assert result == set(['day'])
 
-def test_request_format_is_correct(fixture):
-	fixture.stats.queue.put((
-		fixture.url,
-		'countries',
-		fixture.forever,
-		{
-		'unit': fixture.forever.unit,
-		'units': fixture.forever.span,
-		'link': fixture.url
-		}))
-	results = {fixture.endpoint: []}
-	fixture.stats.request(results)
-	result = results[fixture.endpoint][0]
+def test_get_timespans_handles_default_forever_well():
+	with lnk.config.Manager('googl', write=True) as manager:
+		settings = manager['commands']['stats']['settings']
+		settings['timespan'] = 'forever'
+	stats = googl.stats.Stats(raw=True)
+	result = stats.get_timespans([], False)
 
-	assert isinstance(result, dict)
-	assert 'timespan' in result
-	assert isinstance(result['timespan'], fixture.stats.Timespan)
-	assert 'data' in result
-	assert isinstance(result['data'], list)
+	assert result == set(['allTime'])
 
 
-def test_requests_countries_well(fixture):
-	fixture.stats.queue.put((
-		fixture.url,
-		'countries',
-		fixture.forever,
-		{
-		'unit': fixture.forever.unit,
-		'units': fixture.forever.span,
-		'link': fixture.url
-		}))
-	result = {fixture.endpoint: []}
-	fixture.stats.request(result)
-	result = result[fixture.endpoint][0]
+def test_get_timespans_handles_default_two_hours_well():
+	with lnk.config.Manager('googl', write=True) as manager:
+		settings = manager['commands']['stats']['settings']
+		settings['timespan'] = 'two-hours'
+	stats = googl.stats.Stats(raw=True)
+	result = stats.get_timespans([], False)
 
-	assert result == fixture.forever_data
+	assert result == set(['twoHours'])
 
-def test_requests_referrers_well(fixture):
-	fixture.stats.queue.put((
-		fixture.url,
-		'referrers',
-		fixture.forever,
-		{
-		'unit': fixture.forever.unit,
-		'units': fixture.forever.span,
-		'link': fixture.url
-		}))
-	result = {'referrers': []}
-	fixture.stats.request(result)
-	result = result['referrers'][0]
-	expected = request_stats(fixture.url, 'referrers', fixture.forever)
+def test_get_timespans_handles_forever_well(fixture):
+	result = fixture.stats.get_timespans([], True)
 
-	assert result == expected
-
-def test_requests_clicks_well(fixture):
-	fixture.stats.queue.put((
-		fixture.url,
-		'clicks',
-		fixture.forever,
-		{
-		'unit': fixture.forever.unit,
-		'units': fixture.forever.span,
-		'link': fixture.url
-		}))
-	result = {'clicks': []}
-	fixture.stats.request(result)
-	result = result['clicks'][0]
-	expected = request_stats(fixture.url, 'clicks', fixture.forever)
-
-	assert result == expected
-
-def test_requests_timespan_well(fixture):
-	fixture.stats.queue.put((
-		fixture.url,
-		fixture.endpoint,
-		fixture.timespans[0],
-		{
-		'unit': fixture.timespans[0].unit,
-		'units': fixture.timespans[0].span,
-		'link': fixture.url
-		}))
-	results = {fixture.endpoint: []}
-	fixture.stats.request(results)
-
-	assert results[fixture.endpoint][0] == fixture.timespans_data[0]
+	assert result == set(['allTime'])
 
 
-def test_listify_formats_timespans_well(fixture):
-	data = [
-		copy.deepcopy(fixture.forever_data),
-		copy.deepcopy(fixture.timespans_data[0])
-	]
-	result = fixture.stats.listify(None, data, False)
-	header = 'Last {0} {1}:'.format(fixture.timespans[0].span,
-								    fixture.timespans[0].unit)
-	expected = [
-		fixture.first_level.format('Since forever:'),
-		fixture.first_level.format(header)
-	]
+def test_get_timespans_handles_two_hours_well(fixture):
+	result = fixture.stats.get_timespans(['two-hours'], False)
 
-	for i in expected:
-		assert i in result
+	assert result == set(['twoHours'])
 
 
-def test_listify_sets_None_if_no_items(fixture):
-	data = copy.deepcopy(fixture.forever_data)
-	data['data'] = []
-	result = fixture.stats.listify(None, [data], False)
-	header = fixture.first_level.format('Since forever')
-	expected = ['{0}: None'.format(header)]
+def test_get_timespans_works(fixture):
+	result = fixture.stats.get_timespans(fixture.timespans, False)
 
-	assert result == expected
+	assert result == set(fixture.timespans)
 
 
-def test_listify_handles_clicks_well(fixture):
-	data = copy.deepcopy(fixture.forever_data)
-	data['data'] = 123
-	result = fixture.stats.listify(None, [data], False)
-	header = fixture.first_level.format('Since forever')
-	expected = ['{0}: 123'.format(header)]
-
-	assert result == expected
-
-
-def test_listify_handles_lists_well(fixture):
-	data = copy.deepcopy(fixture.forever_data)
-	result = fixture.stats.listify(None, [data], False)
-	header = fixture.first_level.format('Since forever')
-	expected = ['{0}:'.format(header)]
-	for i in fixture.forever_data['data']:
-		# A way of not having to pop the clicks
-		clicks = i['clicks']
-		keys = i.keys()
-		keys.remove('clicks')
-		assert len(keys) == 1
-		key = i[keys[0]]
-		line = fixture.second_level.format(key, clicks)
+def test_sub_listify_works_in_normal_cases(fixture):
+	result = fixture.stats.sub_listify(fixture.category,
+										 fixture.category_data,
+										 None,
+										 False)
+	expected = []
+	for point in fixture.category_data:
+		line = fixture.second_level.format(point['id'], point['count'])
 		expected.append(line)
 
 	assert result == expected
 
 
+def test_sub_listify_limits_well(fixture):
+	result = fixture.stats.sub_listify(fixture.category,
+										fixture.category_data,
+										1,
+										False)
+	expected = [fixture.second_level.format(fixture.category_data[0]['id'],
+											fixture.category_data[0]['count'])]
+	assert len(result) == 1
+	assert result == expected
+
+
+def test_sub_listify_handles_unknown_well(fixture):
+	data = [dict(id='unknown', count=123)]
+	result = fixture.stats.sub_listify(fixture.category,
+									   data,
+									   None,
+									   False)
+	expected = [fixture.second_level.format('Unknown', 123)]
+
+	assert result == expected
+
+
+def test_sub_listify_leaves_countries_short(fixture):
+	data = [dict(id='DE', count=123)]
+	result = fixture.stats.sub_listify('countries',
+									   data,
+									   None,
+									   False)
+	expected = [fixture.second_level.format('DE', 123)]
+
+	assert result == expected
+
+def test_sub_listify_expands_countries(fixture):
+	data = [dict(id='DE', count=123)]
+	result = fixture.stats.sub_listify('countries',
+									   data,
+									   None,
+									   True)
+	expected = [fixture.second_level.format('Germany', 123)]
+
+	assert result == expected
+
+
+def test_get_header_handles_forever_well(fixture):
+	result = fixture.stats.get_header('allTime')
+	expected = fixture.first_level.format('Since forever:')
+
+	assert result == expected
+
+
+def test_get_header_handles_two_hours_well(fixture):
+	result = fixture.stats.get_header('twoHours')
+	expected = fixture.first_level.format('Last two hours:')
+
+	assert result == expected
+
+
+def test_get_header_handles_normal_cases_well(fixture):
+	result = fixture.stats.get_header('month')
+	expected = fixture.first_level.format('Last month:')
+
+	assert result == expected
+
+
+def test_request_format_is_correct(fixture):
+	fixture.stats.queue.put(fixture.url)
+	result = fixture.stats.request(False)
+
+	assert isinstance(result, dict)
+	assert 'URL' in result
+	assert (isinstance(result['URL'], str)
+		 or isinstance(result['URL'], unicode))
+	assert 'analytics' in result
+	assert isinstance(result['analytics'], dict)
+
+
+def test_requests_well_with_info(fixture):
+	fixture.stats.queue.put(fixture.url)
+	result = fixture.stats.request(True)
+
+	assert result == fixture.full
+
+
+def test_requests_well_without_info(fixture):
+	fixture.stats.queue.put(fixture.url)
+	result = fixture.stats.request(False)
+	expected = fixture.full.copy()
+	for i in ['status', 'created', 'longUrl']:
+		del expected[i]
+
+	assert result == expected
+
+
+def test_listify_formats_timespans_well(fixture):
+	timespans = ['allTime'] + fixture.timespans
+	result = fixture.stats.listify(fixture.analytics,
+								   fixture.category,
+								   timespans,
+								   False,
+								   None)
+
+	expected = [fixture.first_level.format('Since forever:')]
+	for i in fixture.timespans:
+		header = fixture.first_level.format('Last {0}:'.format(i))
+		expected.append(header)
+
+	for i in expected:
+		assert i in result
+
+
+def test_listify_filters_timespans_well(fixture):
+	result = fixture.stats.listify(fixture.analytics,
+								   fixture.category,
+								   fixture.timespans,
+								   False,
+								   None)
+	for i in fixture.timespans:
+		line = 'Last {0}:'.format(i)
+		formatted = fixture.first_level.format(line)
+		assert formatted in result
+
+	unwanted = ['Since forever', 'Last day:', 'Last two hours:']
+	for i in unwanted:
+		formatted = fixture.first_level.format(i)
+		assert formatted not in result
+
+
+def test_listify_handles_clicks_well(fixture):
+	result = fixture.stats.listify(fixture.analytics,
+								   {'clicks': 'shortUrlClicks'},
+								   [fixture.timespans[0]],
+								   False,
+								   None)
+	clicks = fixture.analytics[fixture.timespans[0]]['shortUrlClicks']
+	line = 'Last {0}: {1}'.format(fixture.timespans[0], clicks)
+	expected = fixture.first_level.format(line)
+
+	assert expected in result
+
+
 def test_lineify_formats_headers_well(fixture):
+	data = copy.deepcopy(fixture.full)
+	result = fixture.stats.lineify(data,
+								   fixture.category,
+								   fixture.timespans,
+								   False,
+								   None)
+	for key, value in fixture.full.items():
+		if key != 'analytics':
+			expected = fixture.stats.format(key, value)
+			assert expected in result
 
-	data = {fixture.endpoint: [copy.deepcopy(fixture.forever_data)]}
-	result = fixture.stats.lineify(data, False)
-
-	assert 'Countries:' in result
-
-
-def test_get_timespans_removes_duplicates(fixture):
-	timespans = list(fixture.timespan_tuples)
-	timespans += [fixture.timespan_tuples[0]] * 10
-	result = fixture.stats.get_timespans(timespans, False)
-
-	assert result == set(fixture.timespans)
-
-
-def test_get_timespans_picks_default_timespan_if_no_times(fixture):
-	result = fixture.stats.get_timespans([], False)
-
-	assert result == set([fixture.default_timespan])
-
-
-def test_get_timespans_handles_forever_well(fixture):
-	result = fixture.stats.get_timespans([], True)
-
-	assert result == set([fixture.forever])
-
-
-def test_get_timespans_handles_year_well(fixture):
-	result = fixture.stats.get_timespans(((1, 'year'),), False)
-	expected = set([fixture.stats.Timespan(12, 'months')])
-
-	assert result == expected
-
-
-def test_get_timespans_works(fixture):
-	result = fixture.stats.get_timespans(fixture.timespan_tuples, False)
-
-	assert result == set(fixture.timespans)
-
-
-def test_request_all_works_for_single_endpoint(fixture):
-	result = fixture.stats.request_all(fixture.url,
-									   [fixture.forever],
-									   [fixture.endpoint])
-	expected = {fixture.endpoint: [fixture.forever_data]}
-
-	assert result == expected
-
-def test_request_all_works_for_many_timespans(fixture):
-	result = fixture.stats.request_all(fixture.url,
-									   fixture.timespans,
-									   [fixture.endpoint])
-
-	assert isinstance(result, dict)
-	assert fixture.endpoint in result
-	assert isinstance(result[fixture.endpoint], list)
-
-	expected = sorted(fixture.timespans_data)
-	result = sorted(result[fixture.endpoint])
-
-	assert result == expected
-
-
-def test_request_all_handles_plural_s_in_timespan_well(fixture):
-	timespans = copy.deepcopy(fixture.timespans)
-	timespans[0] = fixture.stats.Timespan(timespans[0].span,
-										  timespans[0].unit + 's')
-	result = fixture.stats.request_all(fixture.url,
-								  	   timespans,
-								       [fixture.endpoint])
-	data = copy.deepcopy(fixture.timespans_data)
-	data[0]['timespan'] = timespans[0]
-
-	assert isinstance(result, dict)
-	assert fixture.endpoint in result
-	assert isinstance(result[fixture.endpoint], list)
-
-	for i, j in zip(data, result[fixture.endpoint]):
-		i['data'].sort()
-		j['data'].sort()
-
-	result = sorted(result[fixture.endpoint])
-	expected = sorted(data)
-
-	assert result == expected
-
-
-def test_request_all_works_for_many_endpoints(fixture):
-	endpoints = ['clicks', 'referrers', 'countries']
-	result = fixture.stats.request_all(fixture.url,
-									   [fixture.forever],
-									   endpoints)
-
-	expected = {fixture.endpoint: [fixture.forever_data]}
-	endpoints.remove(fixture.endpoint)
-	for endpoint in endpoints:
-		data = request_stats(fixture.url, endpoint, fixture.forever)
-		expected[endpoint] = [data]
-
-	assert result == expected
+def test_get_stats_works(fixture):
+	"""
+	result = []
+	fixture.stats.get_stats(result,
+							fixture.category,
+							fixture.timespans,
+							True,
+							False,
+							None)
+	assert result[0] == fixture.full
+	"""
+	pass
 
 
 def test_fetch_works_for_single_url(fixture):
-	result = fixture.stats.fetch([fixture.endpoint],
+	result = fixture.stats.fetch(fixture.category.keys(),
 								 [],
-								 fixture.timespan_tuples,
+								 fixture.timespans,
 								 False,
 								 None,
-								 False,
+								 True,
 								 False,
 								 [fixture.url])
-	expected = ['URL: {0}'.format(fixture.url)]
-	data = copy.deepcopy(fixture.timespans_data)
-	data = {fixture.endpoint: data}
-	expected += fixture.stats.lineify(data, False)
+	data = copy.deepcopy(fixture.full)
+	expected = fixture.stats.lineify(data,
+									 fixture.category,
+									 fixture.timespans,
+									 False,
+									 None)
 
-	assert len(result) == 1
 	assert sorted(result[0]) == sorted(expected)
 
 
 def test_fetch_limits_well(fixture):
-	result = fixture.stats.fetch([fixture.endpoint],
+	result = fixture.stats.fetch(fixture.category.keys(),
 								 [],
-								 [],
-								 True,
-								 1,
+								 fixture.timespans,
 								 False,
+								 1,
+								 True,
 								 False,
 								 [fixture.url])
-	expected = ['URL: {0}'.format(fixture.url)]
-	data = copy.deepcopy(fixture.forever_data)
-	while len(data['data']) > 1:
-		data['data'].pop()
-	assert len(data['data']) == 1
-	data = {fixture.endpoint: [data]}
-	expected += fixture.stats.lineify(data, False)
+	data = copy.deepcopy(fixture.full)
+	expected = fixture.stats.lineify(data,
+									 fixture.category,
+									 fixture.timespans,
+									 False,
+									 1)
 
-	assert len(result) == 1
 	assert sorted(result[0]) == sorted(expected)
 
 def test_fetch_works_for_many_urls(fixture):
-	urls = [fixture.url, 'http://bit.ly/1Km6CB1']
-	result = fixture.stats.fetch([fixture.endpoint],
+	other = 'http://goo.gl/XBzv0g'
+	result = fixture.stats.fetch(fixture.category.keys(),
 								 [],
-								 [],
-								 True,
+								 fixture.timespans,
+								 False,
 								 None,
+								 True,
 								 False,
-								 False,
-								 urls)
-	print(fixture.forever_data)
-	first = ['URL: {0}'.format(fixture.url)]
-	data = {fixture.endpoint: [copy.deepcopy(fixture.forever_data)]}
-	first += fixture.stats.lineify(data, False)
+								 [fixture.url, other])
+	result = sorted(sorted(i) for i in result)
+	data = copy.deepcopy(fixture.full)
+	expected = []
+	first = fixture.stats.lineify(data,
+			  					   fixture.category,
+								   fixture.timespans,
+								   False,
+								   None)
+	expected.append(sorted(first))
+	other_data = request_stats(other)
+	second = fixture.stats.lineify(other_data,
+			  					   fixture.category,
+								   fixture.timespans,
+								   False,
+								   None)
+	expected.append(sorted(second))
 
-	second = ['URL: {0}'.format(urls[1])]
-	data = request_stats(urls[1], fixture.endpoint, fixture.forever)
-	data = {fixture.endpoint: [data]}
-	second += fixture.stats.lineify(data, False)
-
-	expected = [sorted(first), sorted(second)]
-
-	assert [sorted(i) for i in result] == expected
+	assert result == sorted(expected)
 
 
 def test_fetch_adds_info_well(fixture):
-	result = fixture.stats.fetch([fixture.endpoint],
+	result = fixture.stats.fetch(fixture.category.keys(),
 								 [],
-								 fixture.timespan_tuples,
+								 fixture.timespans,
 								 False,
-								 None,
+								 1,
 								 True,
 								 False,
 								 [fixture.url])
-	expected = fixture.info.fetch([], [], False, [fixture.url])[0]
-	data = {fixture.endpoint: fixture.timespans_data}
-	expected += fixture.stats.lineify(data, False)
+	data = copy.deepcopy(fixture.full)
+	expected = fixture.stats.lineify(data,
+									 fixture.category,
+									 fixture.timespans,
+									 False,
+									 1)
 
-	assert len(result) == 1
 	assert sorted(result[0]) == sorted(expected)

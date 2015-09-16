@@ -52,4 +52,6 @@ def main(context, verbose, args):
 @click.argument('urls', nargs=-1)
 def link(copy, quiet, shorten, urls, pretty):
 	"""Link shortening."""
+	if not urls and not shorten:
+		raise errors.UsageError('Please supply at least one URL.')
 	tinyurl.link.echo(copy, quiet, shorten + urls, pretty)

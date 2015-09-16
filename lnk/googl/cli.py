@@ -113,6 +113,7 @@ def info(only, hide, urls):
    			  help='Hide this/these set(s) of statistics.')
 @click.option('-t',
 			  '--time',
+			  '--last',
 		      nargs=1,
 		      multiple=True,
 		      type=click.Choice(stats_config['units']),
@@ -134,11 +135,11 @@ def info(only, hide, urls):
 			  default=stats_config['settings']['full-countries'],
 			  help='Whether to show full or short (abbreviated) country names.')
 @click.argument('urls', nargs=-1)
-def stats(only, hide, time, forever, limit, info, full, urls):
+def stats(only, hide, last, forever, limit, info, full, urls):
 	"""Statistics and metrics for links."""
 	if not urls:
 		raise errors.UsageError('Please supply at least one URL.')
-	googl.stats.echo(only, hide, time, forever, limit, info, full, urls)
+	googl.stats.echo(only, hide, last, forever, limit, info, full, urls)
 
 @main.command()
 @click.option('-g',
@@ -152,7 +153,7 @@ def key(generate):
 @main.command()
 @click.option('-t',
 			  '--time',
-		      '--last',
+			  '--last',
 		      nargs=2,
 		      multiple=True,
 		      type=(int, click.Choice(units)),

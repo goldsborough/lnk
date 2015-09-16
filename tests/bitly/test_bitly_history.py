@@ -26,12 +26,12 @@ def timestamp(time_range):
 		"hour": 3600, 
 		"day": 86400,
 		"week": 604800, 
-		"month": 18446400,
-		"year": 221356800
+		"month": 2629740,
+		"year": 31556900
 	}
 	offset = time_range[0] * seconds[time_range[1]]
 
-	return time.time() - offset
+	return int(time.time() - offset)
 
 def request_history(start=None, end=None, limit=None):
 	if start:
@@ -78,8 +78,8 @@ def fixture():
 	last = [(4, 'week'), (5, 'month')]
 	last_data = [request_history(i) for i in last]
 
-	ranges = [(5, 'month', 4, 'week'), (7, 'year', 3, 'month')]
-	ranges_data = [request_history(i[:2], i[2:]) for i in last]
+	ranges = [(5, 'month', 4, 'day'), (7, 'year', 1, 'day')]
+	ranges_data = [request_history(i[:2], i[2:]) for i in ranges]
 
 	template = ecstasy.beautify(' <+> {0}', ecstasy.Color.Red)
 	url = 'http://bit.ly/1OQM9nA'
@@ -138,7 +138,7 @@ def test_lineify_returns_both_if_both_true(fixture):
 def test_timestamp_works(fixture):
 	now = time.time()
 	result = fixture.history.timestamp((1, 'minute'), now)
-	expected = now - 60
+	expected = int(now - 60)
 
 	assert result == expected
 
@@ -146,34 +146,30 @@ def test_timestamp_works(fixture):
 def test_timestamp_works_if_endswith_s(fixture):
 	now = time.time()
 	result = fixture.history.timestamp((1, 'minutes'), now)
-	expected = now - 60
+	expected = int(now - 60)
 
 	assert result == expected	
 
 
 def test_set_time_works_without_upper_bound(fixture):
 	now = time.time()
-	fixture.history.parameters['created_after'] = None
-	fixture.history.parameters['created_before'] = None
-	fixture.history.set_time((1, 'minute'), base=now)
-	expected = now - 60
+	result = fixture.history.set_time((1, 'minute'), base=now)
+	expected = int(now - 60)
 
-	assert fixture.history.parameters['created_after'] == expected
-	assert fixture.history.parameters['created_before'] is None
+	assert result['created_after'] == expected
+	assert result['created_before'] is None
 
 
 def test_set_time_works_with_upper_bound(fixture):
-	now = time.time()
-	fixture.history.parameters['created_after'] = None
-	fixture.history.parameters['created_before'] = None
-	fixture.history.set_time((2, 'minute'), (1, 'minute'), now)
+	now = int(time.time())
+	result = fixture.history.set_time((2, 'minute'), (1, 'minute'), now)
 
-	assert fixture.history.parameters['created_after'] == now - 120
-	assert fixture.history.parameters['created_before'] == now - 60
+	assert result['created_after'] == now - 120
+	assert result['created_before'] == now - 60
 
 
 def test_last_works_for_single_range(fixture):
-	result = fixture.history.last((fixture.last[0],), False, False, False)
+	result = fixture.history.last([fixture.last[0]], False, False, False)
 	expected = fixture.last_data[0]
 
 	assert result == expected
@@ -185,17 +181,17 @@ def test_last_works_for_many_ranges(fixture):
 	assert result == expected
 
 def test_ranges_works_for_single_range(fixture):
-	result = fixture.history.ranges((fixture.ranges[0],), False, False, False)
+	result = fixture.history.ranges([fixture.ranges[0]], False, False, False)
 	expected = fixture.ranges_data[0]
 
 	assert result == expected
 
 
 def test_ranges_works_for_many_ranges(fixture):
-	result = fixture.history.last(fixture.ranges, False, False, False)
-	expected = fixture.ranges_data[0] + fixture.ranges_data[1]
+	result = fixture.history.ranges(fixture.ranges, False, False, False)
+	expected = [j for i in fixture.ranges_data for j in i]
 
-	assert result == expected
+	assert sorted(result) == sorted(expected)
 
 
 def test_forever_works(fixture):
@@ -215,24 +211,25 @@ def test_pretty_works_for_forever(fixture):
 def test_pretty_works_for_last(fixture):
 	result = fixture.history.last(fixture.last, False, False, True)
 	expected = []
-	for i in fixture.last:
-		expected.append('Last {0} {1}:'.format(i[0], i[1]))
-		for item in fixture.forever_data:
+	for timespan, data in zip(fixture.last, fixture.last_data):
+		header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
+		expected.append(header)
+		for item in data:
 			expected.append(fixture.template.format(item))
 
-	assert result == expected + ['']
+	assert sorted(result) == sorted(expected + [''])
 
 def test_pretty_works_for_ranges(fixture):
 	result = fixture.history.ranges(fixture.ranges, False, False, True)
 	expected = []
-	for i in fixture.ranges:
-		header = 'Between {0} {1} '.format(i[0], i[1])
-		header += 'and {0} {1} ago:'.format(i[2], i[3])
+	for timespan, data in zip(fixture.ranges, fixture.ranges_data):
+		header = 'Between {0} {1} '.format(timespan[0], timespan[1])
+		header += 'and {0} {1} ago:'.format(timespan[2], timespan[3])
 		expected.append(header)
-		for item in fixture.forever_data:
+		for item in data:
 			expected.append(fixture.template.format(item))
 
-	assert result == expected + ['']
+	assert sorted(result) == sorted(expected + [''])
 
 
 def test_fetch_works_only_for_forever(fixture):
@@ -261,7 +258,7 @@ def test_fetch_works_for_all_ranges(fixture):
 	expected = [fixture.forever_data] + fixture.last_data + fixture.ranges_data
 	expected = [j for i in expected for j in i]
 
-	assert result == expected
+	assert sorted(result) == sorted(expected)
 
 
 def test_fetch_limits_well(fixture):

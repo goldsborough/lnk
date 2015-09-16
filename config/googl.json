@@ -2,39 +2,14 @@
     "url": "https://www.googleapis.com/urlshortener", 
     "commands": {
         "info": {
-            "sets": {
-                "created": "created", 
-                "expanded": "longUrl",
-                "status": "status"
-            }, 
             "endpoints": {
                 "info": "url"
             }, 
-            "settings": {
-            }
-        }, 
-        "stats": {
-            "units": [
-                "two-hours", 
-                "day", 
-                "week", 
-                "month"
-            ], 
-            "endpoints": {
-               "stats": "url"
-            }, 
-            "settings": {
-                "info": "False", 
-                "limit": 10,
-                "full-countries": true, 
-                "unit": "forever"
-            }, 
+            "settings": {}, 
             "sets": {
-                "clicks": "shortUrlClicks", 
-                "countries": "countries", 
-                "referrers": "referrers",
-                "browsers": "browsers",
-                "platforms": "platforms"
+                "status": "status", 
+                "expanded": "longUrl", 
+                "created": "created"
             }
         }, 
         "link": {
@@ -44,6 +19,31 @@
             }, 
             "settings": {
                 "pretty": true
+            }
+        }, 
+        "stats": {
+            "units": [
+                "two-hours", 
+                "day", 
+                "week", 
+                "month"
+            ], 
+            "sets": {
+                "platforms": "platforms", 
+                "browsers": "browsers", 
+                "referrers": "referrers", 
+                "clicks": "shortUrlClicks", 
+                "countries": "countries"
+            }, 
+            "endpoints": {
+                "stats": "url"
+            }, 
+            "settings": {
+                "info": "False", 
+                "full-countries": true, 
+                "span": "two-hours", 
+                "limit": 10, 
+                "timespan": "two-hours"
             }
         }, 
         "key": {
@@ -60,7 +60,7 @@
                 "hour", 
                 "day", 
                 "week", 
-                "month",
+                "month", 
                 "year"
             ], 
             "endpoints": {
@@ -74,6 +74,6 @@
         }
     }, 
     "version": 1, 
-    "key": "AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc",
-    "settings": { }
+    "key": "AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc", 
+    "settings": {}
 }

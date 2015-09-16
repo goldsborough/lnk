@@ -37,21 +37,15 @@ class Info(Command):
 		return result if self.raw else beauty.boxify(result)
 
 	def request(self, sets, result, hide_empty):
-		data = {}
 		url = self.queue.get()
-
-		first = self.new_thread(lambda: data.update(self.request_info(url)))
-		second = self.new_thread(lambda: data.update(self.request_history(url)))
-
-		first.join(timeout=10)
-		second.join(timeout=10)
+		data = self.request_info(url)
+		data.update(self.request_history(url))
 
 		selection = {key : data[key] for key in data if key in sets}
 		lines = self.lineify(url, selection, hide_empty)
 
-		self.lock.acquire()
-		result.append(lines)
-		self.lock.release()
+		with self.lock:
+			result.append(lines)
 
 	def request_info(self, url):
 		response = self.get(self.endpoints['info'], dict(shortUrl=url))

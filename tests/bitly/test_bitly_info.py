@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import ecstasy
 import os
 import pytest
 import requests
@@ -60,10 +61,11 @@ def fixture():
 	data.update(request_history(urls[0]))
 	selected = {k:v for k, v in data.items() if k in sets.values()}
 	formatted = ['URL: {0}'.format(urls[0])]
+	template = ecstasy.beautify(' <+> {0}', ecstasy.Color.Red)
 	for key, value in selected.items():
 		if isinstance(value, list):
 			formatted.append('{0}: '.format(key.title()))
-			formatted += [' + {0}'.format(t) for t in value]
+			formatted += [template.format(t) for t in value]
 		else:
 			formatted.append(info.format(key, value))
 
@@ -162,6 +164,8 @@ def test_requests_well(fixture):
 	fixture.info.queue.put(fixture.urls[0])
 	result = []
 	fixture.info.request(fixture.sets.values(), result, False)
+
+	print(result, fixture.formatted)
 
 	assert result[0] == fixture.formatted
 

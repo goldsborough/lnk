@@ -55,19 +55,15 @@ class Link(Command):
 		url = self.queue.get()
 		short = self.get_short(url)
 		formatted = self.copy(copy, short)
-
-		self.lock.acquire()
-		lines.append('{0} => {1}'.format(url, formatted))
-		self.lock.release()
+		with self.lock:
+			lines.append('{0} => {1}'.format(url, formatted))
 
 	def expand(self, lines, copy):
 		url = self.queue.get()
 		expanded = self.get_long(url)
 		formatted = self.copy(copy, expanded)
-
-		self.lock.acquire()
-		lines.append('{0} => {1}'.format(url, formatted))
-		self.lock.release()
+		with self.lock:
+			lines.append('{0} => {1}'.format(url, formatted))
 
 	def get_short(self, url):
 		response = self.get(self.endpoints['shorten'], dict(longUrl=url))

@@ -36,7 +36,11 @@ class Stats(Command):
 
 		sets = abstract.filter_sets(self.sets, only, hide)
 		timespans = self.get_timespans(times, forever)
-		info = self.info.fetch([], [], False, urls) if add_info else []
+		info = []
+		if add_info:
+			info = self.info.fetch([], [], False, urls)
+			if not info:
+				raise errors.InternalError('Could not fetch additional info.')
 
 		results = []
 		for n, url in enumerate(urls):
@@ -81,9 +85,8 @@ class Stats(Command):
 		e = endpoint if endpoint != 'clicks' else 'link_clicks'
 		data = {'timespan': timespan, 'data': response[e]}
 
-		self.lock.acquire()
-		results[endpoint].append(data)
-		self.lock.release()
+		with self.lock:
+			results[endpoint].append(data)
 
 	def get_timespans(self, times, forever):
 		timespans = set()

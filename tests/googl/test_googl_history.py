@@ -54,8 +54,10 @@ def request():
 
 	return response.json()
 
+
 def process(urls):
 	return googl.history.History.process(urls)
+
 
 def filter_urls(urls, start=None, end=None):
 	if start:

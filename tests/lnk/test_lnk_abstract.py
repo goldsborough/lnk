@@ -11,9 +11,9 @@ from collections import namedtuple
 
 import tests.paths
 
-from lnk.abstract import AbstractCommand
+import lnk.abstract
 
-class Command(AbstractCommand):
+class Command(lnk.abstract.AbstractCommand):
 	def __init__(self):
 		super(Command, self).__init__('test', 'do')
 
@@ -159,7 +159,7 @@ def test_verify_not_implemented(fixture):
 def test_filter_sets_filters_well(fixture):
 	base = {i:None for i in 'abcde'}
 	only = ['a', 'c', 'e']
-	result = bitly.command.filter_sets(base, only, [])
+	result = lnk.abstract.filter_sets(base, only, [])
 
 	assert result.keys() == only
 
@@ -167,6 +167,6 @@ def test_filter_sets_filters_well(fixture):
 def test_filter_sets_hides_well(fixture):
 	base = {i:None for i in 'abcde'}
 	hide = ['a', 'c', 'e']
-	result = bitly.command.filter_sets(base, [], hide)
+	result = lnk.abstract.filter_sets(base, [], hide)
 
 	assert result.keys() == ['b', 'd']
