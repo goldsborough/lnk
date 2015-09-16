@@ -23,7 +23,6 @@ class Command(AbstractCommand):
 	def get_api(self):
 		http = self.authorize()
 		api = apiclient.discovery.build('urlshortener', 'v1', http=http)
-		print(type(api), dir(api.url()))
 
 		return api.url()
 

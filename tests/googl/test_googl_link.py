@@ -108,24 +108,28 @@ def test_copy_makes_copied_url_bold(fixture):
 	assert returned_url == fixture.bold
 
 
-def test_get_short_shortens_well(fixture):
-	result = fixture.link.get_short(fixture.long)
+def test_get_long_expands_well(fixture):
+	result = fixture.link.get_long(fixture.short)
 
-	assert result == fixture.short
+	assert result == fixture.long
+
+
+def test_get_short_shortens_well(fixture):
+	short = fixture.link.get_short(fixture.long)
+	result = fixture.link.get_long(short)
+
+	assert result == fixture.long
 
 
 def test_shorten_formats_well(fixture):
 	result = []
 	fixture.link.queue.put(fixture.long)
 	fixture.link.shorten(result, False)
+	result = result[0].split()
 
-	assert result[0] == fixture.long_to_short
-
-
-def test_get_long_expands_well(fixture):
-	result = fixture.link.get_long(fixture.short)
-
-	assert result == fixture.long
+	assert result[0] == fixture.long
+	assert result[1] == '=>'
+	assert result[2].startswith('https://goo.gl/')
 
 
 def test_expand_formats_well(fixture):
@@ -138,17 +142,23 @@ def test_expand_formats_well(fixture):
 
 def test_shorten_urls_works_for_single_url(fixture):
 	result = fixture.link.shorten_urls(False, True, [fixture.long])
+	result = result[0].split()
 
-	assert result[0] == fixture.long_to_short
+	assert result[0] == fixture.long
+	assert result[1] == '=>'
+
+	expanded = fixture.link.get_long(result[2])
+
+	assert expanded == result[0]
 
 
 def test_shorten_urls_works_for_many_urls(fixture):
 	urls = [
-		'http://facebook.com',
-		'http://google.com',
-		'http://python.org'
+		'http://facebook.com/',
+		'http://google.com/',
+		'http://python.org/'
 	]
-	result = set(fixture.link.shorten_urls(False, True, urls))
+	result = fixture.link.shorten_urls(False, True, urls)
 	expected = set()
 	threads = []
 	for url in urls:
@@ -161,9 +171,15 @@ def test_shorten_urls_works_for_many_urls(fixture):
 	for thread in threads:
 		thread.join(timeout=10)
 
-	print(expected, result)
+	for got, wanted in zip(sorted(result), expected):
+		got = got.split()
+		wanted = wanted.split()
 
-	assert result == expected
+		assert got[0] == wanted[0]
+		assert got[1] == wanted[1] == '=>'
+
+		expanded = fixture.link.get_long(got[2])
+		assert expanded == got[0] == wanted[0]
 
 
 def test_expand_urls_works_for_single_url(fixture):
@@ -210,8 +226,17 @@ def test_fetch_works(fixture):
 								[fixture.short],
 								[fixture.long],
 								False)
+	expected = [fixture.long_to_short, fixture.short_to_long]
+	for got, wanted in zip(sorted(result), sorted(expected)):
+		got = got.split()
+		wanted = wanted.split()
 
-	assert result == [fixture.long_to_short, fixture.short_to_long]
+		assert got[0] == wanted[0]
+		assert got[1] == wanted[1] == '=>'
+
+		if got[0] == fixture.long:
+			expanded = fixture.link.get_long(got[2])
+			assert expanded == got[0] == wanted[0]
 
 
 def test_fetch_correct_output_if_raw_false_pretty_false(fixture):

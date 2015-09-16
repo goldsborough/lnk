@@ -85,7 +85,7 @@ class Link(Command):
 
 	def get_short(self, url):
 		api = self.get_api()
-		request = api.insert(body=dict(shortUrl=url))
+		request = api.insert(body=dict(longUrl=url))
 		what = "shorten url '{0}'".format(url)
 		response = self.execute(request, what)
 

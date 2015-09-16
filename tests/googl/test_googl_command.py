@@ -23,23 +23,20 @@ URL = 'https://www.googleapis.com/urlshortener'
 API = apiclient.discovery.build('urlshortener',
 								'v{0}'.format(VERSION),
 								developerKey=KEY).url()
+CREDENTIALS_PATH = os.path.join(tests.paths.CONFIG_PATH, 'credentials')
 
 @pytest.fixture(scope='module')
 
 def fixture():
 	Fixture = namedtuple('Fixture', [
 		'command',
-		'url',
-		'credentials_path'
+		'url'
 		])
 
 	command = googl.command.Command('link')
 	url = 'http://goo.gl/Euc5'
-	credentials_path = os.path.join(tests.paths.CONFIG_PATH, 'credentials')
 
-	return Fixture(command,
-				   url,
-				   credentials_path)
+	return Fixture(command, url)
 
 
 def get(url, projection=None):
@@ -94,24 +91,25 @@ def test_authorize_works(fixture):
 
 	assert isinstance(result, httplib2.Http)
 
-def test_authorize_refreshes_well(fixture):
-	storage = oauth2client.file.Storage(fixture.credentials_path)
+def test_authorize_refreshes_well():
+	storage = oauth2client.file.Storage(CREDENTIALS_PATH)
 	credentials = storage.get()
-	now = datetime.datetime.now()
-	credentials.token_expiry = now
+	old = datetime.datetime.now() - datetime.timedelta(days=100)
+	credentials.token_expiry = old
 	storage.put(credentials)
 
-	fixture.command.authorize()
+	command = googl.command.Command('link')
+	command.authorize()
 
 	credentials = storage.get()
 
-	assert credentials.token_expiry != now
+	assert credentials.token_expiry != old
 
 
 def test_authorize_throws_if_no_credentials(fixture):
-	storage = oauth2client.file.Storage(fixture.credentials_path)
+	storage = oauth2client.file.Storage(CREDENTIALS_PATH)
 	credentials = storage.get()
-	os.remove(fixture.credentials_path)
+	os.remove(CREDENTIALS_PATH)
 
 	with pytest.raises(errors.AuthorizationError):
 		fixture.command.authorize()
