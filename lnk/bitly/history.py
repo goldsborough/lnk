@@ -18,7 +18,7 @@ def echo(*args):
 
 class History(Command):
 	"""
-	Class to retrieve link history for a user.
+	Class to retrieve bit.ly link history for a user.
 
 	The sole purpose of this class is to fetch and return a list of
 	urls the user has shortened using bit.ly in the past. This list

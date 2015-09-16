@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+"""Link-history-retrieval for the goo.gl client."""
+
 from __future__ import unicode_literals
 
 import apiclient.discovery
@@ -24,6 +26,22 @@ def echo(*args):
 
 class History(Command):
 
+	"""
+	Class to retrieve goo.gl link history for a user.
+
+	The sole purpose of this class is to fetch and return a list of
+	urls the user has shortened using goo.gl in the past. This list
+	may, of course, be properly prettified if necessary. A nice feature
+	is that if the history is fetched with the 'plain' flag set to true
+	its output can be piped into other lnk commands, such as 'stat' or 'info'.
+
+	Attributes:
+		raw (bool): Whether to prettify the output or
+					return it raw, for internal use.
+		delta (dict): A mapping between string representations of time
+						and equivalent datetime.timedelta objects.
+	"""
+
 	Url = namedtuple('Url', ['short', 'long', 'created'])
 
 	def __init__(self, raw=False):
@@ -34,8 +52,8 @@ class History(Command):
 			"hour": timedelta(hours=1), 
 			"day": timedelta(days=1),
 			"week": timedelta(weeks=1), 
-			"month": timedelta(weeks=4),
-			"year": timedelta(weeks=52)
+			"month": timedelta(weeks=30.4368),
+			"year": timedelta(days=365.242)
 		}
 
 	def fetch(self, last, ranges, forever, limit, expanded, both, pretty):
@@ -94,10 +112,10 @@ class History(Command):
 
 	def ranges_header(self, timespan, filtered):
 		first_unit = ''
-		if timespan[0][1] != timespan[1][1]:
-			first_unit = '{0} '.format(timespan[0][1])
-		header = 'Between {0} {1}'.format(timespan[0][0], first_unit)
-		header += 'and {0} {1} ago:'.format(timespan[1][0], timespan[1][1])
+		if timespan[1] != timespan[3]:
+			first_unit = '{0} '.format(timespan[1])
+		header = 'Between {0} {1}'.format(timespan[0], first_unit)
+		header += 'and {0} {1} ago:'.format(timespan[2], timespan[3])
 
 		return header if filtered else header + ' None'
 
