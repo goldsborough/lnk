@@ -114,7 +114,7 @@ class Stats(Command):
 	def get_timespans(self, times, forever):
 		timespans = set(times)
 		if not timespans and not forever:
-			default = self.settings['unit']
+			default = self.settings['timespan']
 			timespans.add(default if default != 'forever' else 'allTime')
 		if forever:
 			timespans.add('allTime')

@@ -76,6 +76,8 @@ def main(context, verbose, args):
 @click.argument('urls', nargs=-1)
 def link(copy, quiet, expand, shorten, urls, pretty):
 	"""Link shortening and expansion."""
+	if not urls and not expand and not shorten:
+		raise errors.UsageError('Please supply at least one URL.')
 	googl.link.echo(copy, quiet, expand, shorten + urls, pretty)
 
 @main.command()
@@ -94,6 +96,8 @@ def link(copy, quiet, expand, shorten, urls, pretty):
 @click.argument('urls', nargs=-1)
 def info(only, hide, urls):
 	"""Information about links."""
+	if not urls:
+		raise errors.UsageError('Please supply at least one URL.')
 	googl.info.echo(only, hide, urls)
 
 @main.command()
@@ -132,6 +136,8 @@ def info(only, hide, urls):
 @click.argument('urls', nargs=-1)
 def stats(only, hide, time, forever, limit, info, full, urls):
 	"""Statistics and metrics for links."""
+	if not urls:
+		raise errors.UsageError('Please supply at least one URL.')
 	googl.stats.echo(only, hide, time, forever, limit, info, full, urls)
 
 @main.command()

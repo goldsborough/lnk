@@ -25,6 +25,11 @@ class Error(Exception):
 
 		super(Error, self).__init__(self.what)
 
+	def level(self, verbosity):
+		levels = self.levels[:verbosity + 1]
+
+		return [i for i in levels if i]
+
 	@staticmethod
 	def get_levels(additional):
 		# Each nested list corresponds to one further level of verbosity
@@ -111,7 +116,7 @@ class Catch(object):
 				_, error, _ = sys.exc_info()
 				raise UsageError(error.message)
 			except googleapiclient.errors.HttpError:
-				self.handle_google()
+				self.handle_google_error()
 			except requests.exceptions.ConnectionError:
 				_, error, _ = sys.exc_info()
 				raise ConnectionError('Could not establish connection '
@@ -121,13 +126,12 @@ class Catch(object):
 
 	def handle_error(self):
 		_, error, _ = sys.exc_info()
-		levels = error.levels[:self.verbosity + 1]
-		click.echo('\n'.join([i for i in levels if i]))
+		click.echo('\n'.join(error.level(self.verbosity)))
 		if isinstance(error, UsageError) and self.usage:
 			click.echo(self.usage)
 
 	@staticmethod
-	def handle_google():
+	def handle_google_error():
 		_, error, _ = sys.exc_info()
 		match = re.search(r'<HttpError.+returned "([\w\s]+)">$',
 						  str(error))
