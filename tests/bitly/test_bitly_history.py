@@ -151,18 +151,18 @@ def test_timestamp_works_if_endswith_s(fixture):
 	assert result == expected	
 
 
-def test_set_time_works_without_upper_bound(fixture):
+def test_parse_time_works_without_upper_bound(fixture):
 	now = time.time()
-	result = fixture.history.set_time((1, 'minute'), base=now)
+	result = fixture.history.parse_time((1, 'minute'), base=now)
 	expected = int(now - 60)
 
 	assert result['created_after'] == expected
 	assert result['created_before'] is None
 
 
-def test_set_time_works_with_upper_bound(fixture):
+def test_parse_time_works_with_upper_bound(fixture):
 	now = int(time.time())
-	result = fixture.history.set_time((2, 'minute'), (1, 'minute'), now)
+	result = fixture.history.parse_time((2, 'minute'), (1, 'minute'), now)
 
 	assert result['created_after'] == now - 120
 	assert result['created_before'] == now - 60
@@ -211,20 +211,28 @@ def test_pretty_works_for_forever(fixture):
 def test_pretty_works_for_last(fixture):
 	result = fixture.history.last(fixture.last, False, False, True)
 	expected = []
-	for timespan, data in zip(fixture.last, fixture.last_data):
-		header = 'Last {0} {1}:'.format(timespan[0], timespan[1])
+	for time_point, data in zip(fixture.last, fixture.last_data):
+		header = 'Last {0} {1}:'.format(time_point[0], time_point[1])
 		expected.append(header)
 		for item in data:
 			expected.append(fixture.template.format(item))
 
 	assert sorted(result) == sorted(expected + [''])
 
+def test_ranges_header_removes_unit_if_both_equal(fixture):
+	after = (7, 'days')
+	before = (2, 'days')
+	result = fixture.history.ranges_header(after, before, True)
+	expected = 'Between 7 and 2 days ago:'
+
+	assert result == expected
+
 def test_pretty_works_for_ranges(fixture):
 	result = fixture.history.ranges(fixture.ranges, False, False, True)
 	expected = []
-	for timespan, data in zip(fixture.ranges, fixture.ranges_data):
-		header = 'Between {0} {1} '.format(timespan[0], timespan[1])
-		header += 'and {0} {1} ago:'.format(timespan[2], timespan[3])
+	for time_point, data in zip(fixture.ranges, fixture.ranges_data):
+		header = 'Between {0} {1} '.format(time_point[0], time_point[1])
+		header += 'and {0} {1} ago:'.format(time_point[2], time_point[3])
 		expected.append(header)
 		for item in data:
 			expected.append(fixture.template.format(item))

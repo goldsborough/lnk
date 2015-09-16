@@ -341,6 +341,14 @@ def test_pretty_works_for_ranges(fixture):
 	assert result == expected + ['']
 
 
+def test_ranges_header_removes_unit_if_both_equal(fixture):
+	time_range = ((7, 'days'), (2, 'days'))
+	result = fixture.history.ranges_header(time_range, True)
+	expected = 'Between 7 and 2 days ago:'
+
+	assert result == expected
+
+
 def test_ranges_handles_empty_results_well(fixture):
 	timespan = fixture.ranges[0]
 	result = fixture.history.ranges([],

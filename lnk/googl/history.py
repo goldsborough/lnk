@@ -74,10 +74,7 @@ class History(Command):
 			begin, end = self.get_boundaries(timespan)
 			filtered = self.filter(urls, begin, end)
 			if pretty:
-				header = 'Between {0} {1}'.format(timespan[0], timespan[1])
-				header += ' and {0} {1} ago:'.format(timespan[2], timespan[3])
-				if not filtered:
-					header += ' None'
+				header = self.ranges_header(timespan, filtered)
 				lines.append(header)
 			lines += self.listify(filtered, limit, expanded, both, pretty)
 
@@ -89,14 +86,26 @@ class History(Command):
 			begin = self.get_date(timespan)
 			filtered = self.filter(urls, begin, datetime.now())
 			if pretty:
-				span = '{0} '.format(timespan[0]) if timespan[0] > 1 else ''
-				header = 'Last {0}{1}:'.format(span, timespan[1])
-				if not filtered:
-					header += ' None'
+				header = self.last_header(timespan, filtered)
 				lines.append(header)
 			lines += self.listify(filtered, limit, expanded, both, pretty)
 
 		return lines + [''] if pretty else lines
+
+	def ranges_header(self, timespan, filtered):
+		first_unit = ''
+		if timespan[0][1] != timespan[1][1]:
+			first_unit = '{0} '.format(timespan[0][1])
+		header = 'Between {0} {1}'.format(timespan[0][0], first_unit)
+		header += 'and {0} {1} ago:'.format(timespan[1][0], timespan[1][1])
+
+		return header if filtered else header + ' None'
+
+	def last_header(self, timespan, filtered):
+		span = '{0} '.format(timespan[0]) if timespan[0] > 1 else ''
+		header = 'Last {0}{1}:'.format(span, timespan[1])
+
+		return header if filtered else header + ' None'
 
 	def get_date(self, time_range, base=None):
 		span = time_range[0]
