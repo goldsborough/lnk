@@ -61,12 +61,13 @@ class Manager(object):
 		return self.config.items()
 
 	def __getitem__(self, key):
+		if key not in self.config:
+			raise errors.InvalidKeyError("Key '{0}' not found.".format(key))
 		return self.config[key]
 
 	def __setitem__(self, key, value):
 		if key not in self.config:
-			raise errors.InvalidKeyError("Key '{0}' not found for "
-									     "{1}!".format(key, self.which))
+			raise errors.InvalidKeyError("Key '{0}' not found.".format(key))
 		self.config[key] = value
 
 	def __enter__(self):

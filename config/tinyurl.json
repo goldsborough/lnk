@@ -1,16 +1,16 @@
 {
-	"url": "http://tiny-url.info/api",
-	"version": 1,
-	"key": "0BFA4A7B5BDD5BE7780C",
+    "url": "http://tiny-url.info/api", 
     "commands": {
         "link": {
-        	"endpoints": {
-        		"create": "create"
-        	},
-        	"settings": { 
-        		"pretty": true
-        	}
+            "endpoints": {
+                "create": "create"
+            }, 
+            "settings": {
+                "pretty": true
+            }
         }
-    },
-    "settings": { }
+    }, 
+    "version": 1, 
+    "key": "0BFA4A7B5BDD5BE7780C", 
+    "settings": {}
 }

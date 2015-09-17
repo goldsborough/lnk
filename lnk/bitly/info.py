@@ -43,7 +43,6 @@ class Info(Command):
 		sets (dict): A complete dictionary of the available sets of information.
 		reverse (dict): A reverse mapping of the above-mentioned sets.
 	"""
-
 	def __init__(self, raw=False):
 		super(Info, self).__init__('info')
 
@@ -53,7 +52,7 @@ class Info(Command):
 
 	def fetch(self, only, hide, hide_empty, urls):
 		"""
-		Fetches the link history.
+		Fetches the link information.
 
 		Arguments:
 			only (tuple): A tuple of strings representing the sets to include
@@ -115,8 +114,8 @@ class Info(Command):
 		"""
 		Requests information for a url.
 
-		Requests the part of the information that can be fetched from the
-		/info endpoint.
+		Requests the part of the information that can be fetched from the /info
+		endpoint.
 
 		Arguments:
 			url (str): The bitlink to request information for.
