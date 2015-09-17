@@ -6,6 +6,7 @@
 import click
 import ecstasy
 import pyperclip
+import re
 
 import beauty
 import errors
@@ -28,12 +29,15 @@ class Link(Command):
 		already_copied (bool): Flag set the first time a url is copied
 							   to the clipboard, such that only the first
 							   is copied.
+		http (regex): A compiled regular-expression object matching a
+					  HTTP(S) protocol, for URL-checking.
 	"""
 
 	def __init__(self, raw=False):
 		super(Link, self).__init__('link')
 		self.raw = raw
 		self.already_copied = False
+		self.http = re.compile(r'https?://')
 
 	def fetch(self, copy, quiet, expand, shorten, pretty):
 		"""

@@ -11,6 +11,7 @@ from collections import namedtuple
 
 import tests.paths
 
+import lnk.errors
 import lnk.abstract
 
 class Command(lnk.abstract.AbstractCommand):
@@ -135,6 +136,16 @@ def test_join_method_works(fixture):
 	fixture.command.join(threads)
 
 	assert not any(thread.is_alive() for thread in threads)
+
+
+def test_join_method_throws_if_unjoinable(fixture):
+	def blocks():
+		while True:
+			pass
+	thread = fixture.command.new_thread(blocks)
+
+	with pytest.raises(lnk.errors.InternalError):
+		fixture.command.join([thread], timeout=0.1)
 
 
 def test_join_method_re_raises_thread_exceptions(fixture):
