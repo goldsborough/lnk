@@ -46,7 +46,7 @@ class Key(Command):
 		raw (bool): Whether or not to return the raw output for internal use
 					or the prettified output for outside representation.
 		flow (oauth2client.client.OAuth2WebServerFlow): An object from Google's
-										API client that is used for the entire
+										API-library that is used for the entire
 										authorization-code-to-oauth2-token
 										exchange procedure.
 		credentials_path (str): The path to the credentials file in the config
