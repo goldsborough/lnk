@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+"""The command-line interface to the bit.ly client."""
+
 import click
 
 import config
@@ -14,7 +16,8 @@ link_config = tinyurl_config['commands']['link']
 
 @click.group(invoke_without_command=True,
 			 no_args_is_help=True,
-			 context_settings=dict(ignore_unknown_options=True))
+			 context_settings=dict(ignore_unknown_options=True),
+			 help='Tinyurl command-line client.')
 @click.option('-v',
 			  '--verbose',
 			  count=True,
@@ -24,7 +27,16 @@ link_config = tinyurl_config['commands']['link']
 					  message='Bitly API v%(version)s')
 @click.pass_context
 def main(context, verbose, args):
-	"""Tinyurl command-line client."""
+	"""
+	Main entry-point to the tinyurl API from the command-line.
+
+	All command-calls are handled here. Before passing on all command-specific
+	arguments to the appropriate command, the verbosity setting is handled here,
+	which is of use when catching any exceptions thrown by any commands.
+	Moreover, this entry-point takes care of making the 'link' command of the
+	service its default command, such that the user can type 'lnk ...' when
+	meaning 'lnk tinyurl link ...'.
+	"""
 	if verbose == 0:
 		verbose = lnk_config['verbosity']
 	if args[0] == 'link':
