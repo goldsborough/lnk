@@ -14,6 +14,13 @@ import errors
 from command import Command
 
 def echo(*args):
+	"""
+	Executes a link command and echoes its output.
+
+	Arguments:
+		args (variadic): The arguments to pass to an
+						 Link instance's fetch() method.
+	"""
 	click.echo(Link().fetch(*args))
 
 class Link(Command):
@@ -32,7 +39,6 @@ class Link(Command):
 		http (regex): A compiled regular-expression object matching a
 					  HTTP(S) protocol, for URL-checking.
 	"""
-
 	def __init__(self, raw=False):
 		super(Link, self).__init__('link')
 		self.raw = raw

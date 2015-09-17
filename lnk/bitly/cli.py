@@ -34,7 +34,7 @@ expanded_default = None if display == 'both' else display == 'expanded'
 @click.group(invoke_without_command=True,
 			 no_args_is_help=True,
 			 context_settings=dict(ignore_unknown_options=True),
-			 help='Main entry-point to the bit.ly API from the command-line.')
+			 help='bit.ly command-line client.')
 @click.option('-v',
 			  '--verbose',
 			  count=True,

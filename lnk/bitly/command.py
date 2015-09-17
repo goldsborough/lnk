@@ -20,8 +20,8 @@ class Command(AbstractCommand):
 	to the bit.ly API (the OAuth2 access token). 
 
 	Attributes:
-		parameters (dict): The necessary paramters for
-						  any request to the bit.ly API.
+		parameters (dict): The necessary parameters for any request to the
+						   bit.ly API.
 	"""
 	def __init__(self, which):
 		"""

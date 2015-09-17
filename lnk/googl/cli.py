@@ -31,7 +31,8 @@ units += ['{0}s'.format(i) for i in units]
 
 @click.group(invoke_without_command=True,
 			 no_args_is_help=True,
-			 context_settings=dict(ignore_unknown_options=True))
+			 context_settings=dict(ignore_unknown_options=True),
+			 help='goo.gl command-line client.')
 @click.option('-v',
 			  '--verbose',
 			  count=True,
