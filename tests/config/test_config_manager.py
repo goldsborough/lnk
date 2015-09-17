@@ -12,12 +12,18 @@ import tests.paths
 import config
 import errors
 
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 @pytest.fixture(scope='module')
 def fixture(request):
-	which = 'test'
+	Fixture = namedtuple('Fixture', [
+		'which',
+		'file',
+		'manager',
+		'config'
+		])
+
+	which = 'test_manager'
 	filename = '{0}.json'.format(which)
 	path = os.path.join(tests.paths.CONFIG_PATH, filename)
 
@@ -30,13 +36,6 @@ def fixture(request):
 		os.remove(path)
 
 	request.addfinalizer(finalize)
-	
-	Fixture = namedtuple('Fixture', [
-		'which',
-		'file',
-		'manager',
-		'config'
-		])
 
 	manager = config.Manager()
 
@@ -44,13 +43,13 @@ def fixture(request):
 
 @pytest.fixture(scope='module')
 def changed():
-	with open(os.path.join(HERE, 'changed.json')) as dummy:
+	Fixture = namedtuple('Fixture', ['contents', 'config'])
+	with open(os.path.join(HERE, 'changed_manager.json')) as dummy:
 		contents = dummy.read()
 		configuration = json.loads(contents)
 
-	Fixture = namedtuple('Fixture', ['contents', 'config'])
-
 	return Fixture(contents, configuration)
+
 
 
 def test_opens_correctly(fixture):
@@ -58,6 +57,7 @@ def test_opens_correctly(fixture):
 
 	assert fixture.manager.file == fixture.file
 	assert fixture.manager.config == fixture.config
+
 
 def test_writes_correctly(fixture, changed):
 	fixture.manager['fucks'] = -1
@@ -68,9 +68,11 @@ def test_writes_correctly(fixture, changed):
 	with open(fixture.file) as test:
 		assert json.load(test) == changed.config
 
+
 def test_throws_for_invalid_key(fixture):
 	with pytest.raises(errors.InvalidKeyError):
 		fixture.manager['random'] = None
+
 
 def test_context_syntax_closes_well(fixture):
 	with config.Manager(fixture.which) as manager:
@@ -84,6 +86,7 @@ def test_context_syntax_closes_well(fixture):
 	with open(fixture.file) as test:
 		assert json.load(test) == fixture.config
 
+
 def test_context_syntax_writes_well(fixture, changed):
 	with config.Manager(fixture.which, write=True) as manager:
 		assert manager['fucks'] == 0
@@ -95,13 +98,16 @@ def test_context_syntax_writes_well(fixture, changed):
 	with open(fixture.file) as test:
 		assert json.load(test) == changed.config
 
+
 def test_properties_are_accessible(fixture, changed):
 	assert fixture.manager.keys == changed.config.keys()
 	assert fixture.manager.values == changed.config.values()
 	assert fixture.manager.items == changed.config.items()
 
+
 def test_function_works(changed):
-	assert config.get('test', 'animal') == changed.config['animal']
+	assert config.get('test_manager', 'animal') == changed.config['animal']
+
 
 def test_closes_correctly(fixture):
 	fixture.manager.close()
@@ -109,9 +115,11 @@ def test_closes_correctly(fixture):
 	assert fixture.manager.file is None
 	assert fixture.manager.config is None
 
+
 def test_throws_for_write_when_no_file_open(fixture):
 	with pytest.raises(errors.InternalError):
 		fixture.manager.write()
+
 
 def test_throws_for_close_when_no_file_open(fixture):
 	with pytest.raises(errors.InternalError):

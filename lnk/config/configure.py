@@ -12,6 +12,17 @@ import click
 
 import config
 
+
+def echo(*args):
+	"""
+	Echoes the return value of configure() to stdout.
+
+	Arguments:
+		args (variadic): The arguments to forward to configure().
+	"""
+	click.echo(configure(*args), nl=False)
+
+
 def configure(service, command, keys, values, quiet, all_keys):
 	"""
 	Does the actual configuration-management.
@@ -26,6 +37,12 @@ def configure(service, command, keys, values, quiet, all_keys):
 		quiet (bool): Whether to output anything or just do the
 					 configuration quietly.
 		all_keys (bool): Whether to show all keys.
+
+	Returns:
+		If quiet is True, nothing, else either a string-joined list of lines
+		showing all updates, if values were supplied, else only the keys
+		and if no keys were found (e.g. if the --all-keys was passed but the
+		settings dictionary is empty) the string 'Nothing to see...\n'.
 	"""
 	with config.Manager(service, write=True) as manager:
 		# If the command option is not None, get the settings for that
@@ -35,13 +52,14 @@ def configure(service, command, keys, values, quiet, all_keys):
 		manager = manager['settings']
 		keys = manager.keys() if (not keys or all_keys) else list(keys)
 		values = list(values)
+
 		if quiet:
 			be_quiet(manager, keys, values)
 		else:
 			lines = [update(manager, key, values) for key in keys]
-			if not lines:
-				lines = ['Nothing to see...']
-			click.echo("\n".join(lines))
+
+			return '\n'.join(lines) if lines else 'Nothing to see...\n'
+
 
 def be_quiet(manager, keys, values):
 	"""
@@ -56,8 +74,8 @@ def be_quiet(manager, keys, values):
 	"""
 	while values:
 		key = keys.pop(0)
-		value = values.pop(0)
-		manager[key] = int(value) if value.isdigit() else value
+		manager[key] = values.pop(0)
+
 
 def update(manager, key, values):
 	"""
@@ -78,11 +96,11 @@ def update(manager, key, values):
 	"""
 	line = "{0}: {1}".format(key, format_value(manager[key]))
 	if values:
-		value = values.pop(0)
-		manager[key] = int(value) if value.isdigit() else value
+		manager[key] = values.pop(0)
 		line += " => {0}".format(manager[key])
 
 	return line
+
 
 def format_value(value):
 	"""
@@ -98,7 +116,7 @@ def format_value(value):
 		cast to a string.
 	"""
 	if isinstance(value, list):
-		return ','.join(map(str, value))
+		return ', '.join(map(str, value))
 	elif isinstance(value, dict):
-		return ','.join(["{}: {}".format(k, v) for k, v in value.items()])
+		return ', '.join(["{}: {}".format(k, v) for k, v in value.items()])
 	return str(value)

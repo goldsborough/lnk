@@ -1,0 +1,14 @@
+{
+    "commands": {
+        "cmd": {
+            "settings": {
+                "foo": true,
+                "bar": 7
+            }
+        }
+    },
+    "settings": {
+        "rock": "gas",
+        "water": "solid"
+    }
+}
