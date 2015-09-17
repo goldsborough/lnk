@@ -28,7 +28,7 @@ import errors
 def main(service, command, key, value, quiet, all_keys):
 	"""Configuration interface."""
 	if key or all_keys:
-		errors.catch(config.configure.configure,
+		errors.catch(config.configure.echo,
 					 service,
 					 command,
 					 key,

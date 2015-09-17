@@ -57,8 +57,9 @@ def configure(service, command, keys, values, quiet, all_keys):
 			be_quiet(manager, keys, values)
 		else:
 			lines = [update(manager, key, values) for key in keys]
+			output = '\n'.join(lines) if lines else 'Nothing to see...'
 
-			return '\n'.join(lines) if lines else 'Nothing to see...\n'
+			return '{0}\n'.format(output)
 
 
 def be_quiet(manager, keys, values):
