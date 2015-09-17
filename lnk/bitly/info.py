@@ -63,7 +63,7 @@ class Info(Command):
 						  if only is empty, or else from those selected).
 			hide_empty (bool): Whether or not to show things that are empty,
 							   such as an empty list of tags.
-			urls (tuple): A tuple of urls to show information for.
+			urls (tuple): A tuple of urls to fetch information for.
 
 		Returns:
 			A plain list of the raw lines if the 'raw' attribute is True,

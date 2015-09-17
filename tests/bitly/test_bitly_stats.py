@@ -212,23 +212,6 @@ def test_requests_timespan_well(fixture):
 	assert results[fixture.endpoint][0] == fixture.timespans_data[0]
 
 
-def test_listify_formats_timespans_well(fixture):
-	data = [
-		copy.deepcopy(fixture.forever_data),
-		copy.deepcopy(fixture.timespans_data[0])
-	]
-	result = fixture.stats.listify(None, data, False)
-	header = 'Last {0} {1}:'.format(fixture.timespans[0].span,
-								    fixture.timespans[0].unit)
-	expected = [
-		fixture.first_level.format('Since forever:'),
-		fixture.first_level.format(header)
-	]
-
-	for i in expected:
-		assert i in result
-
-
 def test_listify_sets_None_if_no_items(fixture):
 	data = copy.deepcopy(fixture.forever_data)
 	data['data'] = []
@@ -263,6 +246,41 @@ def test_listify_handles_lists_well(fixture):
 		key = i[keys[0]]
 		line = fixture.second_level.format(key, clicks)
 		expected.append(line)
+
+	assert result == expected
+
+
+def test_get_header_formats_timespans_well(fixture):
+	result = fixture.stats.get_header(4, 'weeks')
+	expected = fixture.first_level.format('Last 4 weeks:')
+
+	assert result == expected
+
+
+def test_get_header_handles_forever_well(fixture):
+	result = fixture.stats.get_header(-1, None)
+	expected = fixture.first_level.format('Since forever:')
+
+	assert result == expected
+
+
+def test_get_header_removes_unit_if_1(fixture):
+	result = fixture.stats.get_header(1, 'day')
+	expected = fixture.first_level.format('Last day:')
+
+	assert result == expected
+
+
+def test_get_header_handles_years_well(fixture):
+	result = fixture.stats.get_header(12, 'months')
+	expected = fixture.first_level.format('Last year:')
+
+	assert result == expected
+
+
+def test_get_header_adds_plural_s_if_multiple_years(fixture):
+	result = fixture.stats.get_header(24, 'months')
+	expected = fixture.first_level.format('Last 2 years:')
 
 	assert result == expected
 
@@ -308,16 +326,16 @@ def test_get_timespans_works(fixture):
 	assert result == set(fixture.timespans)
 
 
-def test_request_all_works_for_single_endpoint(fixture):
-	result = fixture.stats.request_all(fixture.url,
+def test_get_stats_works_for_single_endpoint(fixture):
+	result = fixture.stats.get_stats(fixture.url,
 									   [fixture.forever],
 									   [fixture.endpoint])
 	expected = {fixture.endpoint: [fixture.forever_data]}
 
 	assert result == expected
 
-def test_request_all_works_for_many_timespans(fixture):
-	result = fixture.stats.request_all(fixture.url,
+def test_get_stats_works_for_many_timespans(fixture):
+	result = fixture.stats.get_stats(fixture.url,
 									   fixture.timespans,
 									   [fixture.endpoint])
 
@@ -331,11 +349,11 @@ def test_request_all_works_for_many_timespans(fixture):
 	assert result == expected
 
 
-def test_request_all_handles_plural_s_in_timespan_well(fixture):
+def test_get_stats_handles_plural_s_in_timespan_well(fixture):
 	timespans = copy.deepcopy(fixture.timespans)
 	timespans[0] = fixture.stats.Timespan(timespans[0].span,
 										  timespans[0].unit + 's')
-	result = fixture.stats.request_all(fixture.url,
+	result = fixture.stats.get_stats(fixture.url,
 								  	   timespans,
 								       [fixture.endpoint])
 	data = copy.deepcopy(fixture.timespans_data)
@@ -355,9 +373,9 @@ def test_request_all_handles_plural_s_in_timespan_well(fixture):
 	assert result == expected
 
 
-def test_request_all_works_for_many_endpoints(fixture):
+def test_get_stats_works_for_many_endpoints(fixture):
 	endpoints = ['clicks', 'referrers', 'countries']
-	result = fixture.stats.request_all(fixture.url,
+	result = fixture.stats.get_stats(fixture.url,
 									   [fixture.forever],
 									   endpoints)
 

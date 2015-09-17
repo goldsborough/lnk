@@ -17,11 +17,11 @@ CLIENT_SECRET = 'b5257382fd1c7118688cae7942d5128b4d995c9e'
 
 def echo(*args):
 	"""
-	Executes a history command and echoes its output.
+	Executes a key command and echoes its output.
 
 	Arguments:
 		args (variadic): The arguments to pass to a
-						 History instance's fetch() method.
+						 Key instance's fetch() method.
 	"""
 	click.echo(Key().fetch(*args), nl=False)
 

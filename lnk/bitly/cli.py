@@ -134,6 +134,7 @@ def info(only, hide, hide_empty, urls):
    			  type=click.Choice(stats_config['sets']),
    			  help='Hide this/these set(s) of statistics.')
 @click.option('-t',
+			  '--last',
 			  '--time',
 		      nargs=2,
 		      multiple=True,
