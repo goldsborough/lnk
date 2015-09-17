@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #! -*- coding: utf-8 -*-
 
+"""The command-line interface to the goo.gl client."""
+
 import click
 
 import config
@@ -39,14 +41,27 @@ units += ['{0}s'.format(i) for i in units]
 					  message='goo.gl API v%(version)s')
 @click.pass_context
 def main(context, verbose, args):
-	"""goo.gl command-line client."""
+	"""
+	Main entry-point to the goo.gl API from the command-line.
+
+	All command-calls are handled here. Before passing on all command-specific
+	arguments to the appropriate command, the verbosity setting is handled here,
+	which is of use when catching any exceptions thrown by any commands.
+	Moreover, this entry-point takes care of making the 'link' command of the
+	service its default command, such that the user can type 'lnk ...' when
+	meaning 'lnk googl link ...'.
+	"""
+	# Can't be zero because it's counted (0 = no flag)
 	if verbose == 0:
 		verbose = lnk_config['verbosity']
+	# Could be the name of the command, or the first argument if the command
+	# was not specified (meaning the link command is requested)
 	name = args[0]
 	if name not in googl_config['commands'].keys():
 		name = 'link'
 	else:
 		args = args[1:] if args[1:] else ['--help']
+	# Pick out the function (command)
 	which = globals()[name]
 	catch = errors.Catch(verbose, which.get_help(context), 'goo.gl')
 	catch.catch(which.main, args, standalone_mode=False)
@@ -96,6 +111,8 @@ def link(copy, quiet, expand, shorten, urls, pretty):
 @click.argument('urls', nargs=-1)
 def info(only, hide, urls):
 	"""Information about links."""
+	# Its' horrible to handle the missing parameter when click
+	# throws an exception (doesn't make it accessible), so just do it here.
 	if not urls:
 		raise errors.UsageError('Please supply at least one URL.')
 	googl.info.echo(only, hide, urls)
@@ -147,7 +164,7 @@ def stats(only, hide, last, forever, limit, info, full, urls):
 			 is_flag=True,
 			 help='Initiates the authorization process.')
 def key(generate):
-	"""Generate an API key for user history."""
+	"""Generate an API key."""
 	googl.key.echo(generate)
 
 @main.command()
@@ -186,9 +203,8 @@ def key(generate):
 			  help='Whether to show the history in a pretty box or as a plain list.')
 def history(last, time_range, forever, limit, expanded, both, pretty):
 	"""Retrieve link history."""
-	if not last and not time_range and not forever:
-		message = 'Please specify at least one time range (e.g. --forever)'
-		raise click.UsageError(message)
+	if not last and not time_range:
+		forever = True
 	# Default case for both
 	if not both and expanded is None:
 		both = True

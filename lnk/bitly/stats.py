@@ -31,7 +31,7 @@ def echo(*args):
 
 class Stats(Command):
 	"""
-	Class to retrieve statistics and metrics for one or more bitlinks.
+	Class to retrieve statistics and info for one or more bitlinks.
 
 	The statistics for a link include its referrers (i.e. from where the link
 	was opened), the countries from where the link was opened and of course the
@@ -109,7 +109,7 @@ class Stats(Command):
 		"""
 		Retrieves the statistics for a single url.
 
-		The statistics returned are for all timespans supplied, fitlered
+		The statistics returned are for all timespans supplied, filtered
 		according to the sets of statistics wanted.
 
 		Note:
@@ -161,7 +161,7 @@ class Stats(Command):
 
 	def request(self, results):
 		"""
-		Requests statistics for a given setting.
+		Requests statistics for a given configuration.
 
 		The URL, endpoint (set/category) and timespan are all fetched from
 		a queue, because this method is always run in a separate thread for
@@ -328,6 +328,16 @@ class Stats(Command):
 		Handles special cases such as country-name expansion (the API returns
 		them as ISO abbreviations, e.g. 'DE', but often the full name,
 		e.g. 'Germany', is really wanted)
+
+		Arguments:
+			category (str): The category of the data.
+			key (str): The key of the data-point.
+			value (str): The value of the data-point.
+			full (bool): Whether to show full country names or short
+						 ISO abbreviations (e.g. 'Germany' or 'DE').
+
+		Returns:
+			A pretty list-item.
 		"""
 		if category == 'countries':
 			if key == 'None':

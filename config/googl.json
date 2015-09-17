@@ -39,10 +39,9 @@
                 "stats": "url"
             }, 
             "settings": {
-                "info": "False", 
-                "full-countries": true, 
-                "span": "two-hours", 
-                "limit": 10, 
+                "info": false,
+                "full-countries": true,
+                "limit": 10,
                 "timespan": "two-hours"
             }
         }, 

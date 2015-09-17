@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+A mapping between short ISO abbreviations for countries and their full names.
+"""
+
 names = {
 
     "AF": "Afghanistan",

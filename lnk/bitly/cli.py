@@ -33,7 +33,8 @@ expanded_default = None if display == 'both' else display == 'expanded'
 
 @click.group(invoke_without_command=True,
 			 no_args_is_help=True,
-			 context_settings=dict(ignore_unknown_options=True))
+			 context_settings=dict(ignore_unknown_options=True),
+			 help='Main entry-point to the bit.ly API from the command-line.')
 @click.option('-v',
 			  '--verbose',
 			  count=True,
@@ -49,9 +50,9 @@ def main(context, verbose, args):
 	All command-calls are handled here. Before passing on all command-specific
 	arguments to the appropriate command, the verbosity setting is handled here,
 	which is of use when catching any exceptions thrown by any commands.
-	Moreover, this entry-point takes care of making the 'link' command of any
-	service (e.g. bit.ly or goo.gl) its default command, such that the user
-	can type 'lnk ...' when meaning 'lnk link ...'.
+	Moreover, this entry-point takes care of making the 'link' command of the
+	service its default command, such that the user can type 'lnk ...' when
+	meaning 'lnk bitly link ...'.
 	"""
 	# Can't be zero because it's counted (0 = no flag)
 	if verbose == 0:
@@ -226,9 +227,8 @@ def user(only, hide, everything, add_history, hide_empty):
 			  help='Whether to show the history in a pretty box or as a plain list.')
 def history(last, time_range, forever, limit, expanded, both, pretty):
 	"""Retrieve link history."""
-	if not last and not time_range and not forever:
-		message = 'Please specify at least one time range (e.g. --forever)'
-		raise click.UsageError(message)
+	if not last and not time_range:
+		forever = True
 	# Default case for both
 	if not both and expanded is None:
 		both = True
