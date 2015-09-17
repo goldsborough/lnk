@@ -32,8 +32,8 @@ class Link(Command):
 
 	def __init__(self, raw=False):
 		super(Link, self).__init__('link')
-		self.already_copied = False
 		self.raw = raw
+		self.already_copied = False
 
 	def fetch(self, copy, quiet, expand, shorten, pretty):
 		"""

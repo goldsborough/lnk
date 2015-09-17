@@ -47,6 +47,7 @@ class Link(Command):
 	def request(self, url):
 		response = self.get(self.endpoints['create'], dict(url=url))
 		response = self.verify(response, "shorten url '{0}'".format(url))
+
 		return response['shorturl']
 
 	def copy(self, copy, url):
@@ -54,4 +55,5 @@ class Link(Command):
 			self.already_copied = True
 			pyperclip.copy(url)
 			url = ecstasy.beautify('<{0}>'.format(url), ecstasy.Style.Bold)
+
 		return url
