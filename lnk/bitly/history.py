@@ -40,7 +40,6 @@ class History(Command):
 		seconds (dict): A mapping between string representations of time
 						and equivalent numbers of seconds for each unit.
 	"""
-
 	def __init__(self, raw=False):
 		super(History, self).__init__('history')
 		self.raw = raw
