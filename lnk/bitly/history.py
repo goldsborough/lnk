@@ -14,6 +14,13 @@ import bitly.link
 from bitly.command import Command
 
 def echo(*args):
+	"""
+	Executes a history command and echoes its output.
+
+	Arguments:
+		args (variadic): The arguments to pass to a
+						 History instance's fetch() method.
+	"""
 	click.echo(History().fetch(*args))
 
 class History(Command):
@@ -49,7 +56,7 @@ class History(Command):
 
 	def fetch(self, last, ranges, forever, limit, expanded, both, pretty):
 		"""
-		Fetches the link history and returns a string for output.
+		Fetches the link history.
 
 		Arguments:
 			last (tuple): A tuple of time_points to retrieve history for, without
