@@ -6,11 +6,11 @@
 import click
 import simplejson
 
-import beauty
-import config
-import errors
+import lnk.beauty
+import lnk.config
+import lnk.errors
 
-from bitly.command import Command
+from lnk.bitly.command import Command
 
 CLIENT_ID = '049118cdcf01c6b267f77582990d48da9127259a'
 CLIENT_SECRET = 'b5257382fd1c7118688cae7942d5128b4d995c9e'
@@ -45,7 +45,7 @@ class Key(Command):
 		self.parameters['client_id'] = CLIENT_ID
 		self.parameters['client_service'] = CLIENT_SECRET
 
-	def fetch(self, _, login, password, show):
+	def fetch(self, _, login, password, show, who):
 		"""
 		Fetches an oauth2 access-token for a given login and password.
 
@@ -64,14 +64,25 @@ class Key(Command):
 			an empty string is returned (such that nothing appears in the
 			command-line output).
 		"""
+		if who:
+			who = lnk.config.get('bitly', 'login')
+			print(who)
+			return '{0}\n'.format(who) if who else 'Nobody.\n'
+
+		if not login:
+			login = click.prompt('Login')
+		if not password:
+			password = click.prompt('Password', hide_input=True)
+
 		key = self.request(login, password)
-		with config.Manager('bitly', write=True) as manager:
+		with lnk.config.Manager('bitly', write=True) as manager:
 			manager['key'] = key
+			manager['login'] = login
 
 		if show:
 			if self.raw:
 				return key
-			return beauty.boxify([[key]]) + '\n'
+			return lnk.beauty.boxify([[key]]) + '\n'
 		return ''
 
 	def request(self, login, password):
@@ -119,7 +130,7 @@ class Key(Command):
 		try:
 			response = response.json()
 			if not str(response['status_code']).startswith('2'):
-				raise errors.HTTPError('Could not {}.'.format(what),
+				raise lnk.errors.HTTPError('Could not {}.'.format(what),
 									   response['status_code'],
 							           response['status_txt'])
 		except simplejson.scanner.JSONDecodeError:

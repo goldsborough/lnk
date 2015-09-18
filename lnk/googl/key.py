@@ -11,10 +11,10 @@ import webbrowser
 
 from oauth2client.client import OAuth2WebServerFlow
 
-import errors
-import config
+import lnk.errors
+import lnk.config
 
-from googl.command import Command
+from lnk.googl.command import Command
 
 CLIENT_ID = '324510822959-qcp2d36tkl07v2dfqde3ungmpii4qv96.apps.googleusercontent.com'
 CLIENT_SECRET = 'r7-N-xmGbfePxZP3q6QEXu1Z'
@@ -59,7 +59,7 @@ class Key(Command):
 										client_secret=CLIENT_SECRET,
 										scope=SCOPE,
 										redirect_uri=REDIRECT_URI)
-		self.credentials_path = os.path.join(config.CONFIG_PATH, 'credentials')
+		self.credentials_path = os.path.join(lnk.config.CONFIG_PATH, 'credentials')
 
 
 	def fetch(self, _):
