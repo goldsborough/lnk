@@ -229,6 +229,8 @@ class Catch(object):
 				error = self.get_error()
 				raise ConnectionError('Could not establish connection '
 									  'to {0}server!'.format(self.service))
+			except click.exceptions.Abort:
+				click.echo() # Just the newline
 		except Error:
 			self.handle_error()
 
