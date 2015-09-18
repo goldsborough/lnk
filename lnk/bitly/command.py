@@ -5,10 +5,10 @@
 
 from overrides import overrides
 
-import config
-import errors
+import lnk.config
+import lnk.errors
 
-from abstract import AbstractCommand
+from lnk.abstract import AbstractCommand
 
 class Command(AbstractCommand):
 	"""
@@ -30,9 +30,9 @@ class Command(AbstractCommand):
 									   retrieved from the configuration file.
 		"""
 		super(Command, self).__init__('bitly', which)
-		with config.Manager('bitly') as manager:
+		with lnk.config.Manager('bitly') as manager:
 			if not manager['key'] and which != 'key':
-				raise errors.AuthorizationError('bitly')
+				raise lnk.errors.AuthorizationError('bitly')
 			self.parameters = {'access_token': manager['key']}
 
 	@staticmethod
@@ -65,12 +65,12 @@ class Command(AbstractCommand):
 							 related to the API itself.
 		"""
 		if not str(response.status_code).startswith('2'):
-			raise errors.HTTPError('Could not {0}.'.format(what),
+			raise lnk.errors.HTTPError('Could not {0}.'.format(what),
 								   response.status_code,
 						           response.reason)
 		response = response.json()
 		if not str(response['status_code']).startswith('2'):
-			raise errors.HTTPError('Could not {0}.'.format(what),
+			raise lnk.errors.HTTPError('Could not {0}.'.format(what),
 								   response['status_code'],
 						           response['status_txt'])
 		data = response['data']
@@ -78,6 +78,6 @@ class Command(AbstractCommand):
 			data = data[inner][0]
 		if 'error' in data:
 			what = 'Could not {0}!'.format(what)
-			raise errors.APIError(what, data['error'])
+			raise lnk.errors.APIError(what, data['error'])
 
 		return data

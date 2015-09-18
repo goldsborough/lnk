@@ -2,14 +2,39 @@
     "url": "https://www.googleapis.com/urlshortener", 
     "commands": {
         "info": {
-            "endpoints": {
-                "info": "url"
-            }, 
-            "settings": {}, 
             "sets": {
                 "status": "status", 
                 "expanded": "longUrl", 
                 "created": "created"
+            }, 
+            "endpoints": {
+                "info": "url"
+            }, 
+            "settings": {}
+        }, 
+        "stats": {
+            "units": [
+                "two-hours", 
+                "day", 
+                "week", 
+                "month"
+            ], 
+            "endpoints": {
+                "stats": "url"
+            }, 
+            "settings": {
+                "info": false, 
+                "full-countries": true, 
+                "span": "forever", 
+                "limit": 10, 
+                "timespan": "two-hours"
+            }, 
+            "sets": {
+                "countries": "countries", 
+                "platforms": "platforms", 
+                "browsers": "browsers", 
+                "clicks": "shortUrlClicks", 
+                "referrers": "referrers"
             }
         }, 
         "link": {
@@ -19,30 +44,6 @@
             }, 
             "settings": {
                 "pretty": true
-            }
-        }, 
-        "stats": {
-            "units": [
-                "two-hours", 
-                "day", 
-                "week", 
-                "month"
-            ], 
-            "sets": {
-                "platforms": "platforms", 
-                "browsers": "browsers", 
-                "referrers": "referrers", 
-                "clicks": "shortUrlClicks", 
-                "countries": "countries"
-            }, 
-            "endpoints": {
-                "stats": "url"
-            }, 
-            "settings": {
-                "info": false,
-                "full-countries": true,
-                "limit": 10,
-                "timespan": "two-hours"
             }
         }, 
         "key": {
@@ -74,5 +75,7 @@
     }, 
     "version": 1, 
     "key": "AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc", 
-    "settings": {}
+    "settings": {
+        "command": "link"
+    }
 }

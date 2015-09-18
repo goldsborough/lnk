@@ -9,10 +9,10 @@ import click
 
 from datetime import datetime
 
-import abstract
-import beauty
+import lnk.abstract
+import lnk.beauty
 
-from googl.command import Command
+from lnk.googl.command import Command
 
 def echo(*args):
 	"""
@@ -31,8 +31,7 @@ class Info(Command):
 	Information about a link may include when it was created, its expanded
 	url and its status. This information is returned in a pretty list. The
 	list can be put into a box for terminal output, or can be returned raw
-	for internal use (such as by the stats command). Note that the information
-	retrieved combines data from the /info and user/link_history endpoints.
+	for internal use (such as by the stats command).
 
 	Note:
 		A 'goo.gl link' is a link shortened with bit.ly.
@@ -66,7 +65,7 @@ class Info(Command):
 			A plain list of the raw lines if the 'raw' attribute is True,
 			else a boxified, pretty string.
 		"""
-		sets = abstract.filter_sets(self.sets, only, hide)
+		sets = lnk.abstract.filter_sets(self.sets, only, hide)
 		result = []
 		threads = []
 		for url in urls:
@@ -75,7 +74,7 @@ class Info(Command):
 			threads.append(t)
 		self.join(threads)
 
-		return result if self.raw else beauty.boxify(result)
+		return result if self.raw else lnk.beauty.boxify(result)
 
 	def get_info(self, sets, result):
 		"""

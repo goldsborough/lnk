@@ -174,7 +174,7 @@ def stats(only, hide, last, forever, limit, no_limit, info, full, urls):
 			 is_flag=True,
 			 help='Initiates the authorization process.')
 def key(generate):
-	"""Generate an API key."""
+	"""Authorization management."""
 	lnk.googl.key.echo(generate)
 
 @main.command()

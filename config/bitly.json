@@ -1,5 +1,4 @@
 {
-    "url": "https://api-ssl.bitly.com", 
     "commands": {
         "info": {
             "endpoints": {
@@ -104,7 +103,11 @@
             }
         }
     }, 
+    "settings": {
+        "command": "link"
+    }, 
+    "url": "https://api-ssl.bitly.com", 
     "version": 3, 
-    "key": "c0b14bd71e4e9e5b9fc3841ac62115fd4b98eaac", 
-    "settings": {}
+    "key": "b0b5081ae3385be81656b34bdc7ea0d27c5be0fe", 
+    "login": "lnktest"
 }

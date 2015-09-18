@@ -11,7 +11,7 @@ import threading
 from collections import namedtuple
 
 import tests.paths
-import googl.link
+import lnk.googl.link
 
 VERSION = 1
 KEY = 'AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc'
@@ -68,7 +68,7 @@ def fixture():
 		'short_to_long'
 		])
 
-	link = googl.link.Link(raw=True)
+	link = lnk.googl.link.Link(raw=True)
 	url = 'https://www.github.com/goldsborough/lnk'
 	short = shorten(url)
 	bold = ecstasy.beautify('<{0}>'.format(short), ecstasy.Style.Bold)

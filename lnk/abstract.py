@@ -11,8 +11,8 @@ import requests
 import threading
 import sys
 
-import config
-import errors
+import lnk.config
+import lnk.errors
 
 class AbstractCommand(object):
 	"""
@@ -56,7 +56,7 @@ class AbstractCommand(object):
 						 string to be formatted.
 	"""
 	def __init__(self, service, command):
-		with config.Manager(service) as manager:
+		with lnk.config.Manager(service) as manager:
 			self.url = manager['url']
 			self.api = '{0}/v{1}'.format(self.url, manager['version'])
 			self.config = manager['commands'][command]
@@ -151,7 +151,7 @@ class AbstractCommand(object):
 
 		return thread
 
-	def join(self, threads, timeout=60):
+	def join(self, threads, timeout=120):
 		"""
 		Joins a list of thread and checks for errors.
 
@@ -166,7 +166,7 @@ class AbstractCommand(object):
 							 seconds.
 
 		Raises:
-			errors.InternalError: If a thread could not be joined in the given
+			lnk.errors.InternalError: If a thread could not be joined in the given
 								  timeout period (i.e. if it is still alive after
 								  joining).
 			Other errors: If a thread threw an exception, this exception is
@@ -175,7 +175,7 @@ class AbstractCommand(object):
 		for thread in threads:
 			thread.join(timeout=timeout)
 			if thread.is_alive():
-				raise errors.InternalError('Could not join thread.')
+				raise lnk.errors.InternalError('Could not join thread.')
 		if self.error:
 			raise self.error
 

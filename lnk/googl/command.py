@@ -11,10 +11,10 @@ import os
 
 from overrides import overrides
 
-import config
-import errors
+import lnk.config
+import lnk.errors
 
-from abstract import AbstractCommand
+from lnk.abstract import AbstractCommand
 
 class Command(AbstractCommand):
 	"""
@@ -32,7 +32,7 @@ class Command(AbstractCommand):
 	"""
 	def __init__(self, which):
 		super(Command, self).__init__('googl', which) 
-		credentials_path = os.path.join(config.CONFIG_PATH, 'credentials')
+		credentials_path = os.path.join(lnk.config.CONFIG_PATH, 'credentials')
 		self.credentials = oauth2client.file.Storage(credentials_path)
 
 	def get_api(self):
@@ -94,7 +94,7 @@ class Command(AbstractCommand):
 		"""
 		credentials = self.credentials.get()
 		if not credentials:
-			raise errors.AuthorizationError('goo.gl')
+			raise lnk.errors.AuthorizationError('goo.gl')
 		http = httplib2.Http()
 		if credentials.access_token_expired:
 			credentials.refresh(http)
@@ -114,6 +114,6 @@ class Command(AbstractCommand):
 		try:
 			response = request.execute()
 		except googleapiclient.errors.HttpError:
-			raise errors.HTTPError('Could not {0}.'.format(what))
+			raise lnk.errors.HTTPError('Could not {0}.'.format(what))
 
 		return response

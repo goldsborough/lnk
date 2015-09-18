@@ -72,7 +72,8 @@ class Key(Command):
 		click.echo("Redirecting you to Google's authorization page ...")
 		webbrowser.open(authorize_url)
 
-		code = click.prompt('Please enter the authorization code')
+		code = click.prompt('Please enter the authorization code',
+							hide_input=True)
 
 		# Now exchange the authorization token for credentials, i.e.
 		# an access_token that must be passed as part of the oauth protocol

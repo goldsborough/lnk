@@ -47,7 +47,7 @@ expanded_default = None if display == 'both' else display == 'expanded'
 			  help='Controls the level of verbosity.')
 @click.argument('args', nargs=-1)
 @click.version_option(version=bitly_config['version'],
-					  message='Bitly API v%(version)s')
+					  message='bit.ly API v%(version)s')
 @click.pass_context
 def main(context, verbose, level, args):
 	"""
@@ -70,7 +70,7 @@ def main(context, verbose, level, args):
 		args = args[1:] or ['--help']
 	# Pick out the function (command)
 	which = globals()[name]
-	catch = lnk.errors.Catch(verbose, which.get_help(context), 'bitly')
+	catch = lnk.errors.Catch(verbosity, which.get_help(context), 'bitly')
 	catch.catch(which.main, args, standalone_mode=False)
 
 @main.command()
@@ -152,8 +152,8 @@ def info(only, hide, hide_empty, urls):
 			  default=stats_config['settings']['limit'],
 			  help='Limit the amount of statistics per timespan.')
 @click.option('-a',
-			  '--no-limit',
 			  '--all',
+			  '--no-limit',
 			  is_flag=True,
 			  help='Have no limit on the amount of statistics per timespan.')
 @click.option('-i',
@@ -165,12 +165,12 @@ def info(only, hide, hide_empty, urls):
 			  default=stats_config['settings']['full-countries'],
 			  help='Whether to show full or short (abbreviated) country names.')
 @click.argument('urls', nargs=-1)
-def stats(only, hide, time, forever, limit, no_limit, info, full, urls):
+def stats(only, hide, last, forever, limit, no_limit, info, full, urls):
 	"""Statistics and metrics for links."""
 	if not urls:
 		raise lnk.errors.UsageError('Please supply at least one URL.')
 	limit = None if no_limit else limit
-	lnk.bitly.stats.echo(only, hide, time, forever, limit, info, full, urls)
+	lnk.bitly.stats.echo(only, hide, last, forever, limit, info, full, urls)
 
 @main.command()
 @click.option('-o',
@@ -211,8 +211,7 @@ def user(only, hide, everything, history, hide_empty):
 		      multiple=True,
 		      type=(int, click.Choice(units), int, click.Choice(units)),
 		      help='Display history of links from this time range.')
-@click.option('-a',
-			  '--forever/--all',
+@click.option('--forever',
 			  is_flag=True,
 			  help='Display history of links since forever.')
 @click.option('-l',
@@ -253,18 +252,18 @@ def history(last, time_range, forever, limit, no_limit, expanded, both, pretty):
 			  help='Generate a new api key (asks for login/password).')
 @click.option('-l',
 			  '--login',
-			  prompt=True,
 			  help='Generate a new api key with this login.')
 @click.option('-p',
 			  '--password',
-			  prompt=True,
-			  hide_input=True,
-              confirmation_prompt=True,
               help='Generate a new api key with this password.')
 @click.option('-s/-h',
 			  '--show/--hide',
 			  default=key_config['settings']['show'],
 			  help='Whether to show or hide the generated API key.')
-def key(generate, login, password, show):
-	"""Generate an API key for user metrics and history."""
-	lnk.bitly.key.echo(generate, login, password, show)
+@click.option('-w',
+			  '--who',
+			  is_flag=True,
+			  help="Show who is currently logged in.")
+def key(generate, login, password, show, who):
+	"""Authorization management."""
+	lnk.bitly.key.echo(generate, login, password, show, who)

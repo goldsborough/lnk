@@ -10,7 +10,7 @@ import requests
 from collections import namedtuple
 
 import tests.paths
-import googl.info
+import lnk.googl.info
 
 VERSION = 1
 KEY = 'AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc'
@@ -38,7 +38,7 @@ def fixture():
 		])
 	urls = ['http://goo.gl/9RJxHk', 'https://goo.gl/IpUmJn']
 	expanded = ['http://python.org/', 'http://github.com/']
-	info = googl.info.Info(raw=True)
+	info = lnk.googl.info.Info(raw=True)
 	only = ['created', 'expanded']
 	hide = ['status']
 	sets = {

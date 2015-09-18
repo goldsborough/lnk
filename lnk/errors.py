@@ -16,6 +16,8 @@ import sys
 
 from collections import namedtuple
 
+Message = namedtuple('Message', ['what', 'level'])
+
 class Error(Exception):
 	"""
 	Exception base class for all errors.
@@ -30,14 +32,12 @@ class Error(Exception):
 		levels (list): A list of strings for each verbosity level.
 	"""
 
-	Message = namedtuple('Message', ['what', 'level'])
-
 	def __init__(self, what, **additional):
 		self.what = what or 'Something bad happened.'
 
 		#\a is the bell character (makes a 'beep' sound)
-		additional['Error'] = Error.Message('\a{0}'.format(self.what), 0)
-		additional['Type'] = Error.Message(type(self).__name__, 2)
+		additional['Error'] = Message('\a{0}'.format(self.what), 0)
+		additional['Type'] = Message(type(self).__name__, 2)
 
 		self.levels = self.get_levels(additional)
 
@@ -83,7 +83,7 @@ class Error(Exception):
 		for key, value in additional.items():
 			if key and value:
 				level = 1 # default
-				if isinstance(value, Error.Message):
+				if isinstance(value, Message):
 					level = value.level
 					value = value.what
 				line = '<{0}>: {1}'.format(key, value)
@@ -230,7 +230,7 @@ class Catch(object):
 				raise ConnectionError('Could not establish connection '
 									  'to {0}server!'.format(self.service))
 			except click.exceptions.Abort:
-				click.echo() # Just the newline
+				click.echo() # Just the newline 
 		except Error:
 			self.handle_error()
 

@@ -9,10 +9,10 @@ import ecstasy
 import pyperclip
 import re
 
-import beauty
-import errors
+import lnk.beauty
+import lnk.errors
 
-from googl.command import Command
+from lnk.googl.command import Command
 
 def echo(*args):
 	click.echo(Link().fetch(*args))
@@ -65,7 +65,7 @@ class Link(Command):
 
 		if self.raw:
 			return result
-		return beauty.boxify([result]) if pretty else '\n'.join(result)
+		return lnk.beauty.boxify([result]) if pretty else '\n'.join(result)
 
 	def shorten_urls(self, copy, quiet, urls):
 		"""
@@ -87,7 +87,7 @@ class Link(Command):
 			if not self.http.match(url):
 				url = 'http://{0}'.format(url)
 				if not quiet:
-					errors.warn("Prepending 'http://' to '{0}'".format(url))
+					lnk.errors.warn("Prepending 'http://' to '{0}'".format(url))
 			self.queue.put(url)
 			threads.append(self.new_thread(self.shorten, lines, copy))
 		self.join(threads)
@@ -181,7 +181,7 @@ class Link(Command):
 		response = self.get(url, what="expand url '{0}'".format(url))
 
 		if response['status'] in ['MALWARE', 'PHISHING']:
-			errors.warn("Careful! goo.gl believes the url '{0}' is {1}"
+			lnk.errors.warn("Careful! goo.gl believes the url '{0}' is {1}"
 						"!".format(response['longUrl']),
 								   response['status'].lower())
 		elif response['status'] == 'REMOVED':

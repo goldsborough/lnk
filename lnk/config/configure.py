@@ -10,7 +10,7 @@ general-purpose, they solely execute the config command.
 
 import click
 
-import config
+import lnk.config
 
 
 def echo(*args):
@@ -44,7 +44,7 @@ def configure(which, command, keys, values, quiet, all_keys):
 		and if no keys were found (e.g. if the --all-keys was passed but the
 		settings dictionary is empty) the string 'Nothing to see...\n'.
 	"""
-	with config.Manager(which, write=True) as manager:
+	with lnk.config.Manager(which, write=True) as manager:
 		# If the command option is not None, get the settings for that
 		# command, otherwise we'll use settings for the which itself
 		if command:

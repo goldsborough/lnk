@@ -13,7 +13,7 @@ import time
 from collections import namedtuple
 
 import tests.paths
-import bitly.user
+import lnk.bitly.user
 
 VERSION = 3
 API = 'https://api-ssl.bitly.com/v{0}'.format(VERSION)
@@ -51,7 +51,7 @@ def fixture():
 		'history'
 		])
 
-	user = bitly.user.User(raw=True)
+	user = lnk.bitly.user.User(raw=True)
 	user.parameters['access_token'] = ACCESS_TOKEN
 	user.history.parameters['access_token'] = ACCESS_TOKEN
 	only = ['name', 'date', 'privacy']

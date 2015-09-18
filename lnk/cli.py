@@ -74,6 +74,14 @@ class Main(click.MultiCommand):
 	@overrides
 	def get_command(self, context, name):
 		"""Returns the function for a given subcommand-name."""
+		if name not in self.commands:
+			clue = lnk.errors.Message('Did you mess up the default settings?',
+									  level=0)
+			try_message = lnk.errors.Message("See what 'lnk config -k service'"
+									  		 " says.", level=1)
+			raise lnk.errors.UsageError('Invalid default service.',
+										Clue=clue,
+										Try=try_message)
 		return self.commands[name]
 
 	@staticmethod

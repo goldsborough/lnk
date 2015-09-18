@@ -8,14 +8,13 @@ import httplib2
 import oauth2client.file
 import os
 import pytest
-import requests
 
 from collections import namedtuple
 
 import tests.paths
 
-import googl.command
-import errors
+import lnk.googl.command
+import lnk.errors
 
 VERSION = 1
 KEY = 'AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc'
@@ -33,10 +32,10 @@ def fixture():
 		'url'
 		])
 
-	command = googl.command.Command('link')
+	lnk.command = lnk.googl.command.Command('link')
 	url = 'http://goo.gl/Euc5'
 
-	return Fixture(command, url)
+	return Fixture(lnk.command, url)
 
 
 def get(url, projection=None):
@@ -59,7 +58,7 @@ def test_execute_works_for_healthy_request(fixture):
 	request = API.get(shortUrl=fixture.url)
 	try:
 		response = fixture.command.execute(request)
-	except errors.HTTPError:
+	except lnk.errors.HTTPError:
 		pytest.fail('googl.command.execute threw '
 					'an HTTPError for a healthy request!')
 
@@ -68,13 +67,13 @@ def test_execute_works_for_healthy_request(fixture):
 def test_execute_fails_for_bad_request(fixture):
 	request = API.get(shortUrl='banana')
 
-	with pytest.raises(errors.HTTPError):
+	with pytest.raises(lnk.errors.HTTPError):
 		fixture.command.execute(request)
 
 def test_execute_throws_error_with_correct_message(fixture):
 	request = API.get(shortUrl='banana')
 
-	with pytest.raises(errors.HTTPError) as error:
+	with pytest.raises(lnk.errors.HTTPError) as error:
 		fixture.command.execute(request, 'badness')
 
 		assert error.value.what == 'badness'
@@ -98,8 +97,8 @@ def test_authorize_refreshes_well():
 	credentials.token_expiry = old
 	storage.put(credentials)
 
-	command = googl.command.Command('link')
-	command.authorize()
+	lnk.command = lnk.googl.command.Command('link')
+	lnk.command.authorize()
 
 	credentials = storage.get()
 
@@ -111,7 +110,7 @@ def test_authorize_throws_if_no_credentials(fixture):
 	credentials = storage.get()
 	os.remove(CREDENTIALS_PATH)
 
-	with pytest.raises(errors.AuthorizationError):
+	with pytest.raises(lnk.errors.AuthorizationError):
 		fixture.command.authorize()
 
 	storage.put(credentials)

@@ -12,7 +12,7 @@ import threading
 from collections import namedtuple
 
 import tests.paths
-import bitly.link
+import lnk.bitly.link
 
 VERSION = 3
 API = 'https://api-ssl.bitly.com/v{0}'.format(VERSION)
@@ -66,7 +66,7 @@ def fixture():
 		'short_to_long'
 		])
 
-	link = bitly.link.Link(raw=True)
+	link = lnk.bitly.link.Link(raw=True)
 	url = 'https://www.github.com/goldsborough/lnk'
 	short = shorten(url)
 	bold = ecstasy.beautify('<{0}>'.format(short), ecstasy.Style.Bold)

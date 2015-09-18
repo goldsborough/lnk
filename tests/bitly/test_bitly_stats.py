@@ -12,8 +12,8 @@ import requests
 from collections import namedtuple
 
 import tests.paths
-import bitly.stats
-import bitly.info
+import lnk.bitly.stats
+import lnk.bitly.info
 import lnk.config
 
 VERSION = 3
@@ -51,24 +51,24 @@ def fixture(request):
 		])
 
 	endpoint = 'countries'
-	url = 'http://bit.ly/1OQM9nA'
+	url = 'http://bit.ly/1V0HZR7'
 	timespan_tuples = [(4, 'month'), (3, 'week')]
-	timespans = [bitly.stats.Stats.Timespan(s, u) for s, u in timespan_tuples]
+	timespans = [lnk.bitly.stats.Stats.Timespan(s, u) for s, u in timespan_tuples]
 	first_level = ecstasy.beautify(' <+> {0}', ecstasy.Color.Red)
 	second_level = ecstasy.beautify('   <-> {0}: {1}', ecstasy.Color.Yellow)
-	forever = bitly.stats.Stats.Timespan(-1, 'day')
+	forever = lnk.bitly.stats.Stats.Timespan(-1, 'day')
 	forever_data = request_stats(url, endpoint, forever)
 	timespans_data = [request_stats(url, endpoint, i) for i in timespans]
 
-	default_timespan = bitly.stats.Stats.Timespan(1, 'month')
+	default_timespan = lnk.bitly.stats.Stats.Timespan(1, 'month')
 	with lnk.config.Manager('bitly', write=True) as manager:
 		settings = manager['commands']['stats']['settings']
 		old = (settings['span'], settings['unit'])
 		settings['span'] = default_timespan.span
 		settings['unit'] = default_timespan.unit
 
-	stats = bitly.stats.Stats(raw=True)
-	info = bitly.info.Info(raw=True)
+	stats = lnk.bitly.stats.Stats(raw=True)
+	info = lnk.bitly.info.Info(raw=True)
 
 	def finalize():
 		with lnk.config.Manager('bitly', write=True) as manager:
@@ -236,16 +236,19 @@ def test_listify_handles_lists_well(fixture):
 	data = copy.deepcopy(fixture.forever_data)
 	result = fixture.stats.listify(None, [data], False)
 	header = fixture.first_level.format('Since forever')
-	expected = ['{0}:'.format(header)]
-	for i in fixture.forever_data['data']:
-		# A way of not having to pop the clicks
-		clicks = i['clicks']
-		keys = i.keys()
-		keys.remove('clicks')
-		assert len(keys) == 1
-		key = i[keys[0]]
-		line = fixture.second_level.format(key, clicks)
-		expected.append(line)
+	if fixture.forever_data['data']:
+		expected = ['{0}:'.format(header)]
+		for i in fixture.forever_data['data']:
+			# A way of not having to pop the clicks
+			clicks = i['clicks']
+			keys = i.keys()
+			keys.remove('clicks')
+			assert len(keys) == 1
+			key = i[keys[0]]
+			line = fixture.second_level.format(key, clicks)
+			expected.append(line)
+	else:
+		expected = ['{0}: None'.format(header)]
 
 	assert result == expected
 
@@ -423,7 +426,7 @@ def test_fetch_limits_well(fixture):
 	data = {fixture.endpoint: [data]}
 	expected += fixture.stats.lineify(data, False)
 
-	assert len(result) == 1
+	assert len(result) <= 1
 	assert sorted(result[0]) == sorted(expected)
 
 def test_fetch_works_for_many_urls(fixture):

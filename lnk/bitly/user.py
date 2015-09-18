@@ -10,11 +10,11 @@ import time
 
 from collections import OrderedDict
 
-import abstract
-import beauty
-import bitly.history
+import lnk.abstract
+import lnk.beauty
+import lnk.bitly.history
 
-from bitly.command import Command
+from lnk.bitly.command import Command
 
 def echo(*args):
 	"""
@@ -50,7 +50,7 @@ class User(Command):
 	def __init__(self, raw=False):
 		super(User, self).__init__('user')
 		self.raw = raw
-		self.history = bitly.history.History(raw=True)
+		self.history = lnk.bitly.history.History(raw=True)
 		# The point of this is that usually, the keys that the user can
 		# supply from the command-line to address a certain data category
 		# are fine for output, so there is just one mapping between those
@@ -91,7 +91,7 @@ class User(Command):
 			A plain list of the raw lines if the 'raw' attribute is True,
 			else a boxified, pretty string.
 		"""
-		sets = abstract.filter_sets(self.sets, only, hide)
+		sets = lnk.abstract.filter_sets(self.sets, only, hide)
 		data = self.request(sets.values())
 		result = [self.lineify(data, hide_empty)]
 
@@ -100,7 +100,7 @@ class User(Command):
 		elif self.raw:
 			return result[0]
 
-		return result if self.raw else beauty.boxify(result)
+		return result if self.raw else lnk.beauty.boxify(result)
 
 	def lineify(self, data, hide_empty):
 		"""

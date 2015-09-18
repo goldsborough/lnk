@@ -31,8 +31,8 @@ def test_get_levels_works():
 
 
 def test_verbosity_system_works_with_additional():
-	foo = lnk.errors.Error.Message(what='foo?', level=1)
-	bar = lnk.errors.Error.Message(what='bar!', level=3)
+	foo = lnk.errors.Message(what='foo?', level=1)
+	bar = lnk.errors.Message(what='bar!', level=3)
 	error = lnk.errors.Error('something happened', Foo=foo, Bar=bar)
 
 	assert len(error.levels) == 4
@@ -73,8 +73,8 @@ def test_catch_shows_only_wanted_levels_for_verbosity_0(capsys):
 def test_catch_shows_all_levels_for_verbosity_4(capsys):
 	catch = lnk.errors.Catch(3)
 	def throws():
-		foo = lnk.errors.Error.Message(what='foo?', level=1)
-		bar = lnk.errors.Error.Message(what='bar!', level=3)
+		foo = lnk.errors.Message(what='foo?', level=1)
+		bar = lnk.errors.Message(what='bar!', level=3)
 		raise lnk.errors.InternalError('oops', Foo=foo, Bar=bar)
 	catch.catch(throws)
 	captured = capsys.readouterr()

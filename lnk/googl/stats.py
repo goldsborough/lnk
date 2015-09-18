@@ -8,11 +8,11 @@ from __future__ import unicode_literals
 import click
 import ecstasy
 
-import abstract
-import beauty
-import countries
+import lnk.abstract
+import lnk.beauty
+import lnk.countries
 
-from googl.command import Command
+from lnk.googl.command import Command
 
 def echo(*args):
 	"""
@@ -73,7 +73,7 @@ class Stats(Command):
 			A plain list of the raw lines if the 'raw' attribute is True,
 			else a boxified, pretty string.
 		"""
-		sets = abstract.filter_sets(self.sets, only, hide)
+		sets = lnk.abstract.filter_sets(self.sets, only, hide)
 		timespans = self.get_timespans(times, forever)
 
 		results = []
@@ -85,7 +85,7 @@ class Stats(Command):
 			threads.append(thread)
 		self.join(threads)
 
-		return results if self.raw else beauty.boxify(results)
+		return results if self.raw else lnk.beauty.boxify(results)
 
 	def get_stats(self, results, sets, timespans, add_info, full, limit):
 		"""
@@ -263,7 +263,7 @@ class Stats(Command):
 			if subject == 'unknown':
 				subject = subject.title()
 			if category == 'countries' and full:
-				subject = countries.names[subject]
+				subject = lnk.countries.names[subject]
 			clicks = point['count']
 			line = ecstasy.beautify('   <-> {0}: {1}', ecstasy.Color.Yellow)
 			lines.append(line.format(subject, clicks))

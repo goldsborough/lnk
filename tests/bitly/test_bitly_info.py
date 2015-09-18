@@ -12,7 +12,7 @@ import time
 from collections import namedtuple
 
 import tests.paths
-import bitly.info
+import lnk.bitly.info
 
 VERSION = 3
 API = 'https://api-ssl.bitly.com/v{0}'.format(VERSION)
@@ -28,8 +28,8 @@ def request_info(url):
 
 def request_history(url):
 	response = requests.get('{0}/user/link_history'.format(API),
-							params=dict(link=url,
-										access_token=ACCESS_TOKEN))
+							params=dict(access_token=ACCESS_TOKEN,
+										link=url))
 
 	return response.json()['data']['link_history'][0]
 
@@ -43,11 +43,13 @@ def fixture():
 		'urls',
 		'expanded',
 		'data',
-		'formatted'
+		'formatted',
+		'template'
 		])
-	urls = ['http://bit.ly/1OQM9nA', 'http://bit.ly/1Jjoc4B']
-	expanded = ['http://python.org/', 'http://github.com/']
-	info = bitly.info.Info(raw=True)
+
+	urls = ['http://bit.ly/1V0HZR7', 'http://bit.ly/1V0HPcB']
+	expanded = ['http://google.com/', 'http://stackoverflow.com/']
+	info = lnk.bitly.info.Info(raw=True)
 	only = ['created', 'expanded', 'user', 'tags']
 	hide = ['modified']
 	sets = {
@@ -63,6 +65,8 @@ def fixture():
 	formatted = ['URL: {0}'.format(urls[0])]
 	template = ecstasy.beautify(' <+> {0}', ecstasy.Color.Red)
 	for key, value in selected.items():
+		if not value:
+			formatted.append(info.format(key, 'None'))
 		if isinstance(value, list):
 			formatted.append('{0}: '.format(key.title()))
 			formatted += [template.format(t) for t in value]
@@ -76,7 +80,8 @@ def fixture():
 					urls,
 					expanded,
 					selected,
-					formatted)
+					formatted,
+					template)
 
 def test_initializes_well(fixture):
 
@@ -179,16 +184,15 @@ def test_fetches_well(fixture):
 	data.update(request_history(fixture.urls[1]))
 	data = {k:v for k, v in data.items() if k in fixture.sets.values()}
 	second = ['URL: {0}'.format(fixture.urls[1])]
-	second += [fixture.info.format(k, v) for k, v in data.items()]
+	for key, value in data.items():
+		second.append(fixture.info.format(key, value))
+		if isinstance(value, list):
+			second += [fixture.template.format(i) for i in value]
 	expected = [fixture.formatted, second]
 
 	result[0].sort()
 	result[1].sort()
-	result.sort()
 	expected[0].sort()
 	expected[1].sort()
-	expected.sort()
 
-	print(result, expected)
-
-	assert result == expected
+	assert sorted(result) == sorted(expected)

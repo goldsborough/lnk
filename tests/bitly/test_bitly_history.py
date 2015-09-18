@@ -12,7 +12,7 @@ import time
 from collections import namedtuple
 
 import tests.paths
-import bitly.history
+import lnk.bitly.history
 
 VERSION = 3
 API = 'https://api-ssl.bitly.com/v{0}'.format(VERSION)
@@ -56,8 +56,8 @@ def request_expansion(url):
 
 	return data['expand'][0]['long_url']
 
-@pytest.fixture(scope='module')
 
+@pytest.fixture(scope='module')
 def fixture():
 	
 	Fixture = namedtuple('Fixture', [
@@ -72,7 +72,7 @@ def fixture():
 		'expanded'
 		])
 
-	history = bitly.history.History(raw=True)
+	history = lnk.bitly.history.History(raw=True)
 	forever_data = request_history()
 
 	last = [(4, 'week'), (5, 'month')]
@@ -106,7 +106,9 @@ def test_request_works(fixture):
 	expected = request_history()
 	result = fixture.history.request()
 
-	assert result == expected
+	print(result, expected)
+
+	assert sorted(result) == sorted(expected)
 
 
 def test_lineify_does_nothing_if_pretty_false(fixture):
@@ -213,6 +215,8 @@ def test_pretty_works_for_last(fixture):
 	expected = []
 	for time_point, data in zip(fixture.last, fixture.last_data):
 		header = 'Last {0} {1}:'.format(time_point[0], time_point[1])
+		if not data:
+			header += ' None'
 		expected.append(header)
 		for item in data:
 			expected.append(fixture.template.format(item))
@@ -234,11 +238,14 @@ def test_pretty_works_for_ranges(fixture):
 	for time_point, data in zip(fixture.ranges, fixture.ranges_data):
 		header = 'Between {0} {1} '.format(time_point[0], time_point[1])
 		header += 'and {0} {1} ago:'.format(time_point[2], time_point[3])
+		if not data:
+			header += ' None'
 		expected.append(header)
 		for item in data:
 			expected.append(fixture.template.format(item))
+		expected.append('')
 
-	assert sorted(result) == sorted(expected + [''])
+	assert sorted(result) == sorted(expected)
 
 
 def test_fetch_works_only_for_forever(fixture):
@@ -274,5 +281,5 @@ def test_fetch_limits_well(fixture):
 	result = fixture.history.fetch(None, None, True, 3, False, False, False)
 	expected = fixture.forever_data[:3]
 
-	assert len(result) == 3
+	assert len(result) <= 3
 	assert result == expected

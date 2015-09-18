@@ -13,9 +13,9 @@ import requests
 
 from collections import namedtuple
 
-import errors
+import lnk.errors
 import tests.paths
-import googl.history
+import lnk.googl.history
 
 VERSION = 1
 API = 'https://www.googleapis.com/urlshortener'
@@ -34,7 +34,6 @@ def timestamp(time_range, base=None):
 	base = base or datetime.datetime.now()
 
 	return base - offset
-
 
 def get_token():
 	storage = oauth2client.file.Storage(CREDENTIALS_PATH)
@@ -65,7 +64,7 @@ def request():
 
 
 def process(urls):
-	return googl.history.History.process(urls)
+	return lnk.googl.history.History.process(urls)
 
 
 def filter_urls(urls, start=None, end=None):
@@ -103,7 +102,7 @@ def fixture():
 
 	urls = process(request())
 
-	history = googl.history.History(raw=True)
+	history = lnk.googl.history.History(raw=True)
 
 	last = [(4, 'week'), (5, 'month')]
 	last_urls = [filter_urls(urls, i) for i in last]
@@ -238,7 +237,7 @@ def test_get_boundaries_throws_for_invalid_range(fixture):
 	base = datetime.datetime.now()
 	invalid_range = (4, 'days', 10, 'weeks')
 
-	with pytest.raises(errors.UsageError):
+	with pytest.raises(lnk.errors.UsageError):
 		fixture.history.get_boundaries(invalid_range, base)
 
 
@@ -410,5 +409,5 @@ def test_fetch_limits_well(fixture):
 	result = fixture.history.fetch(None, None, True, 3, False, False, False)
 	expected = [i.short for i in fixture.all_urls[:3]]
 
-	assert len(result) == 3
+	assert len(result) <= 3
 	assert result == expected

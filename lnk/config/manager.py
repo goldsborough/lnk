@@ -4,7 +4,7 @@
 import os
 import json
 
-import errors
+import lnk.errors
 
 def get(which, key):
 	"""
@@ -46,7 +46,7 @@ class Manager(object):
 	def assert_open(self):
 		if not self.file:
 			what = 'No configuration file was ever opened!'
-			raise errors.InternalError(what)
+			raise lnk.errors.InternalError(what)
 
 	@property
 	def keys(self):
@@ -62,12 +62,12 @@ class Manager(object):
 
 	def __getitem__(self, key):
 		if key not in self.config:
-			raise errors.InvalidKeyError("Key '{0}' not found.".format(key))
+			raise lnk.errors.InvalidKeyError("Key '{0}' not found.".format(key))
 		return self.config[key]
 
 	def __setitem__(self, key, value):
 		if key not in self.config:
-			raise errors.InvalidKeyError("Key '{0}' not found.".format(key))
+			raise lnk.errors.InvalidKeyError("Key '{0}' not found.".format(key))
 		self.config[key] = value
 
 	def __enter__(self):

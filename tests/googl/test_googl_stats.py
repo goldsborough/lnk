@@ -11,8 +11,8 @@ import requests
 from collections import namedtuple
 
 import tests.paths
-import googl.stats
-import googl.info
+import lnk.googl.stats
+import lnk.googl.info
 import lnk.config
 
 VERSION = 1
@@ -45,8 +45,7 @@ def fixture(request):
 		'second_level',
 		'forever_data',
 		'category_data',
-		'timespans_data',
-		'template'
+		'timespans_data'
 		])
 
 	category = {'browsers': 'browsers'}
@@ -60,14 +59,13 @@ def fixture(request):
 	category_data = forever_data['browsers']
 	timespans = ['month', 'week']
 	timespans_data = [analytics[i] for i in timespans]
-	template = ecstasy.beautify('<{0}>: {1}', ecstasy.Color.Red)
 
 	with lnk.config.Manager('googl', write=True) as manager:
 		settings = manager['commands']['stats']['settings']
 		old = settings['timespan']
 
-	stats = googl.stats.Stats(raw=True)
-	info = googl.info.Info(raw=True)
+	stats = lnk.googl.stats.Stats(raw=True)
+	info = lnk.googl.info.Info(raw=True)
 
 	def finalize():
 		with lnk.config.Manager('googl', write=True) as manager:
@@ -87,25 +85,24 @@ def fixture(request):
 				   second_level,
 				   forever_data,
 				   category_data,
-				   timespans_data,
-				   template)
+				   timespans_data)
 
 
 def test_format_makes_lines_pretty(fixture):
 	result = fixture.stats.format('foo', 'bar')
-	expected = fixture.template.format('Foo', 'bar')
+	expected = 'Foo: bar'
 
 	assert result == expected
 
 
 def test_format_handles_special_keys_wells(fixture):
 	result = fixture.stats.format('shortUrlClicks', 'foo')
-	expected = fixture.template.format('Clicks', 'foo')
+	expected = 'Clicks: foo'
 
 	assert result == expected
 
 	result = fixture.stats.format('longUrl', 'foo')
-	expected = fixture.template.format('Expanded', 'foo')
+	expected = 'Expanded: foo'
 
 	assert result == expected
 
@@ -122,7 +119,7 @@ def test_get_timespans_picks_default_timespan_if_no_times():
 	with lnk.config.Manager('googl', write=True) as manager:
 		settings = manager['commands']['stats']['settings']
 		settings['timespan'] = 'day'
-	stats = googl.stats.Stats(raw=True)
+	stats = lnk.googl.stats.Stats(raw=True)
 	result = stats.get_timespans([], False)
 
 	assert result == set(['day'])
@@ -131,7 +128,7 @@ def test_get_timespans_handles_default_forever_well():
 	with lnk.config.Manager('googl', write=True) as manager:
 		settings = manager['commands']['stats']['settings']
 		settings['timespan'] = 'forever'
-	stats = googl.stats.Stats(raw=True)
+	stats = lnk.googl.stats.Stats(raw=True)
 	result = stats.get_timespans([], False)
 
 	assert result == set(['allTime'])
@@ -141,7 +138,7 @@ def test_get_timespans_handles_default_two_hours_well():
 	with lnk.config.Manager('googl', write=True) as manager:
 		settings = manager['commands']['stats']['settings']
 		settings['timespan'] = 'two-hours'
-	stats = googl.stats.Stats(raw=True)
+	stats = lnk.googl.stats.Stats(raw=True)
 	result = stats.get_timespans([], False)
 
 	assert result == set(['twoHours'])

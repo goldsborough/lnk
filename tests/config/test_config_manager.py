@@ -9,8 +9,8 @@ from collections import namedtuple
 
 import tests.paths
 
-import config
-import errors
+import lnk.config
+import lnk.errors
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -28,27 +28,27 @@ def fixture(request):
 	path = os.path.join(tests.paths.CONFIG_PATH, filename)
 
 	with open(os.path.join(HERE, filename)) as dummy:
-		configuration = json.load(dummy)
+		lnk.configuration = json.load(dummy)
 		with open(path, 'w') as test:
-			json.dump(configuration, test)
+			json.dump(lnk.configuration, test)
 
 	def finalize():
 		os.remove(path)
 
 	request.addfinalizer(finalize)
 
-	manager = config.Manager()
+	manager = lnk.config.Manager()
 
-	return Fixture(which, path, manager, configuration)
+	return Fixture(which, path, manager, lnk.configuration)
 
 @pytest.fixture(scope='module')
 def changed():
 	Fixture = namedtuple('Fixture', ['contents', 'config'])
 	with open(os.path.join(HERE, 'changed_manager.json')) as dummy:
 		contents = dummy.read()
-		configuration = json.loads(contents)
+		lnk.configuration = json.loads(contents)
 
-	return Fixture(contents, configuration)
+	return Fixture(contents, lnk.configuration)
 
 
 
@@ -70,12 +70,12 @@ def test_writes_correctly(fixture, changed):
 
 
 def test_throws_for_invalid_key(fixture):
-	with pytest.raises(errors.InvalidKeyError):
+	with pytest.raises(lnk.errors.InvalidKeyError):
 		fixture.manager['random'] = None
 
 
 def test_context_syntax_closes_well(fixture):
-	with config.Manager(fixture.which) as manager:
+	with lnk.config.Manager(fixture.which) as manager:
 		assert manager['fucks'] == -1
 		assert manager['animal'] == 'unicorn'
 		manager['fucks'] = 0
@@ -88,7 +88,7 @@ def test_context_syntax_closes_well(fixture):
 
 
 def test_context_syntax_writes_well(fixture, changed):
-	with config.Manager(fixture.which, write=True) as manager:
+	with lnk.config.Manager(fixture.which, write=True) as manager:
 		assert manager['fucks'] == 0
 		assert manager['animal'] == 'cat'
 		manager['fucks'] = -1
@@ -105,8 +105,11 @@ def test_properties_are_accessible(fixture, changed):
 	assert fixture.manager.items == changed.config.items()
 
 
-def test_function_works(changed):
-	assert config.get('test_manager', 'animal') == changed.config['animal']
+def test_get_works(changed):
+	result = lnk.config.get('test_manager', 'animal')
+	expected = changed.config['animal']
+
+	assert result == expected
 
 
 def test_closes_correctly(fixture):
@@ -117,10 +120,10 @@ def test_closes_correctly(fixture):
 
 
 def test_throws_for_write_when_no_file_open(fixture):
-	with pytest.raises(errors.InternalError):
+	with pytest.raises(lnk.errors.InternalError):
 		fixture.manager.write()
 
 
 def test_throws_for_close_when_no_file_open(fixture):
-	with pytest.raises(errors.InternalError):
+	with pytest.raises(lnk.errors.InternalError):
 		fixture.manager.close()

@@ -12,5 +12,7 @@
     }, 
     "version": 1, 
     "key": "0BFA4A7B5BDD5BE7780C", 
-    "settings": {}
+    "settings": {
+        "command": "link"
+    }
 }

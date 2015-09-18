@@ -8,10 +8,10 @@ import ecstasy
 import pyperclip
 import re
 
-import beauty
-import errors
+import lnk.beauty
+import lnk.errors
 
-from command import Command
+from lnk.tinyurl.command import Command
 
 def echo(*args):
 	"""
@@ -71,7 +71,7 @@ class Link(Command):
 
 		if self.raw:
 			return result
-		return beauty.boxify([result]) if pretty else '\n'.join(result)
+		return lnk.beauty.boxify([result]) if pretty else '\n'.join(result)
 
 	def shorten(self, result, copy, quiet, pretty, url):
 		"""
@@ -91,7 +91,7 @@ class Link(Command):
 		if not self.http.match(url):
 			url = 'http://{0}'.format(url)
 			if not quiet:
-				errors.warn("Prepending 'http://' to '{0}'".format(url))
+				lnk.errors.warn("Prepending 'http://' to '{0}'".format(url))
 		short = self.request(url)
 		formatted = self.copy(copy, short)
 		if pretty:

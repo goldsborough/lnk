@@ -30,7 +30,7 @@ link_config = tinyurl_config['commands']['link']
 			  help='Controls the level of verbosity.')
 @click.argument('args', nargs=-1)
 @click.version_option(version=tinyurl_config['version'],
-					  message='Bitly API v%(version)s')
+					  message='tinyurl API v%(version)s')
 @click.pass_context
 def main(context, verbose, level, args):
 	"""
@@ -46,7 +46,7 @@ def main(context, verbose, level, args):
 	verbosity = lnk.cli.get_verbosity(verbose, level)
 	if args and args[0] == tinyurl_config['settings']['command']:
 		args = args[1:] or ['--help']
-	catch = lnk.errors.Catch(verbose, link.get_help(context))
+	catch = lnk.errors.Catch(verbosity, link.get_help(context))
 	catch.catch(link.main, args, standalone_mode=False)
 
 @main.command()

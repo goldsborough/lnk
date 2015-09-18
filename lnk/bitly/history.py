@@ -8,10 +8,10 @@ from __future__ import unicode_literals
 import click
 import time
 
-import beauty
-import bitly.link
+import lnk.beauty
+import lnk.bitly.link
 
-from bitly.command import Command
+from lnk.bitly.command import Command
 
 def echo(*args):
 	"""
@@ -43,7 +43,7 @@ class History(Command):
 	def __init__(self, raw=False):
 		super(History, self).__init__('history')
 		self.raw = raw
-		self.link = bitly.link.Link(raw=True)
+		self.link = lnk.bitly.link.Link(raw=True)
 		self.seconds = {
 			"minute": 60, 
 			"hour": 3600, 
@@ -93,7 +93,7 @@ class History(Command):
 
 		if self.raw:
 			return result
-		return beauty.boxify([result]) if pretty else '\n'.join(result)
+		return lnk.beauty.boxify([result]) if pretty else '\n'.join(result)
 
 	def forever(self, expanded, both, pretty):
 		"""

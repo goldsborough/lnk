@@ -13,11 +13,11 @@ import warnings
 from collections import namedtuple
 from datetime import datetime, timedelta
 
-import beauty
-import config
-import errors
+import lnk.beauty
+import lnk.config
+import lnk.errors
 
-from googl.command import Command
+from lnk.googl.command import Command
 
 warnings.filterwarnings('ignore', module=r'ecstasy\.parser')
 
@@ -107,7 +107,7 @@ class History(Command):
 
 		if self.raw:
 			return result
-		return beauty.boxify([result]) if pretty else '\n'.join(result)
+		return lnk.beauty.boxify([result]) if pretty else '\n'.join(result)
 
 	def forever(self, urls, limit, expanded, both, pretty):
 		"""
@@ -185,7 +185,6 @@ class History(Command):
 		lines = []
 		for time_point in last:
 			begin = self.get_date(time_point)
-			print(time_point, begin)
 			filtered = self.filter(urls, begin, datetime.now())
 			if pretty:
 				header = self.last_header(time_point, filtered)
@@ -290,7 +289,7 @@ class History(Command):
 				   "ago' (start must precede end)"\
 				   "!".format(time_range[0], time_range[1],
 							  time_range[2], time_range[3])
-			raise errors.UsageError(what)
+			raise lnk.errors.UsageError(what)
 		return begin, end
 
 	def request(self):

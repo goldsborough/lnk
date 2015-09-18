@@ -10,7 +10,7 @@ import threading
 from collections import namedtuple
 
 import tests.paths
-import tinyurl.link
+import lnk.tinyurl.link
 
 def shorten(url):
 	response = requests.get('http://tiny-url.info/api/v1/create',
@@ -25,7 +25,7 @@ def shorten(url):
 @pytest.fixture(scope='module')
 def fixture():
 	Fixture = namedtuple('Fixture', ['link', 'long', 'short', 'formatted'])
-	link = tinyurl.link.Link(raw=True)
+	link = lnk.tinyurl.link.Link(raw=True)
 	url = 'https://www.github.com/goldsborough/lnk'
 	short = shorten(url)
 	formatted = ecstasy.beautify('<{0}>'.format(short), ecstasy.Style.Bold)

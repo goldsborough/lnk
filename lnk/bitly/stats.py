@@ -11,13 +11,13 @@ import time
 
 from collections import namedtuple
 
-import abstract
-import beauty
-import bitly.info
-import countries
-import errors
+import lnk.abstract
+import lnk.beauty
+import lnk.bitly.info
+import lnk.countries
+import lnk.errors
 
-from bitly.command import Command
+from lnk.bitly.command import Command
 
 def echo(*args):
 	"""
@@ -47,7 +47,7 @@ class Stats(Command):
 	Attributes:
 		raw (bool): Whether to return the output in raw format for internal use,
 					or in a pretty string-representation for outside-display.
-		info (bitly.info.Info): A bitly.info.Info instance to retrieve
+		info (lnk.bitly.info.Info): A lnk.bitly.info.Info instance to retrieve
 							    addittional information for a bitlink.
 	"""
 
@@ -57,7 +57,7 @@ class Stats(Command):
 		super(Stats, self).__init__('stats')
 
 		self.raw = raw
-		self.info = bitly.info.Info(raw=True)
+		self.info = lnk.bitly.info.Info(raw=True)
 		self.parameters['timezone'] = time.tzname[0]
 
 	def fetch(self, only, hide, times, forever, limit, add_info, full, urls):
@@ -87,13 +87,13 @@ class Stats(Command):
 		"""
 		self.parameters['limit'] = limit
 
-		sets = abstract.filter_sets(self.sets, only, hide)
+		sets = lnk.abstract.filter_sets(self.sets, only, hide)
 		timespans = self.get_timespans(times, forever)
 		info = []
 		if add_info:
 			info = self.info.fetch([], [], False, urls)
 			if not info:
-				raise errors.InternalError('Could not fetch additional info.')
+				raise lnk.errors.InternalError('Could not fetch additional info.')
 
 		results = []
 		for n, url in enumerate(urls):
@@ -103,7 +103,7 @@ class Stats(Command):
 
 			results.append(header + lines)
 
-		return results if self.raw else beauty.boxify(results)
+		return results if self.raw else lnk.beauty.boxify(results)
 
 	def get_stats(self, url, timespans, sets):
 		"""
@@ -221,7 +221,7 @@ class Stats(Command):
 			unit = self.settings['unit']
 			span = self.settings['span']
 			if not unit or not span:
-				raise errors.InternalError('Default timespan is invalid!')
+				raise lnk.errors.InternalError('Default timespan is invalid!')
 			if unit == 'forever':
 				timespans.add(Stats.Timespan(-1, 'day'))
 			elif 'year' in unit:
@@ -343,7 +343,7 @@ class Stats(Command):
 			if key == 'None':
 				key = 'Other'
 		 	elif full:
-				key = countries.names[key]
+				key = lnk.countries.names[key]
 		elif key == 'direct':
 			key = key.title()
 		line = '   <-> {0}: {1}'.format(key, value)

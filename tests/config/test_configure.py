@@ -8,9 +8,9 @@ import pytest
 from collections import namedtuple
 
 import tests.paths
-import errors
+import lnk.errors
 
-from config import configure
+from lnk.config import configure
 
 @pytest.fixture(scope='module')
 def fixture(request):
@@ -25,7 +25,7 @@ def fixture(request):
 		'new_values'
 		])
 	service = 'test_command'
-	command = 'cmd'
+	lnk.command = 'cmd'
 
 	here = os.path.dirname(os.path.abspath(__file__))
 	original_file = '{0}.json'.format(service)
@@ -49,7 +49,7 @@ def fixture(request):
 	request.addfinalizer(finalize)
 
 	return Fixture(service,
-				   command,
+				   lnk.command,
 				   path,
 				   original,
 				   changed,

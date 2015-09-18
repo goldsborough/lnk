@@ -8,10 +8,10 @@ from __future__ import unicode_literals
 import click
 import time
 
-import abstract
-import beauty
+import lnk.abstract
+import lnk.beauty
 
-from bitly.command import Command
+from lnk.bitly.command import Command
 
 def echo(*args):
 	"""
@@ -68,7 +68,7 @@ class Info(Command):
 			A plain list of the raw lines if the 'raw' attribute is True,
 			else a boxified, pretty string.
 		"""
-		sets = abstract.filter_sets(self.sets, only, hide)
+		sets = lnk.abstract.filter_sets(self.sets, only, hide)
 
 		result = []
 		threads = []
@@ -78,7 +78,7 @@ class Info(Command):
 			threads.append(t)
 		self.join(threads)
 
-		return result if self.raw else beauty.boxify(result)
+		return result if self.raw else lnk.beauty.boxify(result)
 
 	def request(self, sets, result, hide_empty):
 		"""
@@ -145,7 +145,8 @@ class Info(Command):
 		"""
 		response = self.get(self.endpoints['history'], dict(link=url))
 		response = self.verify(response,
-				   			   "retrieve history for '{0}'".format(url),
+				   			   "retrieve additional "
+				   			   "information for '{0}'".format(url),
 				   			   'link_history')
 
 		return response

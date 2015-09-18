@@ -9,7 +9,7 @@ import lnk.config.manager
 import lnk.config.configure
 import lnk.errors
 
-allowed_wich = lnk.config.manager.get('lnk', 'services') + ['lnk']
+allowed_wich = lnk.config.manager.get('lnk', 'services') + ['lnk', 'config']
 
 @click.command()
 @click.argument('which',
@@ -22,19 +22,23 @@ allowed_wich = lnk.config.manager.get('lnk', 'services') + ['lnk']
 			  '--key',
 			  nargs=1,
 			  multiple=True,
-			  metavar='KEY')
+			  metavar='KEY',
+			  help='A key to show or manipulate.')
 @click.option('-v',
 			  '--value',
 			  nargs=1,
 			  multiple=True,
-			  metavar='VALUE')
+			  metavar='VALUE',
+			  help='A new value for a key.')
 @click.option('-q/-l',
 			  '--quiet/--loud',
-			  default=False)
+			  default=False,
+			  help='Whether to visualize changes.')
 @click.option('-a',
 			  '--all',
 			  '--all-keys',
-			  is_flag=True)
+			  is_flag=True,
+			  help='Whether to show all keys.')
 def main(which, command, key, value, quiet, all_keys):
 	"""Configuration interface."""
 	if command:

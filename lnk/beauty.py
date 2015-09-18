@@ -179,7 +179,7 @@ def escape(line):
 						 r'(.+)'				 	# formatted string
 						 r'(?:\033\[(?:\d;?)+m)'   	# escape codes
 						 r'(.*)$')					# anything
-	line = line.strip()
+	line = line.rstrip()
 	if '\033' in line:
 		match = pattern.search(line)
 		if not match:

@@ -7,19 +7,19 @@ import requests
 
 import tests.paths
 
-import bitly.command
-import config
-import errors
+import lnk.bitly.command
+import lnk.config
+import lnk.errors
 
 VERSION = 3
 API = 'https://api-ssl.bitly.com'
 with open(os.path.join(tests.paths.TEST_PATH, 'bitly', 'token')) as source:
 	ACCESS_TOKEN = source.read()
 
-@pytest.fixture(scope='module')
 
+@pytest.fixture(scope='module')
 def fixture():
-	return bitly.command.Command('link')
+	return lnk.bitly.command.Command('link')
 
 
 def shorten(url='http://python.org', version=VERSION):
@@ -35,12 +35,12 @@ def expand(url):
 
 
 def test_throws_when_not_yet_authenticated():
-	with config.Manager('bitly', write=True) as manager:
+	with lnk.config.Manager('bitly', write=True) as manager:
 		old = manager['key']
 		manager['key'] = None
-	with pytest.raises(errors.AuthorizationError):
-		bitly.command.Command('link')
-	with config.Manager('bitly', write=True) as manager:
+	with pytest.raises(lnk.errors.AuthorizationError):
+		lnk.bitly.command.Command('link')
+	with lnk.config.Manager('bitly', write=True) as manager:
 		manager['key'] = old
 
 
@@ -57,16 +57,16 @@ def test_verify_works_for_healthy_response(fixture):
 
 def test_verify_throws_for_http_error(fixture):
 	response = shorten(version=123)
-	with pytest.raises(errors.HTTPError):
+	with pytest.raises(lnk.errors.HTTPError):
 		fixture.verify(response, 'even')
 
 	response = shorten('invalid_uri')
-	with pytest.raises(errors.HTTPError):
+	with pytest.raises(lnk.errors.HTTPError):
 		fixture.verify(response, 'even')
 
 
 def test_verify_throws_for_api_error(fixture):
 	response = expand('google.com')
 
-	with pytest.raises(errors.APIError):
+	with pytest.raises(lnk.errors.APIError):
 		fixture.verify(response, 'even', 'expand')
