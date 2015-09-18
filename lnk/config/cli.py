@@ -5,11 +5,11 @@
 
 import click
 
-import config.manager
-import config.configure
-import errors
+import lnk.config.manager
+import lnk.config.configure
+import lnk.errors
 
-allowed_wich = config.manager.get('lnk', 'services') + ['lnk']
+allowed_wich = lnk.config.manager.get('lnk', 'services') + ['lnk']
 
 @click.command()
 @click.argument('which',
@@ -42,17 +42,17 @@ def main(which, command, key, value, quiet, all_keys):
 			what = 'lnk has no commands to configure.'
 			hint = "If '{0}' is a key, you ".format(command)
 			hint += "probably wanted to use '-k {0}'.".format(command)
-			raise errors.UsageError(what, Hint=hint)
-		elif command not in config.get(which, 'commands').keys():
+			raise lnk.errors.UsageError(what, Hint=hint)
+		elif command not in lnk.config.get(which, 'commands').keys():
 			what = "No such command '{0}' for {1}.".format(command, which)
-			raise errors.UsageError(what)
+			raise lnk.errors.UsageError(what)
 	if key or all_keys:
-		errors.catch(config.configure.echo,
-					 which,
-					 command,
-					 key,
-					 value,
-					 quiet,
-					 all_keys)
+		lnk.errors.catch(lnk.config.configure.echo,
+						 which,
+						 command,
+						 key,
+						 value,
+						 quiet,
+						 all_keys)
 	else:
 		main(['--help'])

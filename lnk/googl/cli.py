@@ -134,8 +134,7 @@ def info(only, hide, urls):
 			  multiple=True,
    			  type=click.Choice(stats_config['sets']),
    			  help='Hide this/these set(s) of statistics.')
-@click.option('-t',
-			  '--time',
+@click.option('-l',
 			  '--last',
 		      nargs=1,
 		      multiple=True,
@@ -149,19 +148,24 @@ def info(only, hide, urls):
 			  default=stats_config['settings']['info'],
 			  help='Also display information for each link.')
 @click.option('--limit',
-			  nargs=1,
 			  type=int,
 			  default=stats_config['settings']['limit'],
-			  help='Limit the amount of statistics retrieved per timespan.')
+			  help='Limit the number of links shown per time range.')
+@click.option('-a',
+			  '--all',
+			  '--no-limit',
+			  is_flag=True,
+			  help='Have no limit on the amount of statistics per timespan.')
 @click.option('-f/-s',
 			  '--full/--short',
 			  default=stats_config['settings']['full-countries'],
 			  help='Whether to show full or short (abbreviated) country names.')
 @click.argument('urls', nargs=-1)
-def stats(only, hide, last, forever, limit, info, full, urls):
+def stats(only, hide, last, forever, limit, no_limit, info, full, urls):
 	"""Statistics and metrics for links."""
 	if not urls:
 		raise lnk.errors.UsageError('Please supply at least one URL.')
+	limit = None if no_limit else limit
 	lnk.googl.stats.echo(only, hide, last, forever, limit, info, full, urls)
 
 @main.command()
@@ -174,8 +178,7 @@ def key(generate):
 	lnk.googl.key.echo(generate)
 
 @main.command()
-@click.option('-t',
-			  '--time',
+@click.option('-l',
 			  '--last',
 		      nargs=2,
 		      multiple=True,
@@ -192,11 +195,15 @@ def key(generate):
 			  '--forever',
 			  is_flag=True,
 			  help='Display history of links since forever.')
-@click.option('-l',
-			  '--limit',
+@click.option('--limit',
 			  type=int,
 			  default=history_config['settings']['limit'],
 			  help='Limit the number of links shown per time range.')
+@click.option('-a',
+			  '--all',
+			  '--no-limit',
+			  is_flag=True,
+			  help='Have no limit on the number of links per timespan.')
 @click.option('-e/-s',
 			  '--expanded/--short',
 			  default=expanded_default,
@@ -208,11 +215,12 @@ def key(generate):
 @click.option('--pretty/--plain',
 			  default=history_config['settings']['pretty'],
 			  help='Whether to show the history in a pretty box or as a plain list.')
-def history(last, time_range, forever, limit, expanded, both, pretty):
+def history(last, time_range, forever, limit, no_limit, expanded, both, pretty):
 	"""Retrieve link history."""
 	if not last and not time_range:
 		forever = True
 	# Default case for both
 	if not both and expanded is None:
 		both = True
+	limit = None if no_limit else limit
 	lnk.googl.history.echo(last, time_range, forever, limit, expanded, both, pretty)
