@@ -6,7 +6,7 @@ A command-line URL-shortening client for bitly, tinyurl and goo.gl.
 
 How a smart dev (you) shortens a URL:
 
-.. image:: https://raw.githubusercontent.com/goldsborough/lnk/master/docs/img/shorten.gif
+.. image:: https://goo.gl/Y5eCsd
 
 But **lnk** is *MORE*. **lnk** can also expand short URLs:
 
