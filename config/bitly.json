@@ -2,6 +2,13 @@
     "url": "https://api-ssl.bitly.com", 
     "commands": {
         "info": {
+            "endpoints": {
+                "info": "info", 
+                "history": "user/link_history"
+            }, 
+            "settings": {
+                "hide-empty": false
+            }, 
             "sets": {
                 "archived": "archived", 
                 "created": "created_at", 
@@ -13,13 +20,6 @@
                 "user": "created_by", 
                 "title": "title", 
                 "tags": "tags"
-            }, 
-            "endpoints": {
-                "info": "info", 
-                "history": "user/link_history"
-            }, 
-            "settings": {
-                "hide-empty": false
             }
         }, 
         "stats": {
@@ -31,6 +31,11 @@
                 "month", 
                 "year"
             ], 
+            "sets": {
+                "referrers": "referrers", 
+                "clicks": "clicks", 
+                "countries": "countries"
+            }, 
             "endpoints": {
                 "referrers": "link/referrers", 
                 "clicks": "link/clicks", 
@@ -42,11 +47,6 @@
                 "span": -1, 
                 "limit": 10, 
                 "unit": "forever"
-            }, 
-            "sets": {
-                "referrers": "referrers", 
-                "clicks": "clicks", 
-                "countries": "countries"
             }
         }, 
         "link": {
@@ -59,13 +59,6 @@
             }
         }, 
         "user": {
-            "endpoints": {
-                "user": "user/info"
-            }, 
-            "settings": {
-                "hide-empty": false, 
-                "history": false
-            }, 
             "sets": {
                 "name": "full_name", 
                 "privacy": "default_link_privacy", 
@@ -75,6 +68,13 @@
                 "date": "member_since", 
                 "login": "login", 
                 "display": "display_name"
+            }, 
+            "endpoints": {
+                "user": "user/info"
+            }, 
+            "settings": {
+                "hide-empty": false, 
+                "history": false
             }
         }, 
         "key": {
