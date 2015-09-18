@@ -146,6 +146,8 @@ class User(Command):
 		into a pretty list-item.
 		"""
 		lines = ['Share Accounts:']
+		if not value:
+			lines[-1] += ' None'
 		for account in value:
 			if account['account_type'] == 'twitter':
 				user = account['account_name']

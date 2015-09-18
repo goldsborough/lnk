@@ -179,16 +179,15 @@ def stats(only, hide, time, forever, limit, info, full, urls):
 			  '--everything/--all',
 			  is_flag=True,
 			  help='Display all sets of user information.')
-@click.option('-h',
-			  '--add-history/--no-history',
+@click.option('--history/--no-history',
 			  default=user_config['settings']['history'],
 			  help='Also show the user history (of links).')
 @click.option('--hide-empty/--show-empty',
 			  default=user_config['settings']['hide-empty'],
 			  help='Whether to hide or show empty results.')
-def user(only, hide, everything, add_history, hide_empty):
+def user(only, hide, everything, history, hide_empty):
 	"""Show meta-information for the current user."""
-	bitly.user.echo(only, hide, everything, add_history, hide_empty)
+	bitly.user.echo(only, hide, everything, history, hide_empty)
 
 @main.command()
 @click.option('-t',

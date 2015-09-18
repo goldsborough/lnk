@@ -23,14 +23,14 @@ def echo(*args):
 	click.echo(configure(*args), nl=False)
 
 
-def configure(service, command, keys, values, quiet, all_keys):
+def configure(which, command, keys, values, quiet, all_keys):
 	"""
 	Does the actual configuration-management.
 
 	Arguments:
-		service (str): The service for which to configure settings
-					   (e.g. 'bitly').
-		command (str): Optionally, the command of the service for which
+		which (str): The configuration file for which to configure settings
+					 (e.g. 'lnk' or 'bitly').
+		command (str): Optionally, the command of the which for which
 					   to configure settings (e.g. 'link').
 		keys (tuple): The keys to show.
 		values (tuple): The values to give the keys.
@@ -44,9 +44,9 @@ def configure(service, command, keys, values, quiet, all_keys):
 		and if no keys were found (e.g. if the --all-keys was passed but the
 		settings dictionary is empty) the string 'Nothing to see...\n'.
 	"""
-	with config.Manager(service, write=True) as manager:
+	with config.Manager(which, write=True) as manager:
 		# If the command option is not None, get the settings for that
-		# command, otherwise we'll use settings for the service itself
+		# command, otherwise we'll use settings for the which itself
 		if command:
 			manager = manager['commands'][command]
 		manager = manager['settings']

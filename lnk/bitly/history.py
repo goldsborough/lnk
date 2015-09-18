@@ -143,8 +143,10 @@ class History(Command):
 			for url in urls:
 				line = self.lineify(url, expanded, both, pretty)
 				lines.append(line)
+			if pretty:
+				lines.append('')
 
-		return lines + [''] if pretty else lines
+		return lines
 
 	def last(self, last, expanded, both, pretty):
 		"""
@@ -171,8 +173,10 @@ class History(Command):
 			for url in urls:
 				line = self.lineify(url, expanded, both, pretty)
 				lines.append(line)
+			if pretty:
+				lines.append('')
 
-		return lines + [''] if pretty else lines
+		return lines
 
 	def ranges_header(self, after, before, urls):
 		"""

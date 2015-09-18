@@ -7,6 +7,7 @@ import click
 import os
 
 import config
+import errors
 
 class Main(click.MultiCommand):
 	"""
@@ -94,4 +95,6 @@ def main(args):
 		args (tuple): The command-line arguments.
 	"""
 	command = Main()
-	command.main(args, standalone_mode=False)
+	catch = errors.Catch(1)
+	catch.catch(command.main, args, standalone_mode=False)
+

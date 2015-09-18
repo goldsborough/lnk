@@ -183,7 +183,8 @@ def key(generate):
 		      multiple=True,
 		      type=(int, click.Choice(units), int, click.Choice(units)),
 		      help='Display history of links from this time range.')
-@click.option('--forever',
+@click.option('-a',
+			  '--forever',
 			  is_flag=True,
 			  help='Display history of links since forever.')
 @click.option('-l',

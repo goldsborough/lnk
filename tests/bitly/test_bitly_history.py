@@ -216,8 +216,9 @@ def test_pretty_works_for_last(fixture):
 		expected.append(header)
 		for item in data:
 			expected.append(fixture.template.format(item))
+		expected.append('')
 
-	assert sorted(result) == sorted(expected + [''])
+	assert sorted(result) == sorted(expected)
 
 def test_ranges_header_removes_unit_if_both_equal(fixture):
 	after = (7, 'days')

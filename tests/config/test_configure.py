@@ -88,15 +88,16 @@ def test_configure_returns_correct_output(fixture):
 								 fixture.old_values,
 								 False,
 								 False)
-	expected = []
+	lines = []
 	# Note that we updated back to the old values
 	# (that's why the name switch)
-	items = zip(fixture.keys, fixture.old_values, fixture.new_values)
-	for key, new, old in items:
+	items = zip(fixture.keys, fixture.new_values, fixture.old_values)
+	for key, old, new in items:
 		line = '{0}: {1} => {2}'.format(key, old, new)
-		expected.append(line)
+		lines.append(line)
+	expected = '{0}\n'.format('\n'.join(lines))
 
-	assert result == '\n'.join(expected)
+	assert result == expected
 
 
 def test_configure_updates_command_settings_well(fixture):

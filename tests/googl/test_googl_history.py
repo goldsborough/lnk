@@ -27,8 +27,8 @@ def timestamp(time_range, base=None):
 		"hour": datetime.timedelta(hours=1), 
 		"day": datetime.timedelta(days=1),
 		"week": datetime.timedelta(weeks=1), 
-		"month": datetime.timedelta(weeks=4),
-		"year": datetime.timedelta(weeks=52)
+		"month": datetime.timedelta(days=30.4368),
+		"year": datetime.timedelta(days=365.242199)
 	}
 	offset = time_range[0] * delta[time_range[1]]
 	base = base or datetime.datetime.now()
@@ -50,9 +50,18 @@ def get_token():
 def request():
 	token = get_token()
 	url = '{0}/v{1}/url/history'.format(API, VERSION)
-	response = requests.get(url, params=dict(access_token=token))
+	urls = []
+	data = {'nextPageToken': None}
+	while 'nextPageToken' in data:
+		response = requests.get(url,
+								params={
+								'start-token': data['nextPageToken'],
+								'access_token': token
+								})
+		data = response.json()
+		urls += data['items']
 
-	return response.json()
+	return urls
 
 
 def process(urls):
@@ -318,8 +327,9 @@ def test_pretty_works_for_last(fixture):
 		expected.append(header)
 		for item in urls:
 			expected.append(fixture.template.format(item.short))
+		expected.append('')
 
-	assert result == expected + ['']
+	assert result == expected
 
 def test_pretty_works_for_ranges(fixture):
 	result = fixture.history.ranges(fixture.all_urls,
@@ -337,12 +347,13 @@ def test_pretty_works_for_ranges(fixture):
 		expected.append(header)
 		for item in urls:
 			expected.append(fixture.template.format(item.short))
+		expected.append('')
 
-	assert result == expected + ['']
+	assert result == expected
 
 
 def test_ranges_header_removes_unit_if_both_equal(fixture):
-	time_range = ((7, 'days'), (2, 'days'))
+	time_range = (7, 'days', 2, 'days')
 	result = fixture.history.ranges_header(time_range, True)
 	expected = 'Between 7 and 2 days ago:'
 

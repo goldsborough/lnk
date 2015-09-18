@@ -61,7 +61,7 @@ class History(Command):
 			"hour": timedelta(hours=1), 
 			"day": timedelta(days=1),
 			"week": timedelta(weeks=1), 
-			"month": timedelta(weeks=30.4368),
+			"month": timedelta(days=30.4368),
 			"year": timedelta(days=365.242199)
 		}
 
@@ -159,8 +159,10 @@ class History(Command):
 				header = self.ranges_header(time_range, filtered)
 				lines.append(header)
 			lines += self.listify(filtered, limit, expanded, both, pretty)
+			if pretty:
+				lines.append('')
 
-		return lines + [''] if pretty else lines
+		return lines
 
 	def last(self, urls, last, limit, expanded, both, pretty):
 		"""
@@ -169,7 +171,8 @@ class History(Command):
 		Arguments:
 			urls (list|tuple): The original/full list of urls.
 			last (tuple): The open-ended time-ranges of schema (span, unit).
-			limit (int): A limit to the number of links to pick for each time-range.
+			limit (int): A limit to the number of links to pick for each
+						 time-range.
 			expanded (bool): Whether to show exapanded or short links.
 			both (bool): Whether to show both expanded and short links.
 			pretty (bool): Whether to prettify the output.
@@ -182,13 +185,16 @@ class History(Command):
 		lines = []
 		for time_point in last:
 			begin = self.get_date(time_point)
+			print(time_point, begin)
 			filtered = self.filter(urls, begin, datetime.now())
 			if pretty:
 				header = self.last_header(time_point, filtered)
 				lines.append(header)
 			lines += self.listify(filtered, limit, expanded, both, pretty)
+			if pretty:
+				lines.append('')
 
-		return lines + [''] if pretty else lines
+		return lines
 
 	def ranges_header(self, time_range, urls):
 		"""
@@ -280,11 +286,11 @@ class History(Command):
 		begin = self.get_date(time_range[:2], base)
 		end = self.get_date(time_range[2:], base)
 		if end < begin:
-			raise errors.UsageError("Illegal time range 'between {0} "
-									"and {1} and {2} {3} ago' (start must"
-									"precede end)"
-									"!".format(time_range[0], time_range[1],
-											   time_range[2], time_range[3]))
+			what = "Illegal time range 'between {0} and {1} and {2} {3} "\
+				   "ago' (start must precede end)"\
+				   "!".format(time_range[0], time_range[1],
+							  time_range[2], time_range[3])
+			raise errors.UsageError(what)
 		return begin, end
 
 	def request(self):
@@ -295,10 +301,15 @@ class History(Command):
 			A list of links.
 		"""
 		api = self.get_api()
-		request = api.list()
-		response = self.execute(request, 'retrieve history')
 
-		return response
+		data = []
+		response = {'nextPageToken': None}
+		while 'nextPageToken' in response:
+			request = api.list(start_token=response['nextPageToken'])
+			response = self.execute(request, 'retrieve history')
+			data += response['items']
+
+		return data
 
 	def listify(self, urls, limit, expanded, both, pretty):
 		"""
@@ -397,14 +408,14 @@ class History(Command):
 		for its date of creation.
 
 		Arguments:
-			data (dict): The response from the HTTP request sent in the
+			data (list): The data from the HTTP request sent in the
 						 request() method.
 
 		Returns:
 			A list of History.Url objects.
 		"""
 		urls = []
-		for item in data['items']:
+		for item in data:
 			relevant = item['created'].split('.')[0]
 			created = datetime.strptime(relevant, '%Y-%m-%dT%H:%M:%S')
 			url = History.Url(item['id'], item['longUrl'], created)
