@@ -13,7 +13,7 @@ import sys
 
 from collections import namedtuple
 
-import errors
+import lnk.errors
 
 MAX_WIDTH = 60 # 3/4 of 80
 # If we are connected to a terminal right now
@@ -38,7 +38,7 @@ def boxify(results):
 		The results in a pretty box, as a string.
 	"""
 	if not results:
-		raise errors.InternalError('Cannot boxify empty results!')
+		raise lnk.errors.InternalError('Cannot boxify empty results!')
 	results, width = get_escaped(results)
 	border = '─' * (width + 2)
 	lines = ['┌{0}┐'.format(border)]
@@ -179,11 +179,11 @@ def escape(line):
 						 r'(.+)'				 	# formatted string
 						 r'(?:\033\[(?:\d;?)+m)'   	# escape codes
 						 r'(.*)$')					# anything
-
+	line = line.strip()
 	if '\033' in line:
 		match = pattern.search(line)
 		if not match:
-			raise errors.InternalError("Could not parse '{0}'".format(line))
+			raise lnk.errors.InternalError("Could not parse '{0}'".format(line))
 		escaped = ''.join([i for i in match.groups() if i])
 	else:
 		escaped = line
