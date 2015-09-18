@@ -14,7 +14,7 @@ But **lnk** is *MORE*. **lnk** can also expand short URLs:
 
 	$ lnk -e http://bit.ly/1NWAPWn
 	┌─────────────────────────────────────────────┐
-	│ http://bit.ly/1NWAPWn => http://google.com/ │
+	│ http://bit.ly/1NWAPWn => http://google.com/     │
 	└─────────────────────────────────────────────┘
 
 Get all sorts of awesome stats and metrics for a URL:
@@ -23,25 +23,25 @@ Get all sorts of awesome stats and metrics for a URL:
 
 	$ lnk stats -i http://bit.ly/1NWAPWn
 	┌───────────────────────────────┐
-	│ URL: http://bit.ly/1EHdqZq    │
-	│ Referrers:                    │
-	│  + Since forever:             │
-	│    - Direct: 503              │
-	│    - http://bit.ly/1EHdqZq: 1 │
-	│ Clicks:                       │
-	│  + Since forever: 504         │
-	│ Countries:                    │
-	│  + Since forever:             │
-	│    - United States: 197       │
-	│    - United Kingdom: 50       │
-	│    - Germany: 45              │
-	│    - France: 27               │
-	│    - Canada: 20               │
-	│    - Netherlands: 16          │
-	│    - Russian Federation: 12   │
-	│    - Australia: 11            │
-	│    - Spain: 10                │
-	│    - Brazil: 9                │
+	│ URL: http://bit.ly/1EHdqZq       │
+	│ Referrers:                       │
+	│  + Since forever:                │
+	│    - Direct: 503                 │
+	│    - http://bit.ly/1EHdqZq: 1    │
+	│ Clicks:                          │
+	│  + Since forever: 504            │
+	│ Countries:                       │
+	│  + Since forever:                │
+	│    - United States: 197          │
+	│    - United Kingdom: 50          │
+	│    - Germany: 45                 │
+	│    - France: 27                  │
+	│    - Canada: 20                  │
+	│    - Netherlands: 16             │
+	│    - Russian Federation: 12      │
+	│    - Australia: 11               │
+	│    - Spain: 10                   │
+	│    - Brazil: 9                   │
 	└───────────────────────────────┘
 
 Tell you about yourself:
@@ -50,11 +50,11 @@ Tell you about yourself:
 
 	$ lnk user -a
 	┌────────────────────────────────────────────────────┐
-	│ Full Name: Peter Goldsborough                      │
-	│ Login: goldsborough                                │
-	│ Member Since: Wed Aug 26 13:57:00 2015             │
-	│ Link privacy: public                               │
-	│ ...                                                │
+	│ Full Name: Peter Goldsborough                           │
+	│ Login: goldsborough                                     │
+	│ Member Since: Wed Aug 26 13:57:00 2015                  │
+	│ Link privacy: public                                    │
+	│ ...                                                     │
 	└────────────────────────────────────────────────────┘
 
 And what you've been up to:
@@ -63,11 +63,11 @@ And what you've been up to:
 
 	$ lnk history --last 4 days
 	┌────────────────────────────┐
-	│ Last 4 days:               │
-	│  + http://bit.ly/1OQM9nA   │
-	│  + http://bit.ly/1Km6CB1   │
-	│  + http://bit.ly/1OQLTov   │
-	│  + http://on.fb.me/1OQHeD0 │
+	│ Last 4 days:                  │
+	│  + http://bit.ly/1OQM9nA      │
+	│  + http://bit.ly/1Km6CB1      │
+	│  + http://bit.ly/1OQLTov      │
+	│  + http://on.fb.me/1OQHeD0    │
 	└────────────────────────────┘
 
 
