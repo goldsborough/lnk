@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os.path
 import pytest
 import re
 
@@ -29,7 +30,9 @@ def test_bitly_key_generation(fixture):
 	assert len(key) == 40
 	assert re.match(r'[a-z\d]', key)
 
-	with open('token', 'wt') as destination:
+	here = os.path.dirname(os.path.abspath(__file__))
+	path = os.path.join(here, 'token')
+	with open(path, 'wt') as destination:
 		destination.write(key)
 
 def test_bitly_key_is_hidden_if_show_false(fixture):
