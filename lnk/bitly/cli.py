@@ -5,6 +5,7 @@
 
 import click
 
+import lnk.cli
 import lnk.config
 import lnk.errors
 
@@ -38,12 +39,17 @@ expanded_default = None if display == 'both' else display == 'expanded'
 @click.option('-v',
 			  '--verbose',
 			  count=True,
-			  help='Controls the level of verbosity (in case of exceptions).')
+			  help='Increments the level of verbosity.')
+@click.option('-l',
+			  '--level',
+			  nargs=1,
+			  type=int,
+			  help='Controls the level of verbosity.')
 @click.argument('args', nargs=-1)
 @click.version_option(version=bitly_config['version'],
 					  message='Bitly API v%(version)s')
 @click.pass_context
-def main(context, verbose, args):
+def main(context, verbose, level, args):
 	"""
 	Main entry-point to the bit.ly API from the command-line.
 
@@ -54,9 +60,7 @@ def main(context, verbose, args):
 	service its default command, such that the user can type 'lnk ...' when
 	meaning 'lnk bitly link ...'.
 	"""
-	# Can't be zero because it's counted (0 = no flag)
-	if verbose == 0:
-		verbose = lnk_config['verbosity']
+	verbosity = lnk.cli.get_verbosity(verbose, level)
 	# Could be the name of the command, or the first argument if the command
 	# was not specified (meaning the link command is requested)
 	if not args or args[0] not in bitly_config['commands'].keys():

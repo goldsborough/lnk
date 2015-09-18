@@ -35,9 +35,6 @@ class Main(click.MultiCommand):
 	def __init__(self):
 		super(Main, self).__init__(context_settings=dict(
 								  ignore_unknown_options=True))
-		self.name = "lnk"
-		self.short_help = "lnk"
-		self.help = "lnk"
 		self.commands = {}
 		with lnk.config.Manager('lnk') as manager:
 			self.default = manager['settings']['service']
@@ -49,7 +46,7 @@ class Main(click.MultiCommand):
 		# Hack to make the main script's name
 		# appear as 'lnk' rather than 'main.py'
 		context.info_name = 'lnk'
-	
+
 		return super(Main, self).format_usage(context, *args)
 
 	@overrides
@@ -99,6 +96,26 @@ class Main(click.MultiCommand):
 			eval(code, namespace, namespace)
 
 		return namespace['main']
+
+def get_verbosity(count, level):
+	"""
+	Returns the appropriate verbosity level.
+
+	Defined here for use by all cli modules (e.g. bitly.cli).
+
+	Arguments:
+		count (int): The verbosity count (from the -vvv flags).
+		level (int): The verbosity level (from the --level flag).
+
+	Returns:
+		The default verbosity if both count and level are zero, else
+		the level and only if the level is also zero, the count.
+	"""
+	if count == 0 and not level:
+		return lnk.config.get('lnk', 'settings')['verbosity']
+	elif level:
+		return level
+	return count
 
 def main():
 	"""

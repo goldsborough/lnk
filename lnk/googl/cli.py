@@ -5,6 +5,7 @@
 
 import click
 
+import lnk.cli
 import lnk.config
 import lnk.errors
 
@@ -57,14 +58,7 @@ def main(context, verbose, level, args):
 	service its default command, such that the user can type 'lnk ...' when
 	meaning 'lnk googl link ...'.
 	"""
-	# Can't be zero because it's counted (0 = no flag)
-	if verbose == 0 and not level:
-		verbosity = lnk_config['verbosity']
-	elif level:
-		verbosity = level
-	else:
-		verbosity = verbose
-
+	verbosity = lnk.cli.get_verbosity(verbose, level)
 	# Could be the name of the command, or the first argument if the command
 	# was not specified (meaning the link command is requested)
 	if not args or args[0] not in googl_config['commands'].keys():
@@ -72,7 +66,7 @@ def main(context, verbose, level, args):
 	else:
 		name = args[0]
 		args = args[1:] or ['--help']
-	print(name, args)
+
 	# Pick out the function (command)
 	which = globals()[name]
 	catch = lnk.errors.Catch(verbosity, which.get_help(context), 'goo.gl')

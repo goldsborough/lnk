@@ -5,6 +5,7 @@
 
 import click
 
+import lnk.cli
 import lnk.config
 import lnk.errors
 
@@ -21,12 +22,17 @@ link_config = tinyurl_config['commands']['link']
 @click.option('-v',
 			  '--verbose',
 			  count=True,
-			  help='Controls the level of verbosity (in case of exceptions).')
+			  help='Increments the level of verbosity.')
+@click.option('-l',
+			  '--level',
+			  nargs=1,
+			  type=int,
+			  help='Controls the level of verbosity.')
 @click.argument('args', nargs=-1)
 @click.version_option(version=tinyurl_config['version'],
 					  message='Bitly API v%(version)s')
 @click.pass_context
-def main(context, verbose, args):
+def main(context, verbose, level, args):
 	"""
 	Main entry-point to the tinyurl API from the command-line.
 
@@ -37,8 +43,7 @@ def main(context, verbose, args):
 	service its default command, such that the user can type 'lnk ...' when
 	meaning 'lnk tinyurl link ...'.
 	"""
-	if verbose == 0:
-		verbose = lnk_config['verbosity']
+	verbosity = lnk.cli.get_verbosity(verbose, level)
 	if args and args[0] == tinyurl_config['settings']['command']:
 		args = args[1:] or ['--help']
 	catch = lnk.errors.Catch(verbose, link.get_help(context))
