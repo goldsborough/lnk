@@ -2,6 +2,12 @@
 lnk
 ***
 
+.. image:: https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square
+ :target: http://goldsborough.mit-license.org
+
+.. image:: http://img.shields.io/gratipay/goldsborough.svg?style=flat-square
+ :target: https://gratipay.com/~goldsborough/
+
 A command-line URL-shortening client for bitly, tinyurl and goo.gl.
 
 How a smart dev (you) shortens a URL:
@@ -85,7 +91,7 @@ Whoop:
 dee-doo.
 
 `Documentation <http://lnk.rtfd.org/>`_
-=============
+=======================================
 
 Documentation for the project's source alongside a detailed description of how to effectively use **lnk** can be found `here <http://lnk.rtfd.org/>`_.
 
