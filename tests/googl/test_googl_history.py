@@ -370,16 +370,16 @@ def test_ranges_handles_empty_results_well(fixture):
 	header = 'Between {0} {1} '.format(timespan[0], timespan[1])
 	header += 'and {0} {1} ago:'.format(timespan[2], timespan[3])
 	header += ' None'
-	expected = [header] + ['']
+	expected = [header, '']
 
-	assert result == expected
+	assert sorted(result) == sorted(expected)
 
 
 def test_fetch_works_only_for_forever(fixture):
 	result = fixture.history.fetch(None, None, True, None, False, False, False)
 	expected = [i.short for i in fixture.all_urls]
 
-	assert result == expected
+	assert sorted(result) == sorted(expected)
 
 
 def test_fetch_removes_last_line(fixture):
@@ -410,4 +410,4 @@ def test_fetch_limits_well(fixture):
 	expected = [i.short for i in fixture.all_urls[:3]]
 
 	assert len(result) <= 3
-	assert result == expected
+	assert sorted(result) == sorted(expected)

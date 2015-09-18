@@ -62,7 +62,7 @@ def fixture():
 	    'privacy': 'default_link_privacy',
 	}
 	data = request_info()
-	selected = {k: data[k] for k in data if k in sets.values()}
+	selected = dict((k, data[k]) for k in data if k in sets.values())
 	formatted = []
 	for key, value in selected.items():
 		if isinstance(value, list):
@@ -104,7 +104,7 @@ def test_order_works(fixture):
 
 	keys = fixture.selected.keys()
 	random.shuffle(keys)
-	shuffled = {key:fixture.selected[key] for key in keys}
+	shuffled = dict((key, fixture.selected[key]) for key in keys)
 	result = fixture.user.order(shuffled, fixture.sets.values())
 
 	assert result.keys() == expected

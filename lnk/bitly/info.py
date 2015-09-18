@@ -48,7 +48,8 @@ class Info(Command):
 
 		self.raw = raw
 		self.sets = self.config['sets']
-		self.reverse = {value:key for key, value in self.sets.items()}
+		# Dictionary comprehensions don't work for Python < 2.7
+		self.reverse = dict((value, key) for (key, value) in self.sets.items())
 
 	def fetch(self, only, hide, hide_empty, urls):
 		"""
@@ -104,7 +105,7 @@ class Info(Command):
 		data = self.request_info(url)
 		data.update(self.request_history(url))
 
-		selection = {key : data[key] for key in data if key in sets}
+		selection = dict((key, data[key]) for key in data if key in sets)
 		lines = self.lineify(url, selection, hide_empty)
 
 		with self.lock:

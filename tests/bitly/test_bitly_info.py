@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import copy
 import ecstasy
 import os
 import pytest
@@ -61,10 +62,15 @@ def fixture():
 
 	data = request_info(urls[0])
 	data.update(request_history(urls[0]))
-	selected = {k:v for k, v in data.items() if k in sets.values()}
+	selection = {}
+	# No dictionary comprehension in Python 2.6
+	for key, value in data.items():
+		if key in sets.values():
+			selection[key] = value
+	print(selection)
 	formatted = ['URL: {0}'.format(urls[0])]
 	template = ecstasy.beautify(' <+> {0}', ecstasy.Color.Red)
-	for key, value in selected.items():
+	for key, value in selection.items():
 		if not value:
 			formatted.append(info.format(key, 'None'))
 		if isinstance(value, list):
@@ -79,7 +85,7 @@ def fixture():
 					sets,
 					urls,
 					expanded,
-					selected,
+					selection,
 					formatted,
 					template)
 
@@ -88,7 +94,9 @@ def test_initializes_well(fixture):
 	assert hasattr(fixture.info, 'sets')
 	assert hasattr(fixture.info, 'reverse')
 
-	reverse = {v:k for k, v in fixture.info.sets.items()}
+	reverse = {}
+	for key, value in fixture.info.sets.items():
+		reverse[value] = key
 
 	assert fixture.info.reverse == reverse
 
@@ -144,7 +152,8 @@ def test_format_does_not_format_value_if_list(fixture):
 	assert result == expected
 
 def test_lineify_works_without_lists(fixture):
-	data = {k:v for k, v in fixture.data.items() if k != 'tags'}
+	data = copy.deepcopy(fixture.data)
+	del data['tags']
 	expected = [fixture.formatted[0]]
 	expected += [fixture.info.format(k, v) for k, v in data.items()]
 	result = fixture.info.lineify(fixture.urls[0], data, False)
@@ -182,9 +191,13 @@ def test_fetches_well(fixture):
 
 	data = request_info(fixture.urls[1])
 	data.update(request_history(fixture.urls[1]))
-	data = {k:v for k, v in data.items() if k in fixture.sets.values()}
-	second = ['URL: {0}'.format(fixture.urls[1])]
+	selection = {}
+	# No dictionary comprehension in Python 2.6
 	for key, value in data.items():
+		if key in fixture.sets.values():
+			selection[key] = value
+	second = ['URL: {0}'.format(fixture.urls[1])]
+	for key, value in selection.items():
 		second.append(fixture.info.format(key, value))
 		if isinstance(value, list):
 			second += [fixture.template.format(i) for i in value]

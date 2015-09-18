@@ -18,8 +18,8 @@ class Command(lnk.abstract.AbstractCommand):
 	def __init__(self):
 		super(Command, self).__init__('test', 'do')
 
-@pytest.fixture(scope='module')
 
+@pytest.fixture(scope='module')
 def fixture(request):
 	Fixture = namedtuple('Fixture', [
 		'command',
@@ -162,22 +162,17 @@ def test_fetch_not_implemented(fixture):
 		fixture.command.fetch()
 
 
-def test_verify_not_implemented(fixture):
-	with pytest.raises(NotImplementedError):
-		fixture.command.verify(None, None)
-
-
 def test_filter_sets_filters_well(fixture):
-	base = {i:None for i in 'abcde'}
+	base = dict((i, None) for i in 'abcde')
 	only = ['a', 'c', 'e']
 	result = lnk.abstract.filter_sets(base, only, [])
 
-	assert result.keys() == only
+	assert sorted(result.keys()) == only
 
 
 def test_filter_sets_hides_well(fixture):
-	base = {i:None for i in 'abcde'}
+	base = dict((i, None) for i in 'abcde')
 	hide = ['a', 'c', 'e']
 	result = lnk.abstract.filter_sets(base, [], hide)
 
-	assert result.keys() == ['b', 'd']
+	assert sorted(result.keys()) == ['b', 'd']

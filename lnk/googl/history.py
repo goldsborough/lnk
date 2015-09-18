@@ -57,12 +57,12 @@ class History(Command):
 		super(History, self).__init__('history')
 		self.raw = raw
 		self.delta = {
-			"minute": timedelta(minutes=1), 
-			"hour": timedelta(hours=1), 
-			"day": timedelta(days=1),
-			"week": timedelta(weeks=1), 
-			"month": timedelta(days=30.4368),
-			"year": timedelta(days=365.242199)
+			'minute': timedelta(minutes=1), 
+			'hour': timedelta(hours=1), 
+			'day': timedelta(days=1),
+			'week': timedelta(weeks=1), 
+			'month': timedelta(days=30.4368),
+			'year': timedelta(days=365.242199)
 		}
 
 	def fetch(self, last, ranges, forever, limit, expanded, both, pretty):
@@ -287,7 +287,7 @@ class History(Command):
 		if end < begin:
 			what = "Illegal time range 'between {0} and {1} and {2} {3} "\
 				   "ago' (start must precede end)"\
-				   "!".format(time_range[0], time_range[1],
+				   '!'.format(time_range[0], time_range[1],
 							  time_range[2], time_range[3])
 			raise lnk.errors.UsageError(what)
 		return begin, end

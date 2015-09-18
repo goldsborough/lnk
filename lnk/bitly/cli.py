@@ -263,7 +263,7 @@ def history(last, time_range, forever, limit, no_limit, expanded, both, pretty):
 @click.option('-w',
 			  '--who',
 			  is_flag=True,
-			  help="Show who is currently logged in.")
+			  help='Show who is currently logged in.')
 def key(generate, login, password, show, who):
 	"""Authorization management."""
 	lnk.bitly.key.echo(generate, login, password, show, who)

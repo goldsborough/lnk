@@ -130,7 +130,7 @@ class Key(Command):
 		try:
 			response = response.json()
 			if not str(response['status_code']).startswith('2'):
-				raise lnk.errors.HTTPError('Could not {}.'.format(what),
+				raise lnk.errors.HTTPError('Could not {0}.'.format(what),
 									   response['status_code'],
 							           response['status_txt'])
 		except simplejson.scanner.JSONDecodeError:

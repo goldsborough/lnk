@@ -47,7 +47,11 @@ def fixture():
 	}
 
 	data = request(urls[0])
-	selected = {k:v for k, v in data.items() if k in sets.values()}
+	selected = {}
+	# No dictionary comprehension in Python 2.6
+	for key, value in data.items():
+		if key in sets.values():
+			selected[key] = value
 	formatted = ['URL: {0}'.format(urls[0])]
 	for key, value in selected.items():
 		formatted.append(info.format(key, value))
@@ -66,7 +70,7 @@ def test_initializes_well(fixture):
 	assert hasattr(fixture.info, 'sets')
 	assert hasattr(fixture.info, 'reverse')
 
-	reverse = {v:k for k, v in fixture.info.sets.items()}
+	reverse = dict((v, k) for k, v in fixture.info.sets.items())
 
 	assert fixture.info.reverse == reverse
 	assert all(i in fixture.info.sets for i in fixture.only)
@@ -109,9 +113,13 @@ def test_fetches_well(fixture):
 								fixture.urls)
 
 	data = request(fixture.urls[1])
-	data = {k:v for k, v in data.items() if k in fixture.sets.values()}
+	selection = {}
+	# No dictionary comprehension in Python 2.6
+	for key, value in data.items():
+		if key in fixture.sets.values():
+			selection[key] = value
 	second = ['URL: {0}'.format(fixture.urls[1])]
-	second += [fixture.info.format(k, v) for k, v in data.items()]
+	second += [fixture.info.format(k, v) for k, v in selection.items()]
 	expected = [fixture.formatted, second]
 
 	result[0].sort()

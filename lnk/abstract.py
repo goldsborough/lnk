@@ -179,25 +179,6 @@ class AbstractCommand(object):
 		if self.error:
 			raise self.error
 
-	@staticmethod
-	def verify(response, what):
-		"""
-		Abstract method to verify an HTTP response.
-
-		Arguments:
-			response (requests.Response): The requests.Response following an
-										  HTTP request.
-			what (str): A message regarding what the request was doing,
-						such that if an error is thrown by this method
-						(because a fault was detected in the response),
-						the error-message of that error follows the schema
-						'Could not <what>'.
-
-		Raises:
-			NotImplementedError: When called directly.
-		"""
-		raise NotImplementedError
-
 def filter_sets(all_sets, only, hide):
 	"""
 	Filters a set of categories.

@@ -8,7 +8,10 @@ from __future__ import unicode_literals
 import click
 import time
 
-from collections import OrderedDict
+try:
+	from collections import OrderedDict
+except ImportError:
+	from ordereddict import OrderedDict
 
 import lnk.abstract
 import lnk.beauty

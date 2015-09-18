@@ -9,8 +9,6 @@ import httplib2
 import oauth2client.file
 import os
 
-from overrides import overrides
-
 import lnk.config
 import lnk.errors
 

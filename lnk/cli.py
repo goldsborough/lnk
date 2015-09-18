@@ -143,5 +143,5 @@ def main():
 	catch = lnk.errors.Catch(1)
 	catch.catch(command.main, args, standalone_mode=False)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	main()

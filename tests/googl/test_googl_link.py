@@ -36,7 +36,7 @@ def shorten_fmt(destination):
 	formatted = '{0} => {1}'.format(url, short)
 
 	LOCK.acquire()
-	destination.add(formatted)
+	destination.append(formatted)
 	LOCK.release()
 
 
@@ -53,7 +53,7 @@ def expand_fmt(destination):
 	formatted = '{0} => {1}'.format(url, expanded)
 
 	LOCK.acquire()
-	destination.add(formatted)
+	destination.append(formatted)
 	LOCK.release()
 
 
@@ -159,7 +159,7 @@ def test_shorten_urls_works_for_many_urls(fixture):
 		'http://python.org/'
 	]
 	result = fixture.link.shorten_urls(False, True, urls)
-	expected = set()
+	expected = []
 	threads = []
 	for url in urls:
 		QUEUE.put(url)
@@ -171,7 +171,9 @@ def test_shorten_urls_works_for_many_urls(fixture):
 	for thread in threads:
 		thread.join(timeout=10)
 
-	for got, wanted in zip(sorted(result), expected):
+	print(sorted(result), sorted(expected))
+
+	for got, wanted in zip(sorted(result), sorted(expected)):
 		got = got.split()
 		wanted = wanted.split()
 
@@ -195,7 +197,7 @@ def test_expand_urls_works_for_many_urls(fixture):
 		'https://goo.gl/maps/HZqGm'
 	]
 	result = fixture.link.expand_urls(False, urls)
-	expected = set()
+	expected = []
 	threads = []
 	for url in urls:
 		QUEUE.put(url)
@@ -209,7 +211,7 @@ def test_expand_urls_works_for_many_urls(fixture):
 
 	print(result, expected)
 
-	assert set(result) == expected
+	assert sorted(result) == sorted(expected)
 
 
 def test_shorten_urls_warns_about_url_without_protocol(fixture, capsys):

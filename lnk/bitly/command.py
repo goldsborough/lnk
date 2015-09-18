@@ -3,8 +3,6 @@
 
 """Contains the base-class for all bit.ly commands."""
 
-from overrides import overrides
-
 import lnk.config
 import lnk.errors
 
@@ -36,7 +34,6 @@ class Command(AbstractCommand):
 			self.parameters = {'access_token': manager['key']}
 
 	@staticmethod
-	@overrides
 	def verify(response, what, inner=None):
 		"""
 		Verifies an HTTP-response from the bit.ly API.

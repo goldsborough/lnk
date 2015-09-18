@@ -31,7 +31,6 @@ class Command(AbstractCommand):
 		self.parameters['provider'] = 'tinyurl_com'
 
 	@staticmethod
-	@overrides
 	def verify(response, what):
 		"""
 		Verifies an HTTP-response from the tinyurl API.

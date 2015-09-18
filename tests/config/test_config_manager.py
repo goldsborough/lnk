@@ -27,10 +27,10 @@ def fixture(request):
 	filename = '{0}.json'.format(which)
 	path = os.path.join(tests.paths.CONFIG_PATH, filename)
 
-	with open(os.path.join(HERE, filename)) as dummy:
-		lnk.configuration = json.load(dummy)
+	with open(os.path.join(HERE, filename)) as source:
+		config = json.load(source)
 		with open(path, 'w') as test:
-			json.dump(lnk.configuration, test)
+			json.dump(config, test)
 
 	def finalize():
 		os.remove(path)
@@ -39,16 +39,16 @@ def fixture(request):
 
 	manager = lnk.config.Manager()
 
-	return Fixture(which, path, manager, lnk.configuration)
+	return Fixture(which, path, manager, config)
 
 @pytest.fixture(scope='module')
 def changed():
 	Fixture = namedtuple('Fixture', ['contents', 'config'])
-	with open(os.path.join(HERE, 'changed_manager.json')) as dummy:
-		contents = dummy.read()
-		lnk.configuration = json.loads(contents)
+	with open(os.path.join(HERE, 'changed_manager.json')) as source:
+		contents = source.read()
+		config = json.loads(contents)
 
-	return Fixture(contents, lnk.configuration)
+	return Fixture(contents, config)
 
 
 
@@ -100,9 +100,11 @@ def test_context_syntax_writes_well(fixture, changed):
 
 
 def test_properties_are_accessible(fixture, changed):
-	assert fixture.manager.keys == changed.config.keys()
-	assert fixture.manager.values == changed.config.values()
-	assert fixture.manager.items == changed.config.items()
+	print(fixture, changed)
+	print(fixture.manager.config, changed.config)
+	assert sorted(fixture.manager.keys) == sorted(changed.config.keys())
+	assert sorted(fixture.manager.values) == sorted(changed.config.values())
+	assert sorted(fixture.manager.items) == sorted(changed.config.items())
 
 
 def test_get_works(changed):

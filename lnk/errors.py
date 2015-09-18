@@ -296,6 +296,6 @@ def warn(what):
 	Arguments:
 		what (str): The warning string to output.
 	"""
-	what = "\a<Warning>: {}".format(what)
+	what = '\a<Warning>: {0}'.format(what)
 	formatted = ecstasy.beautify(what, ecstasy.Color.Yellow)
 	click.echo(formatted)

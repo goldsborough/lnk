@@ -95,10 +95,10 @@ def update(manager, key, values):
 		A formatted line, following the schema
 		'<key>: <old_value> => <new_value>'.
 	"""
-	line = "{0}: {1}".format(key, format_value(manager[key]))
+	line = '{0}: {1}'.format(key, format_value(manager[key]))
 	if values:
 		manager[key] = values.pop(0)
-		line += " => {0}".format(manager[key])
+		line += ' => {0}'.format(manager[key])
 
 	return line
 
@@ -119,5 +119,5 @@ def format_value(value):
 	if isinstance(value, list):
 		return ', '.join(map(str, value))
 	elif isinstance(value, dict):
-		return ', '.join(["{}: {}".format(k, v) for k, v in value.items()])
+		return ', '.join(['{0}: {1}'.format(k, v) for k, v in value.items()])
 	return str(value)
