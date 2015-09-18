@@ -5,17 +5,17 @@
 
 import click
 
-import config
-import errors
+import lnk.config
+import lnk.errors
 
-import googl.link
-import googl.info
-import googl.stats
-import googl.history
-import googl.key
+import lnk.googl.link
+import lnk.googl.info
+import lnk.googl.stats
+import lnk.googl.history
+import lnk.googl.key
 
-lnk_config = config.Manager('lnk')['settings']
-googl_config = config.Manager('googl')
+lnk_config = lnk.config.Manager('lnk')['settings']
+googl_config = lnk.config.Manager('googl')
 
 link_config = googl_config['commands']['link']
 info_config = googl_config['commands']['info']
@@ -36,12 +36,17 @@ units += ['{0}s'.format(i) for i in units]
 @click.option('-v',
 			  '--verbose',
 			  count=True,
-			  help='Controls the level of verbosity (in case of exceptions).')
+			  help='Increments the level of verbosity.')
+@click.option('-l',
+			  '--level',
+			  nargs=1,
+			  type=int,
+			  help='Controls the level of verbosity.')
 @click.argument('args', nargs=-1)
 @click.version_option(version=googl_config['version'],
 					  message='goo.gl API v%(version)s')
 @click.pass_context
-def main(context, verbose, args):
+def main(context, verbose, level, args):
 	"""
 	Main entry-point to the goo.gl API from the command-line.
 
@@ -53,18 +58,24 @@ def main(context, verbose, args):
 	meaning 'lnk googl link ...'.
 	"""
 	# Can't be zero because it's counted (0 = no flag)
-	if verbose == 0:
-		verbose = lnk_config['verbosity']
+	if verbose == 0 and not level:
+		verbosity = lnk_config['verbosity']
+	elif level:
+		verbosity = level
+	else:
+		verbosity = verbose
+
 	# Could be the name of the command, or the first argument if the command
 	# was not specified (meaning the link command is requested)
-	name = args[0]
-	if name not in googl_config['commands'].keys():
-		name = 'link'
+	if not args or args[0] not in googl_config['commands'].keys():
+		name = googl_config['settings']['command']
 	else:
-		args = args[1:] if args[1:] else ['--help']
+		name = args[0]
+		args = args[1:] or ['--help']
+	print(name, args)
 	# Pick out the function (command)
 	which = globals()[name]
-	catch = errors.Catch(verbose, which.get_help(context), 'goo.gl')
+	catch = lnk.errors.Catch(verbosity, which.get_help(context), 'goo.gl')
 	catch.catch(which.main, args, standalone_mode=False)
 
 @main.command()
@@ -80,7 +91,7 @@ def main(context, verbose, args):
 			  '--expand',
 			  multiple=True,
 			  metavar='URL',
-			  help='Expand a short url (bitlink).')
+			  help='Expand a short url.')
 @click.option('-s',
 			  '--shorten',
 			  multiple=True,
@@ -93,8 +104,8 @@ def main(context, verbose, args):
 def link(copy, quiet, expand, shorten, urls, pretty):
 	"""Link shortening and expansion."""
 	if not urls and not expand and not shorten:
-		raise errors.UsageError('Please supply at least one URL.')
-	googl.link.echo(copy, quiet, expand, shorten + urls, pretty)
+		raise lnk.errors.UsageError('Please supply at least one URL.')
+	lnk.googl.link.echo(copy, quiet, expand, shorten + urls, pretty)
 
 @main.command()
 @click.option('-o',
@@ -115,8 +126,8 @@ def info(only, hide, urls):
 	# Its' horrible to handle the missing parameter when click
 	# throws an exception (doesn't make it accessible), so just do it here.
 	if not urls:
-		raise errors.UsageError('Please supply at least one URL.')
-	googl.info.echo(only, hide, urls)
+		raise lnk.errors.UsageError('Please supply at least one URL.')
+	lnk.googl.info.echo(only, hide, urls)
 
 @main.command()
 @click.option('-o',
@@ -156,8 +167,8 @@ def info(only, hide, urls):
 def stats(only, hide, last, forever, limit, info, full, urls):
 	"""Statistics and metrics for links."""
 	if not urls:
-		raise errors.UsageError('Please supply at least one URL.')
-	googl.stats.echo(only, hide, last, forever, limit, info, full, urls)
+		raise lnk.errors.UsageError('Please supply at least one URL.')
+	lnk.googl.stats.echo(only, hide, last, forever, limit, info, full, urls)
 
 @main.command()
 @click.option('-g',
@@ -166,7 +177,7 @@ def stats(only, hide, last, forever, limit, info, full, urls):
 			 help='Initiates the authorization process.')
 def key(generate):
 	"""Generate an API key."""
-	googl.key.echo(generate)
+	lnk.googl.key.echo(generate)
 
 @main.command()
 @click.option('-t',
@@ -210,4 +221,4 @@ def history(last, time_range, forever, limit, expanded, both, pretty):
 	# Default case for both
 	if not both and expanded is None:
 		both = True
-	googl.history.echo(last, time_range, forever, limit, expanded, both, pretty)
+	lnk.googl.history.echo(last, time_range, forever, limit, expanded, both, pretty)

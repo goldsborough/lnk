@@ -5,18 +5,18 @@
 
 import click
 
-import config
-import errors
+import lnk.config
+import lnk.errors
 
-import bitly.stats
-import bitly.info
-import bitly.link
-import bitly.user
-import bitly.history
-import bitly.key
+import lnk.bitly.stats
+import lnk.bitly.info
+import lnk.bitly.link
+import lnk.bitly.user
+import lnk.bitly.history
+import lnk.bitly.key
 
-lnk_config = config.Manager('lnk')['settings']
-bitly_config = config.Manager('bitly')
+lnk_config = lnk.config.Manager('lnk')['settings']
+bitly_config = lnk.config.Manager('bitly')
 
 link_config = bitly_config['commands']['link']
 info_config = bitly_config['commands']['info']
@@ -59,14 +59,14 @@ def main(context, verbose, args):
 		verbose = lnk_config['verbosity']
 	# Could be the name of the command, or the first argument if the command
 	# was not specified (meaning the link command is requested)
-	name = args[0]
-	if name not in bitly_config['commands'].keys():
-		name = 'link'
+	if not args or args[0] not in bitly_config['commands'].keys():
+		name = name = bitly_config['settings']['command']
 	else:
-		args = args[1:] if args[1:] else ['--help']
+		name = args[0]
+		args = args[1:] or ['--help']
 	# Pick out the function (command)
 	which = globals()[name]
-	catch = errors.Catch(verbose, which.get_help(context), 'bitly')
+	catch = lnk.errors.Catch(verbose, which.get_help(context), 'bitly')
 	catch.catch(which.main, args, standalone_mode=False)
 
 @main.command()
@@ -95,8 +95,8 @@ def main(context, verbose, args):
 def link(copy, quiet, expand, shorten, urls, pretty):
 	"""Link shortening and expansion."""
 	if not urls and not expand and not shorten:
-		raise errors.UsageError('Please supply at least one URL.')
-	bitly.link.echo(copy, quiet, expand, shorten + urls, pretty)
+		raise lnk.errors.UsageError('Please supply at least one URL.')
+	lnk.bitly.link.echo(copy, quiet, expand, shorten + urls, pretty)
 
 @main.command()
 @click.option('-o',
@@ -120,8 +120,8 @@ def info(only, hide, hide_empty, urls):
 	# Its' horrible to handle the missing parameter when click
 	# throws an exception (doesn't make it accessible), so just do it here.
 	if not urls:
-		raise errors.UsageError('Please supply at least one URL.')
-	bitly.info.echo(only, hide, hide_empty, urls)
+		raise lnk.errors.UsageError('Please supply at least one URL.')
+	lnk.bitly.info.echo(only, hide, hide_empty, urls)
 
 @main.command()
 @click.option('-o',
@@ -161,8 +161,8 @@ def info(only, hide, hide_empty, urls):
 def stats(only, hide, time, forever, limit, info, full, urls):
 	"""Statistics and metrics for links."""
 	if not urls:
-		raise errors.UsageError('Please supply at least one URL.')
-	bitly.stats.echo(only, hide, time, forever, limit, info, full, urls)
+		raise lnk.errors.UsageError('Please supply at least one URL.')
+	lnk.bitly.stats.echo(only, hide, time, forever, limit, info, full, urls)
 
 @main.command()
 @click.option('-o',
@@ -187,7 +187,7 @@ def stats(only, hide, time, forever, limit, info, full, urls):
 			  help='Whether to hide or show empty results.')
 def user(only, hide, everything, history, hide_empty):
 	"""Show meta-information for the current user."""
-	bitly.user.echo(only, hide, everything, history, hide_empty)
+	lnk.bitly.user.echo(only, hide, everything, history, hide_empty)
 
 @main.command()
 @click.option('-t',
@@ -231,7 +231,7 @@ def history(last, time_range, forever, limit, expanded, both, pretty):
 	# Default case for both
 	if not both and expanded is None:
 		both = True
-	bitly.history.echo(last, time_range, forever, limit, expanded, both, pretty)
+	lnk.bitly.history.echo(last, time_range, forever, limit, expanded, both, pretty)
 
 @main.command()
 @click.option('-g',
@@ -254,4 +254,4 @@ def history(last, time_range, forever, limit, expanded, both, pretty):
 			  help='Whether to show or hide the generated API key.')
 def key(generate, login, password, show):
 	"""Generate an API key for user metrics and history."""
-	bitly.key.echo(generate, login, password, show)
+	lnk.bitly.key.echo(generate, login, password, show)

@@ -5,19 +5,19 @@
 
 import click
 
-import config
-import errors
+import lnk.config
+import lnk.errors
 
-import tinyurl.link
+import lnk.tinyurl.link
 
-lnk_config = config.Manager('lnk')['settings']
-tinyurl_config = config.Manager('tinyurl')
+lnk_config = lnk.config.Manager('lnk')['settings']
+tinyurl_config = lnk.config.Manager('tinyurl')
 link_config = tinyurl_config['commands']['link']
 
 @click.group(invoke_without_command=True,
 			 no_args_is_help=True,
 			 context_settings=dict(ignore_unknown_options=True),
-			 help='Tinyurl command-line client.')
+			 help='tinyurl command-line client.')
 @click.option('-v',
 			  '--verbose',
 			  count=True,
@@ -39,9 +39,9 @@ def main(context, verbose, args):
 	"""
 	if verbose == 0:
 		verbose = lnk_config['verbosity']
-	if args[0] == 'link':
-		args = args[1:] if args[1:] else ['--help']
-	catch = errors.Catch(verbose, link.get_help(context))
+	if args and args[0] == tinyurl_config['settings']['command']:
+		args = args[1:] or ['--help']
+	catch = lnk.errors.Catch(verbose, link.get_help(context))
 	catch.catch(link.main, args, standalone_mode=False)
 
 @main.command()
@@ -65,5 +65,5 @@ def main(context, verbose, args):
 def link(copy, quiet, shorten, urls, pretty):
 	"""Link shortening."""
 	if not urls and not shorten:
-		raise errors.UsageError('Please supply at least one URL.')
-	tinyurl.link.echo(copy, quiet, shorten + urls, pretty)
+		raise lnk.errors.UsageError('Please supply at least one URL.')
+	lnk.tinyurl.link.echo(copy, quiet, shorten + urls, pretty)

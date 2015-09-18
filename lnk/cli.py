@@ -5,9 +5,12 @@
 
 import click
 import os
+import sys
 
-import config
-import errors
+from overrides import overrides
+
+import lnk.config
+import lnk.errors
 
 class Main(click.MultiCommand):
 	"""
@@ -32,13 +35,24 @@ class Main(click.MultiCommand):
 	def __init__(self):
 		super(Main, self).__init__(context_settings=dict(
 								  ignore_unknown_options=True))
+		self.name = "lnk"
+		self.short_help = "lnk"
+		self.help = "lnk"
 		self.commands = {}
-		with config.Manager('lnk') as manager:
+		with lnk.config.Manager('lnk') as manager:
 			self.default = manager['settings']['service']
 			for command in manager['services'] + ['config']:
 				command = command.replace('.', '') # goo.gl -> googl
 				self.commands[command] = self.get_function(command)
 
+	def format_usage(self, context, *args):
+		# Hack to make the main script's name
+		# appear as 'lnk' rather than 'main.py'
+		context.info_name = 'lnk'
+	
+		return super(Main, self).format_usage(context, *args)
+
+	@overrides
 	def invoke(self, context):
 		"""
 		Invokes a command.
@@ -55,10 +69,12 @@ class Main(click.MultiCommand):
 			context.args[0] = escaped
 		super(Main, self).invoke(context)
 
+	@overrides
 	def list_commands(self, context):
 		"""Returns the names of all available subcommands."""
 		return self.commands.keys()
 
+	@overrides
 	def get_command(self, context, name):
 		"""Returns the function for a given subcommand-name."""
 		return self.commands[name]
@@ -84,7 +100,7 @@ class Main(click.MultiCommand):
 
 		return namespace['main']
 
-def main(args):
+def main():
 	"""
 	Insantiates a Main object and executes it.
 
@@ -94,7 +110,13 @@ def main(args):
 	Arguments:
 		args (tuple): The command-line arguments.
 	"""
+	args = sys.argv[1:]
+	# If stdin is not empty (being piped to)
+	if not sys.stdin.isatty():
+		args += sys.stdin.readlines()
 	command = Main()
-	catch = errors.Catch(1)
+	catch = lnk.errors.Catch(1)
 	catch.catch(command.main, args, standalone_mode=False)
 
+if __name__ == "__main__":
+	main()
