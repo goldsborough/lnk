@@ -26,13 +26,15 @@ lnk
 
 A command-line URL-shortening client for bitly, tinyurl and goo.gl.
 
-\
-
 How a smart dev (you) shortens a URL:
 
 .. image:: https://goo.gl/Y5eCsd
 
+\
+
 But **lnk** is *MORE*. **lnk** can also expand short URLs:
+
+\
 
 .. code-block:: bash
 
@@ -112,6 +114,8 @@ dee-doo.
 ======================================
 
 Documentation for the project's source alongside a detailed description of how to effectively use **lnk** can be found `here <http://lnk.rtfd.org>`_.
+
+One thing to document here: the "l" in lnk is a small letter "L" (short for "link").
 
 `License <http://goldsborough.mit-license.org>`_
 ================================================
