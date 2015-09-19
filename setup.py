@@ -43,7 +43,7 @@ class Install(setuptools.command.install.install):
 		config['key'] = None
 		with open(for_bitly, 'w') as destination:
 			json.dump(config, destination, indent=4)
-		for_googl = os.path.join('config', 'credentials')
+		for_googl = os.path.join('config', '.credentials')
 		if os.path.exists(for_googl):
 			os.remove(for_googl)
 

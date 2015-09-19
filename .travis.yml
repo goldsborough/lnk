@@ -10,7 +10,7 @@ before_install:
 install:
   - "pip install ."
   - "pip install -rrequirements.txt"
-script: coverage run -m pytest -k "not copy" -kgoogl
+script: coverage run -m pytest -k "not copy"
 notifications:
   email: 
     - petergoldsborough@hotmail.com
