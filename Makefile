@@ -1,20 +1,21 @@
 .PHONY: clean-pyc clean-build docs clean
  
 help:
-	@echo "clean - remove all build, test, coverage and Python artifacts"
-	@echo "clean-build - remove build artifacts"
-	@echo "clean-pyc - remove Python file artifacts"
-	@echo "clean-test - remove test and coverage artifacts"
-	@echo "lint - check style with flake8"
-	@echo "test - run tests quickly with the default Python"
-	@echo "coverage - check code coverage quickly with the default Python"
-	@echo "docs - generate Sphinx HTML documentation, including API docs"
-	@echo "test-register - register the project at TestPyPI"
-	@echo "register - register the project at PyPI"
-	@echo "test-upload - package and upload a releaes to TestPyPI"
-	@echo "upload - package and upload a upload to PyPI"
-	@echo "dist - package"
-	@echo "install - install the package to the active Python's site-packages"
+	@echo "clean - remove all build, test, coverage and Python artifacts."
+	@echo "clean-build - remove build artifacts."
+	@echo "clean-pyc - remove Python file artifacts."
+	@echo "clean-test - remove test and coverage artifacts."
+	@echo "lint - check style with flake8."
+	@echo "test - run tests quickly with the default Python."
+	@echo "coverage - check code coverage quickly with the default Python."
+	@echo "docs - generate Sphinx HTML documentation, including API docs."
+	@echo "bump - bumps the version."
+	@echo "test-register - register the project at TestPyPI."
+	@echo "register - register the project at PyPI."
+	@echo "test-upload - package and upload a releaes to TestPyPI."
+	@echo "upload - package and upload a upload to PyPI."
+	@echo "dist - package."
+	@echo "install - install the package to the active Python's site-packages."
  
 clean: clean-build clean-pyc clean-test
  
@@ -52,6 +53,9 @@ docs:
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	open docs/build/html/index.html
+
+bump:
+	python -m scripts.bump
 
 dist: clean
 	python setup.py sdist

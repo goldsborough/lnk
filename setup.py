@@ -10,8 +10,11 @@ import re
 import setuptools
 import setuptools.command.install
 
-with open('lnk/__init__.py') as init:
+INIT_PATH = os.path.join('lnk', '__init__.py')
+
+with open(INIT_PATH) as init:
 	INIT = init.read()
+
 
 def get(thing):
 	"""Retrieves a setup value."""
@@ -22,6 +25,7 @@ def get(thing):
 	match = re.search(pattern, INIT, re.MULTILINE)
 
 	return match.group(1)
+
 
 class Install(setuptools.command.install.install):
 	"""Subclass of setuptool's install class to have a post-install task."""
@@ -42,6 +46,7 @@ class Install(setuptools.command.install.install):
 		for_googl = os.path.join('config', 'credentials')
 		if os.path.exists(for_googl):
 			os.remove(for_googl)
+
 
 setuptools.setup(
 	cmdclass=dict(install=Install),
@@ -84,7 +89,7 @@ setuptools.setup(
 		'../docs/source/conf.py',
 		'../docs/Makefile',
 		]),
-	packages=setuptools.find_packages(),
+	packages=setuptools.find_packages(exclude=['scripts']),
 	install_requires=[
 		'click==4.1',
 		'coverage==3.7.1',

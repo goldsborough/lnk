@@ -3,7 +3,7 @@
 """Package settings."""
 
 __title__ = 'lnk'
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 __author__ = 'Peter Goldsborough'
 __email__ = 'petergoldsborough@hotmail.com'
 __license__ = 'MIT'
