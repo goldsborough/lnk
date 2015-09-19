@@ -37,7 +37,8 @@ requirements = [
 	'overrides==0.5',
 	'pyperclip==1.5.11',
 	'requests==2.7.0',
-	'ordereddict==1.1'
+	'ordereddict==1.1',
+	'enum34==1.0.4'
 ]
 
 test_requirements = [
@@ -49,19 +50,13 @@ test_requirements = [
 
 setup(
 	name=name,
-
 	version=version,
-
 	description='A command-line URL-shortening client.',
 	long_description=readme,
-
 	author=author,
 	author_email=email,
-
 	url=url,
-
 	license=license_name,
-
 	classifiers=[
 		'Development Status :: 4 - Beta',
 
@@ -82,18 +77,20 @@ setup(
 		'Programming Language :: Python :: 3.3',
 		'Programming Language :: Python :: 3.4',
 	],
-
 	keywords='lnk, url-shortening, bitly, googl, tinyurl',
-
 	include_package_data=True,
-
-	packages=find_packages(exclude=['docs', 'tests*']),
-
+	package_data=dict(lnk=[
+		'../README.rst',
+		'../LICENSE',
+		'../Makefile',
+		'../config/*',
+		'../docs/source/*.rst',
+		'../docs/source/conf.py',
+		'../docs/Makefile',
+		]),
+	packages=find_packages(),
 	install_requires=requirements,
-
 	test_suite='tests',
-
 	tests_require=test_requirements,
-
 	entry_points=dict(console_scripts=['lnk = lnk.cli:main'])
 )

@@ -3,6 +3,7 @@ include LICENSE
 include Makefile
  
 recursive-include tests *
+recursive-include config *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
  

@@ -11,8 +11,8 @@ help:
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
 	@echo "test-register - register the project at TestPyPI"
 	@echo "register - register the project at PyPI"
-	@echo "test-release - package and upload a releaes to TestPyPI"
-	@echo "release - package and upload a release to PyPI"
+	@echo "test-upload - package and upload a releaes to TestPyPI"
+	@echo "upload - package and upload a upload to PyPI"
 	@echo "dist - package"
 	@echo "install - install the package to the active Python's site-packages"
  
@@ -53,22 +53,21 @@ docs:
 	$(MAKE) -C docs html
 	open docs/build/html/index.html
 
+dist: clean
+	python setup.py sdist
+	python setup.py bdist_wheel
+
 test-register:
 	python setup.py register -r test
 
 register:
 	python setup.py register
 
-test-release: clean
-	twine upload -r test sdist
-	twine upload -r test bdist_wheel
+test-upload:
+	twine upload -r test $(wildcard dist/*)
 
-release: clean
-	twine upload dist/*
+upload:
+	twine upload $(wildcard dist/*)
  
-dist: clean
-	python setup.py sdist
-	python setup.py bdist_wheel
- 
-install: clean
+install:
 	python setup.py install
