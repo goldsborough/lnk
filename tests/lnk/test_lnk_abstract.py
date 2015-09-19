@@ -126,7 +126,7 @@ def test_exception_handling_for_threads_works(fixture):
 
 	assert fixture.command.error is not None
 	assert isinstance(fixture.command.error, RuntimeError)
-	assert fixture.command.error.message == 'Meh'
+	assert str(fixture.command.error.message) == 'Meh'
 
 	fixture.command.error = None
 
@@ -150,7 +150,7 @@ def test_join_method_throws_if_unjoinable(fixture):
 
 def test_join_method_re_raises_thread_exceptions(fixture):
 	def throws():
-		raise RuntimeError('Meh')
+		raise RuntimeError
 	thread = fixture.command.new_thread(throws)
 
 	with pytest.raises(RuntimeError):

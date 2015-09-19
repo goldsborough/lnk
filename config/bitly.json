@@ -1,27 +1,44 @@
 {
+    "login": "lnktest", 
+    "version": 3, 
     "commands": {
-        "info": {
-            "endpoints": {
-                "info": "info", 
-                "history": "user/link_history"
-            }, 
+        "user": {
             "settings": {
+                "history": false, 
                 "hide-empty": false
             }, 
             "sets": {
-                "archived": "archived", 
-                "created": "created_at", 
-                "expanded": "long_url", 
-                "modified": "modified_at", 
-                "shares": "shares", 
-                "note": "note", 
-                "privacy": "private", 
-                "user": "created_by", 
-                "title": "title", 
-                "tags": "tags"
+                "date": "member_since", 
+                "login": "login", 
+                "display": "display_name", 
+                "share": "share_accounts", 
+                "image": "profile_image", 
+                "name": "full_name", 
+                "url": "profile_url", 
+                "privacy": "default_link_privacy"
+            }, 
+            "endpoints": {
+                "user": "user/info"
             }
         }, 
         "stats": {
+            "endpoints": {
+                "clicks": "link/clicks", 
+                "countries": "link/countries", 
+                "referrers": "link/referrers"
+            }, 
+            "sets": {
+                "clicks": "clicks", 
+                "countries": "countries", 
+                "referrers": "referrers"
+            }, 
+            "settings": {
+                "limit": 10, 
+                "info": "False", 
+                "full-countries": true, 
+                "span": -1, 
+                "unit": "forever"
+            }, 
             "units": [
                 "minute", 
                 "hour", 
@@ -29,51 +46,54 @@
                 "week", 
                 "month", 
                 "year"
-            ], 
-            "endpoints": {
-                "referrers": "link/referrers", 
-                "clicks": "link/clicks", 
-                "countries": "link/countries"
-            }, 
+            ]
+        }, 
+        "history": {
             "settings": {
-                "full-countries": true, 
-                "info": "False", 
+                "display": "short", 
                 "limit": 10, 
-                "unit": "forever", 
-                "span": -1
+                "pretty": true
+            }, 
+            "endpoints": {
+                "history": "user/link_history"
+            }, 
+            "units": [
+                "minute", 
+                "hour", 
+                "day", 
+                "week", 
+                "month", 
+                "year"
+            ]
+        }, 
+        "info": {
+            "settings": {
+                "hide-empty": false
             }, 
             "sets": {
-                "referrers": "referrers", 
-                "clicks": "clicks", 
-                "countries": "countries"
+                "modified": "modified_at", 
+                "expanded": "long_url", 
+                "shares": "shares", 
+                "created": "created_at", 
+                "note": "note", 
+                "tags": "tags", 
+                "title": "title", 
+                "user": "created_by", 
+                "archived": "archived", 
+                "privacy": "private"
+            }, 
+            "endpoints": {
+                "info": "info", 
+                "history": "user/link_history"
             }
         }, 
         "link": {
             "endpoints": {
-                "shorten": "shorten", 
-                "expand": "expand"
+                "expand": "expand", 
+                "shorten": "shorten"
             }, 
             "settings": {
                 "pretty": true
-            }
-        }, 
-        "user": {
-            "endpoints": {
-                "user": "user/info"
-            }, 
-            "settings": {
-                "hide-empty": false, 
-                "history": false
-            }, 
-            "sets": {
-                "name": "full_name", 
-                "privacy": "default_link_privacy", 
-                "url": "profile_url", 
-                "image": "profile_image", 
-                "share": "share_accounts", 
-                "date": "member_since", 
-                "login": "login", 
-                "display": "display_name"
             }
         }, 
         "key": {
@@ -83,31 +103,11 @@
             "settings": {
                 "show": false
             }
-        }, 
-        "history": {
-            "units": [
-                "minute", 
-                "hour", 
-                "day", 
-                "week", 
-                "month", 
-                "year"
-            ], 
-            "endpoints": {
-                "history": "user/link_history"
-            }, 
-            "settings": {
-                "limit": 10, 
-                "display": "short", 
-                "pretty": true
-            }
         }
     }, 
     "settings": {
         "command": "link"
     }, 
     "url": "https://api-ssl.bitly.com", 
-    "version": 3, 
-    "key": "b0b5081ae3385be81656b34bdc7ea0d27c5be0fe", 
-    "login": "lnktest"
+    "key": "b0b5081ae3385be81656b34bdc7ea0d27c5be0fe"
 }

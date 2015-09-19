@@ -1,50 +1,35 @@
 {
+    "version": 1, 
+    "settings": {
+        "command": "link"
+    }, 
+    "key": "AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc", 
     "url": "https://www.googleapis.com/urlshortener", 
     "commands": {
-        "info": {
+        "stats": {
             "sets": {
-                "status": "status", 
-                "expanded": "longUrl", 
-                "created": "created"
+                "clicks": "shortUrlClicks", 
+                "referrers": "referrers", 
+                "browsers": "browsers", 
+                "platforms": "platforms", 
+                "countries": "countries"
+            }, 
+            "settings": {
+                "limit": 10, 
+                "timespan": "two-hours", 
+                "info": false, 
+                "span": "two-hours", 
+                "full-countries": true
             }, 
             "endpoints": {
-                "info": "url"
+                "stats": "url"
             }, 
-            "settings": {}
-        }, 
-        "stats": {
             "units": [
                 "two-hours", 
                 "day", 
                 "week", 
                 "month"
-            ], 
-            "sets": {
-                "platforms": "platforms", 
-                "browsers": "browsers", 
-                "referrers": "referrers", 
-                "clicks": "shortUrlClicks", 
-                "countries": "countries"
-            }, 
-            "endpoints": {
-                "stats": "url"
-            }, 
-            "settings": {
-                "info": false, 
-                "full-countries": true, 
-                "span": "two-hours", 
-                "limit": 10, 
-                "timespan": "two-hours"
-            }
-        }, 
-        "link": {
-            "endpoints": {
-                "shorten": "url", 
-                "expand": "url"
-            }, 
-            "settings": {
-                "pretty": true
-            }
+            ]
         }, 
         "key": {
             "endpoints": {
@@ -54,7 +39,24 @@
                 "show": false
             }
         }, 
+        "link": {
+            "endpoints": {
+                "expand": "url", 
+                "shorten": "url"
+            }, 
+            "settings": {
+                "pretty": true
+            }
+        }, 
         "history": {
+            "settings": {
+                "display": "short", 
+                "limit": 10, 
+                "pretty": true
+            }, 
+            "endpoints": {
+                "history": "url/history"
+            }, 
             "units": [
                 "minute", 
                 "hour", 
@@ -62,20 +64,18 @@
                 "week", 
                 "month", 
                 "year"
-            ], 
-            "endpoints": {
-                "history": "url/history"
+            ]
+        }, 
+        "info": {
+            "sets": {
+                "created": "created", 
+                "expanded": "longUrl", 
+                "status": "status"
             }, 
-            "settings": {
-                "limit": 10, 
-                "display": "short", 
-                "pretty": true
-            }
+            "endpoints": {
+                "info": "url"
+            }, 
+            "settings": {}
         }
-    }, 
-    "version": 1, 
-    "key": "AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc", 
-    "settings": {
-        "command": "link"
     }
 }
