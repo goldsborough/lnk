@@ -17,7 +17,7 @@ class Command(AbstractCommand):
 	Configures the AbstractCommand base class for all commands in the
 	entire application, which needs information about the service being
 	used. Moreover sets up the necessary parameters needed for any request
-	to the bit.ly API (the api-key, the response-format and the provider). 
+	to the bit.ly API (the api-key, the response-format and the provider).
 
 	Attributes:
 		parameters (dict): The necessary parameters for any request to the
@@ -57,7 +57,7 @@ class Command(AbstractCommand):
 		if not str(response.status_code).startswith('2'):
 			raise lnk.errors.HTTPError('Could not {0}!'.format(what),
 								   response.status_code,
-						           response.reason)
+								   response.reason)
 		data = response.json()
 		if data['state'] == 'error':
 			what = 'Could not {0}!'.format(what)

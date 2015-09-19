@@ -140,10 +140,10 @@ def info(only, hide, hide_empty, urls):
    			  help='Hide this/these set(s) of statistics.')
 @click.option('-l',
 			  '--last',
-		      nargs=2,
-		      multiple=True,
-		      type=(int, click.Choice(units)),
-		      help='Show statistics for this/these timespan(s).')
+			  nargs=2,
+			  multiple=True,
+			  type=(int, click.Choice(units)),
+			  help='Show statistics for this/these timespan(s).')
 @click.option('--forever',
 			  is_flag=True,
 			  help='Show statistics for all timespans (since forever).')
@@ -199,18 +199,18 @@ def user(only, hide, everything, history, hide_empty):
 
 @main.command()
 @click.option('-l',
-		      '--last',
-		      nargs=2,
-		      multiple=True,
-		      type=(int, click.Choice(units)),
-		      help='Display history of links from this time range, relative to now.')
+			  '--last',
+			  nargs=2,
+			  multiple=True,
+			  type=(int, click.Choice(units)),
+			  help='Display history of links from this time range, relative to now.')
 @click.option('-r',
 			  '--range',
-		      '--time-range',
-		      nargs=4,
-		      multiple=True,
-		      type=(int, click.Choice(units), int, click.Choice(units)),
-		      help='Display history of links from this time range.')
+			  '--time-range',
+			  nargs=4,
+			  multiple=True,
+			  type=(int, click.Choice(units), int, click.Choice(units)),
+			  help='Display history of links from this time range.')
 @click.option('--forever',
 			  is_flag=True,
 			  help='Display history of links since forever.')
@@ -255,7 +255,7 @@ def history(last, time_range, forever, limit, no_limit, expanded, both, pretty):
 			  help='Generate a new api key with this login.')
 @click.option('-p',
 			  '--password',
-              help='Generate a new api key with this password.')
+			  help='Generate a new api key with this password.')
 @click.option('-s/-h',
 			  '--show/--hide',
 			  default=key_config['settings']['show'],

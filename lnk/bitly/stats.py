@@ -48,7 +48,7 @@ class Stats(Command):
 		raw (bool): Whether to return the output in raw format for internal use,
 					or in a pretty string-representation for outside-display.
 		info (lnk.bitly.info.Info): A lnk.bitly.info.Info instance to retrieve
-							    addittional information for a bitlink.
+								addittional information for a bitlink.
 	"""
 
 	Timespan = namedtuple('Timespan', ['span', 'unit'])
@@ -342,7 +342,7 @@ class Stats(Command):
 		if category == 'countries':
 			if key == 'None':
 				key = 'Other'
-		 	elif full:
+			elif full:
 				key = lnk.countries.names[key]
 		elif key == 'direct':
 			key = key.title()

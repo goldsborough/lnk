@@ -64,12 +64,12 @@ class Command(AbstractCommand):
 		if not str(response.status_code).startswith('2'):
 			raise lnk.errors.HTTPError('Could not {0}.'.format(what),
 								   response.status_code,
-						           response.reason)
+								   response.reason)
 		response = response.json()
 		if not str(response['status_code']).startswith('2'):
 			raise lnk.errors.HTTPError('Could not {0}.'.format(what),
 								   response['status_code'],
-						           response['status_txt'])
+								   response['status_txt'])
 		data = response['data']
 		if inner:
 			data = data[inner][0]

@@ -136,10 +136,10 @@ def info(only, hide, urls):
    			  help='Hide this/these set(s) of statistics.')
 @click.option('-l',
 			  '--last',
-		      nargs=1,
-		      multiple=True,
-		      type=click.Choice(stats_config['units']),
-		      help='Show statistics for this/these timespan(s).')
+			  nargs=1,
+			  multiple=True,
+			  type=click.Choice(stats_config['units']),
+			  help='Show statistics for this/these timespan(s).')
 @click.option('--forever',
 			  is_flag=True,
 			  help='Show statistics for all timespans (since forever).')
@@ -180,17 +180,17 @@ def key(generate):
 @main.command()
 @click.option('-l',
 			  '--last',
-		      nargs=2,
-		      multiple=True,
-		      type=(int, click.Choice(units)),
-		      help='Display history of links from this time range, relative to now.')
+			  nargs=2,
+			  multiple=True,
+			  type=(int, click.Choice(units)),
+			  help='Display history of links from this time range, relative to now.')
 @click.option('-r',
 			  '--range',
-		      '--time-range',
-		      nargs=4,
-		      multiple=True,
-		      type=(int, click.Choice(units), int, click.Choice(units)),
-		      help='Display history of links from this time range.')
+			  '--time-range',
+			  nargs=4,
+			  multiple=True,
+			  type=(int, click.Choice(units), int, click.Choice(units)),
+			  help='Display history of links from this time range.')
 @click.option('-a',
 			  '--forever',
 			  is_flag=True,

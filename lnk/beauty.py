@@ -94,7 +94,7 @@ def wrap(line, width, indent=None):
 			index = e_start + (len(reverse) - boundary.end())
 			# Only go backwards to the last word boundary if that
 			# is not where we started (else just split it mid-word here).
-			# If we went back to the start, we'd get an endless loop 
+			# If we went back to the start, we'd get an endless loop
 			if e < len(line.escaped) and index != e_start:
 				# Go backwards to the last word boundary
 				while e > index:
@@ -171,10 +171,10 @@ def escape(line):
 
 	Returns:
 		A beauty.Line object with the original raw component and the same
-		string, but escaped, i.e. without the formatting codes applied by 
+		string, but escaped, i.e. without the formatting codes applied by
 		ecstasy -- only the text.
 	"""
-	pattern = re.compile(r'^(.*)'    				# anything
+	pattern = re.compile(r'^(.*)'					# anything
 						 r'(?:\033\[(?:\d;?)+m)'   	# escape codes
 						 r'(.+)'				 	# formatted string
 						 r'(?:\033\[(?:\d;?)+m)'   	# escape codes
