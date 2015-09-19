@@ -38,23 +38,26 @@ def fixture():
 		])
 
 	lnk.command = lnk.googl.command.Command('link', tests.paths.CREDENTIALS_PATH)
+
+	print(10, os.listdir(os.path.dirname(tests.paths.CREDENTIALS_PATH)))
 	url = 'http://goo.gl/Euc5'
 
 	return Fixture(lnk.command, url)
 
 
 def test_initializes_well(fixture):
+	assert hasattr(fixture.command, 'credentials_path')
 	assert hasattr(fixture.command, 'credentials')
 
 
 def test_get_api_works(fixture):
 
-	result = fixture.command.get_api()
 	print(6, os.listdir(tests.paths.TEST_PATH))
 	print(7, os.listdir(os.path.dirname(os.path.realpath(__file__))))
 	print(8, oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH).get())
 	print(9, oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH).get().access_token)
-	assert False
+
+	result = fixture.command.get_api()
 
 	assert isinstance(result, googleapiclient.discovery.Resource)
 	assert all(hasattr(result, i) for i in ['get', 'insert', 'list'])

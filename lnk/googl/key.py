@@ -60,7 +60,7 @@ class Key(Command):
 										client_secret=CLIENT_SECRET,
 										scope=SCOPE,
 										redirect_uri=REDIRECT_URI)
-		self.credentials_path = os.path.join(lnk.config.CONFIG_PATH, 'credentials')
+		self.credentials_path = os.path.join(lnk.config.CONFIG_PATH, '.credentials')
 
 
 	def fetch(self, _):

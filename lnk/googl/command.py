@@ -43,7 +43,7 @@ class Command(AbstractCommand):
 			self.credentials_path = credentials_path
 		else:
 			self.credentials_path = os.path.join(lnk.config.CONFIG_PATH,
-												 'credentials')
+												 '.credentials')
 		self.credentials = oauth2client.file.Storage(self.credentials_path)
 
 	def get_api(self):
