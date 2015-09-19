@@ -18,9 +18,6 @@ lnk
 .. image:: https://img.shields.io/github/license/mashape/apistatus.png?style=flat-square
  :target: http://goldsborough.mit-license.org
 
-.. image:: http://img.shields.io/gratipay/goldsborough.png?style=flat-square
- :target: https://gratipay.com/~goldsborough/
-
 .. image:: https://badges.gitter.im/Join%20Chat.png
    :alt: Join the chat at https://gitter.im/goldsborough/lnk
    :target: https://gitter.im/goldsborough/lnk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
@@ -125,3 +122,6 @@ Authors
 =======
 
 Peter Goldsborough & `cat <https://goo.gl/IpUmJn>`_ :heart:
+
+.. image:: http://img.shields.io/gratipay/goldsborough.png?style=flat-square
+ :target: https://gratipay.com/~goldsborough/
