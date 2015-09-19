@@ -100,11 +100,9 @@ def test_context_syntax_writes_well(fixture, changed):
 
 
 def test_properties_are_accessible(fixture, changed):
-	print(fixture, changed)
-	print(fixture.manager.config, changed.config)
-	assert sorted(fixture.manager.keys) == sorted(changed.config.keys())
-	assert sorted(fixture.manager.values) == sorted(changed.config.values())
-	assert sorted(fixture.manager.items) == sorted(changed.config.items())
+	assert all(i in fixture.manager.keys for i in changed.config.keys())
+	assert all(i in fixture.manager.values for i in changed.config.values())
+	assert all(i in fixture.manager.items for i in changed.config.items())
 
 
 def test_get_works(changed):
