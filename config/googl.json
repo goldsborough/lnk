@@ -2,24 +2,15 @@
     "url": "https://www.googleapis.com/urlshortener", 
     "commands": {
         "info": {
-            "endpoints": {
-                "info": "url"
-            }, 
-            "settings": {}, 
             "sets": {
                 "status": "status", 
                 "expanded": "longUrl", 
                 "created": "created"
-            }
-        }, 
-        "link": {
-            "endpoints": {
-                "shorten": "url", 
-                "expand": "url"
             }, 
-            "settings": {
-                "pretty": true
-            }
+            "endpoints": {
+                "info": "url"
+            }, 
+            "settings": {}
         }, 
         "stats": {
             "units": [
@@ -28,6 +19,13 @@
                 "week", 
                 "month"
             ], 
+            "sets": {
+                "platforms": "platforms", 
+                "browsers": "browsers", 
+                "referrers": "referrers", 
+                "clicks": "shortUrlClicks", 
+                "countries": "countries"
+            }, 
             "endpoints": {
                 "stats": "url"
             }, 
@@ -37,13 +35,15 @@
                 "span": "two-hours", 
                 "limit": 10, 
                 "timespan": "two-hours"
+            }
+        }, 
+        "link": {
+            "endpoints": {
+                "shorten": "url", 
+                "expand": "url"
             }, 
-            "sets": {
-                "countries": "countries", 
-                "platforms": "platforms", 
-                "browsers": "browsers", 
-                "clicks": "shortUrlClicks", 
-                "referrers": "referrers"
+            "settings": {
+                "pretty": true
             }
         }, 
         "key": {

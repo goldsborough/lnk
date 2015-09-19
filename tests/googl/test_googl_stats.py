@@ -344,7 +344,7 @@ def test_get_stats_works(fixture):
 
 
 def test_fetch_works_for_single_url(fixture):
-	result = fixture.stats.fetch(fixture.category.keys(),
+	result = fixture.stats.fetch(list(fixture.category.keys()),
 								 [],
 								 fixture.timespans,
 								 False,
@@ -363,7 +363,7 @@ def test_fetch_works_for_single_url(fixture):
 
 
 def test_fetch_limits_well(fixture):
-	result = fixture.stats.fetch(fixture.category.keys(),
+	result = fixture.stats.fetch(list(fixture.category.keys()),
 								 [],
 								 fixture.timespans,
 								 False,
@@ -382,7 +382,7 @@ def test_fetch_limits_well(fixture):
 
 def test_fetch_works_for_many_urls(fixture):
 	other = 'http://goo.gl/XBzv0g'
-	result = fixture.stats.fetch(fixture.category.keys(),
+	result = fixture.stats.fetch(list(fixture.category.keys()),
 								 [],
 								 fixture.timespans,
 								 False,
@@ -411,7 +411,7 @@ def test_fetch_works_for_many_urls(fixture):
 
 
 def test_fetch_adds_info_well(fixture):
-	result = fixture.stats.fetch(fixture.category.keys(),
+	result = fixture.stats.fetch(list(fixture.category.keys()),
 								 [],
 								 fixture.timespans,
 								 False,

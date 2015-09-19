@@ -102,12 +102,12 @@ def test_order_works(fixture):
 		'default_link_privacy'
 	]
 
-	keys = fixture.selected.keys()
+	keys = list(fixture.selected.keys())
 	random.shuffle(keys)
 	shuffled = dict((key, fixture.selected[key]) for key in keys)
 	result = fixture.user.order(shuffled, fixture.sets.values())
 
-	assert result.keys() == expected
+	assert list(result.keys()) == expected
 
 
 def test_request_works(fixture):

@@ -236,19 +236,19 @@ def test_listify_handles_lists_well(fixture):
 	data = copy.deepcopy(fixture.forever_data)
 	result = fixture.stats.listify(None, [data], False)
 	header = fixture.first_level.format('Since forever')
+	expected = ['{0}:'.format(header)]
 	if fixture.forever_data['data']:
-		expected = ['{0}:'.format(header)]
 		for i in fixture.forever_data['data']:
 			# A way of not having to pop the clicks
 			clicks = i['clicks']
-			keys = i.keys()
+			keys = list(i.keys())
 			keys.remove('clicks')
 			assert len(keys) == 1
 			key = i[keys[0]]
 			line = fixture.second_level.format(key, clicks)
 			expected.append(line)
 	else:
-		expected = ['{0}: None'.format(header)]
+		expected[-1] += ' None'
 
 	assert result == expected
 

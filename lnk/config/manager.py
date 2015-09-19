@@ -50,15 +50,15 @@ class Manager(object):
 
 	@property
 	def keys(self):
-		return self.config.keys()
+		return list(self.config.keys())
 
 	@property
 	def values(self):
-		return self.config.values()
+		return list(self.config.values())
 
 	@property
 	def items(self):
-		return self.config.items()
+		return list(self.config.items())
 
 	def __getitem__(self, key):
 		if key not in self.config:

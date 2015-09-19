@@ -50,7 +50,8 @@ def configure(which, command, keys, values, quiet, all_keys):
 		if command:
 			manager = manager['commands'][command]
 		manager = manager['settings']
-		keys = manager.keys() if (not keys or all_keys) else list(keys)
+		keys = manager.keys() if (not keys or all_keys) else keys
+		keys = list(keys)
 		values = list(values)
 
 		if quiet:
