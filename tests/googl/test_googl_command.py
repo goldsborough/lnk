@@ -48,7 +48,13 @@ def test_initializes_well(fixture):
 
 
 def test_get_api_works(fixture):
+
 	result = fixture.command.get_api()
+	print(6, os.listdir(tests.paths.TEST_PATH))
+	print(7, os.listdir(os.path.dirname(os.path.realpath(__file__))))
+	print(8, oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH).get())
+	print(9, oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH).get().access_token)
+	assert False
 
 	assert isinstance(result, googleapiclient.discovery.Resource)
 	assert all(hasattr(result, i) for i in ['get', 'insert', 'list'])
