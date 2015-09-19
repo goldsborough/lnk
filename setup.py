@@ -95,7 +95,6 @@ setuptools.setup(
 		'coverage==3.7.1',
 		'ecstasy==0.1.3',
 		'google-api-python-client==1.4.2',
-		'overrides==0.5',
 		'pyperclip==1.5.11',
 		'requests==2.7.0',
 		'ordereddict==1.1',

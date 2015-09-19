@@ -7,8 +7,6 @@ import click
 import os
 import sys
 
-from overrides import overrides
-
 import lnk.config
 import lnk.errors
 
@@ -49,7 +47,6 @@ class Main(click.MultiCommand):
 
 		return super(Main, self).format_usage(context, *args)
 
-	@overrides
 	def invoke(self, context):
 		"""
 		Invokes a command.
@@ -66,12 +63,10 @@ class Main(click.MultiCommand):
 			context.args[0] = escaped
 		super(Main, self).invoke(context)
 
-	@overrides
 	def list_commands(self, context):
 		"""Returns the names of all available subcommands."""
 		return self.commands.keys()
 
-	@overrides
 	def get_command(self, context, name):
 		"""Returns the function for a given subcommand-name."""
 		if name not in self.commands:

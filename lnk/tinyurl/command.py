@@ -3,8 +3,6 @@
 
 """Contains the base-class for all bit.ly commands."""
 
-from overrides import overrides
-
 import lnk.config
 import lnk.errors
 
