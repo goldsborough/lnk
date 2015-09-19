@@ -6,10 +6,14 @@
 from __future__ import unicode_literals
 
 import ecstasy
-import Queue
 import requests
 import threading
 import sys
+
+try:
+	from Queue import Queue
+except ImportError:
+	from queue import Queue
 
 import lnk.config
 import lnk.errors
@@ -63,7 +67,7 @@ class AbstractCommand(object):
 			self.endpoints = self.config['endpoints']
 			self.settings = self.config.get('settings')
 			self.sets = self.config.get('sets')
-		self.queue = Queue.Queue()
+		self.queue = Queue()
 		self.lock = threading.Lock()
 		self.error = None
 		self.parameters = {}
