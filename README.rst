@@ -15,7 +15,7 @@ lnk
 .. image:: https://coveralls.io/repos/goldsborough/lnk/badge.png?branch=master&service=github
   :target: https://coveralls.io/github/goldsborough/lnk?branch=master
 
-.. image:: https://img.shields.io/github/license/mashape/apistatus.png?style=flat-square
+.. image:: https://img.shields.io/github/license/mashape/apistatus.png
  :target: http://goldsborough.mit-license.org
 
 .. image:: https://badges.gitter.im/Join%20Chat.png

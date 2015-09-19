@@ -281,7 +281,7 @@ class Stats(Command):
 			elif isinstance(items, list):
 				for item in items:
 					clicks = item.pop('clicks')
-					key = item.values()[0]
+					key = list(item.values())[0]
 					line = self.format(category, key, clicks, full)
 					lines.append(line)
 			else:
