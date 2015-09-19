@@ -4,6 +4,7 @@
 import os.path
 import pytest
 import re
+import sys
 
 from collections import namedtuple
 
@@ -39,31 +40,41 @@ def fixture(request):
 
 
 def test_key_generation(fixture):
-	key = fixture.key.fetch(None,
-							fixture.login,
-							fixture.password,
-							True,
-							False)
+	try:
+		key = fixture.key.fetch(None,
+								fixture.login,
+								fixture.password,
+								True,
+								False)
 
-	assert isinstance(key, str)
-	assert len(key) == 40
-	assert re.match(r'[a-z\d]', key)
+		assert isinstance(key, str)
+		assert len(key) == 40
+		assert re.match(r'[a-z\d]', key)
 
-	here = os.path.dirname(os.path.abspath(__file__))
-	path = os.path.join(here, 'token')
-	with open(path, 'wt') as destination:
-		destination.write(key)
+		here = os.path.dirname(os.path.abspath(__file__))
+		path = os.path.join(here, 'token')
+		with open(path, 'wt') as destination:
+			destination.write(key)
+	except lnk.errors.HTTPError:
+		_, error, _ = sys.exc_info()
+		if 'RATE_LIMIT_EXCEEDED' not in error.level(1)[1]:
+			raise error
 
 
 def test_key_is_hidden_if_show_false(fixture):
-	result = fixture.key.fetch(None,
-							  fixture.login,
-							  fixture.password,
-							  False,
-							  False)
+	try:
+		result = fixture.key.fetch(None,
+								  fixture.login,
+								  fixture.password,
+								  False,
+								  False)
 
-	assert isinstance(result, str)
-	assert result == ''
+		assert isinstance(result, str)
+		assert result == ''
+	except lnk.errors.HTTPError:
+		_, error, _ = sys.exc_info()
+		if 'RATE_LIMIT_EXCEEDED' not in error.level(1)[1]:
+			raise error
 
 
 def test_key_generation_fails_for_bad_login(fixture):

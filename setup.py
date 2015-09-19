@@ -10,9 +10,7 @@ import re
 import setuptools
 import setuptools.command.install
 
-INIT_PATH = os.path.join('lnk', '__init__.py')
-
-with open(INIT_PATH) as init:
+with open(os.path.join('lnk', '__init__.py')) as init:
 	INIT = init.read()
 
 

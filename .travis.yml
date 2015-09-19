@@ -6,7 +6,7 @@ python:
   - "3.4"
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install xclip xsel
+  - sudo apt-get install xsel
 install:
   - pip install .
   - pip install -rrequirements.txt

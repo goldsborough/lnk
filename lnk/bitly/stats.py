@@ -313,7 +313,7 @@ class Stats(Command):
 			# the API, but it looks weird to the user if he
 			# wanted years and got an equivalent number of months
 			if unit == 'months' and span % 12 == 0:
-				span /= 12
+				span //= 12
 				unit = 'years' if span > 1 else 'year'
 			span = '{0} '.format(span) if span > 1 else ''
 			header = 'Last {0}{1}:'.format(span, unit)
