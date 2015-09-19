@@ -2,6 +2,9 @@
 lnk
 ***
 
+.. image:: https://badge.fury.io/py/lnk.svg
+    :target: http://badge.fury.io/py/lnk
+
 .. image:: https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square
  :target: http://goldsborough.mit-license.org
 
