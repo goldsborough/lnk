@@ -57,6 +57,8 @@ class Command(AbstractCommand):
 		print(1, self.credentials_path)
 		print(2, self.credentials.get())
 		print(3, self.credentials)
+		print(4, os.getcwd())
+		print(5, os.listdir())
 		http = self.authorize()
 		api = apiclient.discovery.build('urlshortener', 'v1', http=http)
 

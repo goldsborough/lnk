@@ -5,7 +5,7 @@ lnk
 .. image:: https://travis-ci.org/goldsborough/lnk.png
     :target: https://travis-ci.org/goldsborough/lnk
 
-.. image:: https://badge.fury.io/py/lnk.png?style=flat-square
+.. image:: https://badge.fury.io/py/lnk.png
     :target: http://badge.fury.io/py/lnk
 
 .. image:: https://readthedocs.org/projects/lnk/badge/?version=latest
