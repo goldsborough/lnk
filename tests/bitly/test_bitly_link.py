@@ -5,9 +5,13 @@ import ecstasy
 import os
 import pyperclip
 import pytest
-import Queue
 import requests
 import threading
+
+try:
+	from Queue import Queue
+except ImportError:
+	from queue import Queue
 
 from collections import namedtuple
 
@@ -20,7 +24,7 @@ with open(os.path.join(tests.paths.TEST_PATH, 'bitly', 'token')) as source:
 	ACCESS_TOKEN = source.read()
 
 LOCK = threading.Lock()
-QUEUE = Queue.Queue()
+QUEUE = Queue()
 
 def shorten(url):
 	response = requests.get('{0}/shorten'.format(API),

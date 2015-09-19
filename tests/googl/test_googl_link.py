@@ -5,9 +5,13 @@ import ecstasy
 import oauth2client.file
 import pyperclip
 import pytest
-import Queue
 import requests
 import threading
+
+try:
+	from Queue import Queue
+except ImportError:
+	from queue import Queue
 
 from collections import namedtuple
 
@@ -19,7 +23,7 @@ KEY = 'AIzaSyAoXKM_AMBafkXqmVeqJ82o9B9NPCTvXxc'
 API = 'https://www.googleapis.com/urlshortener'
 
 LOCK = threading.Lock()
-QUEUE = Queue.Queue()
+QUEUE = Queue()
 
 def shorten(url='http://python.org'):
 	headers = {'content-type': 'application/json'}

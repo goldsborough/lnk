@@ -108,10 +108,10 @@ Whoop:
 
 dee-doo.
 
-`Documentation <lnk.rtfd.org>`_
+`Documentation <http://lnk.rtfd.org>`_
 ===============================
 
-Documentation for the project's source alongside a detailed description of how to effectively use **lnk** can be found `here <lnk.rtfd.org>`_.
+Documentation for the project's source alongside a detailed description of how to effectively use **lnk** can be found `here <http://lnk.rtfd.org>`_.
 
 `License <http://goldsborough.mit-license.org>`_
 ================================================
