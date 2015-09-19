@@ -4,6 +4,7 @@
 """Handles the oauth2 authorization procedure for the goo.gl API."""
 
 import click
+import ecstasy
 import oauth2client.file
 import oauth2client.tools
 import os.path
@@ -23,7 +24,7 @@ REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
 
 def echo(*args):
 	"""
-	Executes a key command and echoes its output.
+	Executes a key command.
 
 	Arguments:
 		args (variadic): The arguments to pass to a
@@ -83,3 +84,6 @@ class Key(Command):
 
 		storage = oauth2client.file.Storage(self.credentials_path)
 		storage.put(credentials)
+
+		success = ecstasy.beautify('<Success!>', ecstasy.Color.Magenta)
+		click.echo(success)

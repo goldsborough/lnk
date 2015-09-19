@@ -4,6 +4,7 @@
 """Handles the oauth2 authorization procedure for the bit.ly API."""
 
 import click
+import ecstasy
 import simplejson
 
 import lnk.beauty
@@ -66,7 +67,6 @@ class Key(Command):
 		"""
 		if who:
 			who = lnk.config.get('bitly', 'login')
-			print(who)
 			return '{0}\n'.format(who) if who else 'Nobody.\n'
 
 		if not login:
@@ -78,6 +78,9 @@ class Key(Command):
 		with lnk.config.Manager('bitly', write=True) as manager:
 			manager['key'] = key
 			manager['login'] = login
+
+		success = ecstasy.beautify('<Success!>', ecstasy.Color.Magenta)
+		click.echo(success)
 
 		if show:
 			if self.raw:

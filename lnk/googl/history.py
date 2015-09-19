@@ -22,6 +22,13 @@ from lnk.googl.command import Command
 warnings.filterwarnings('ignore', module=r'ecstasy\.parser')
 
 def echo(*args):
+	"""
+	Executes a history command and echoes its output.
+
+	Arguments:
+		args (variadic): The arguments to pass to a
+						 History instance's fetch() method.
+	"""
 	click.echo(History().fetch(*args))
 
 class History(Command):

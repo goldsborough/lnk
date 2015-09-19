@@ -1,6 +1,13 @@
 {
     "commands": {
         "info": {
+            "endpoints": {
+                "info": "info", 
+                "history": "user/link_history"
+            }, 
+            "settings": {
+                "hide-empty": false
+            }, 
             "sets": {
                 "archived": "archived", 
                 "created": "created_at", 
@@ -12,13 +19,6 @@
                 "user": "created_by", 
                 "title": "title", 
                 "tags": "tags"
-            }, 
-            "endpoints": {
-                "info": "info", 
-                "history": "user/link_history"
-            }, 
-            "settings": {
-                "hide-empty": false
             }
         }, 
         "stats": {
@@ -30,11 +30,6 @@
                 "month", 
                 "year"
             ], 
-            "sets": {
-                "referrers": "referrers", 
-                "clicks": "clicks", 
-                "countries": "countries"
-            }, 
             "endpoints": {
                 "referrers": "link/referrers", 
                 "clicks": "link/clicks", 
@@ -46,6 +41,11 @@
                 "limit": 10, 
                 "unit": "forever", 
                 "span": -1
+            }, 
+            "sets": {
+                "referrers": "referrers", 
+                "clicks": "clicks", 
+                "countries": "countries"
             }
         }, 
         "link": {
@@ -58,6 +58,13 @@
             }
         }, 
         "user": {
+            "endpoints": {
+                "user": "user/info"
+            }, 
+            "settings": {
+                "hide-empty": false, 
+                "history": false
+            }, 
             "sets": {
                 "name": "full_name", 
                 "privacy": "default_link_privacy", 
@@ -67,13 +74,6 @@
                 "date": "member_since", 
                 "login": "login", 
                 "display": "display_name"
-            }, 
-            "endpoints": {
-                "user": "user/info"
-            }, 
-            "settings": {
-                "hide-empty": false, 
-                "history": false
             }
         }, 
         "key": {
@@ -108,6 +108,6 @@
     }, 
     "url": "https://api-ssl.bitly.com", 
     "version": 3, 
-    "key": null, 
+    "key": "b0b5081ae3385be81656b34bdc7ea0d27c5be0fe", 
     "login": "lnktest"
 }

@@ -15,6 +15,13 @@ import lnk.errors
 from lnk.googl.command import Command
 
 def echo(*args):
+	"""
+	Executes a Link command and echoes its output.
+
+	Arguments:
+		args (variadic): The arguments to pass to a
+						 Link instance's fetch() method.
+	"""
 	click.echo(Link().fetch(*args))
 
 class Link(Command):
