@@ -2,7 +2,7 @@
 lnk
 ***
 
-.. image:: https://badge.fury.io/py/lnk.svg
+.. image:: https://badge.fury.io/py/lnk.png?style=flat-square
     :target: http://badge.fury.io/py/lnk
 
 .. image:: https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square
@@ -11,7 +11,15 @@ lnk
 .. image:: http://img.shields.io/gratipay/goldsborough.svg?style=flat-square
  :target: https://gratipay.com/~goldsborough/
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/goldsborough/lnk
+   :target: https://gitter.im/goldsborough/lnk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+\
+
 A command-line URL-shortening client for bitly, tinyurl and goo.gl.
+
+\
 
 How a smart dev (you) shortens a URL:
 
