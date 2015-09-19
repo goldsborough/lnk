@@ -126,7 +126,7 @@ def test_exception_handling_for_threads_works(fixture):
 
 	assert fixture.command.error is not None
 	assert isinstance(fixture.command.error, RuntimeError)
-	assert str(fixture.command.error.message) == 'Meh'
+	assert str(fixture.command.error) == 'Meh'
 
 	fixture.command.error = None
 
