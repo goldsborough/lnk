@@ -187,12 +187,14 @@ class Link(Command):
 		"""
 		response = self.get(url, what="expand url '{0}'".format(url))
 
+		print(response)
+
 		if response['status'] in ['MALWARE', 'PHISHING']:
-			lnk.errors.warn("Careful! goo.gl believes the url '{0}' is {1}"
-						"!".format(response['longUrl']),
-								   response['status'].lower())
+			what = "Careful! goo.gl believes the url '{0}' is {1}!"
+			lnk.errors.warn(what.format(response['longUrl'],
+										response['status'].lower()))
 		elif response['status'] == 'REMOVED':
-			return '{0} (removed)'.format(response['longUrl'])
+			return 'REMOVED'
 
 		return response['longUrl']
 

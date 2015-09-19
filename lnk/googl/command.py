@@ -38,10 +38,12 @@ class Command(AbstractCommand):
 									file. The one at lnk/config/credentials
 									will be chosen by default.
 		"""
-		super(Command, self).__init__('googl', which) 
-		if not credentials_path:
+		super(Command, self).__init__('googl', which)
+		if credentials_path:
+			self.credentials_path = credentials_path
+		else:
 			self.credentials_path = os.path.join(lnk.config.CONFIG_PATH,
-											'credentials')
+												 'credentials')
 		self.credentials = oauth2client.file.Storage(self.credentials_path)
 
 	def get_api(self):
