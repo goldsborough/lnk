@@ -22,17 +22,16 @@ URL = 'https://www.googleapis.com/urlshortener'
 API = apiclient.discovery.build('urlshortener',
 								'v{0}'.format(VERSION),
 								developerKey=KEY).url()
-CREDENTIALS_PATH = os.path.join(tests.paths.CONFIG_PATH, 'credentials')
+
 
 @pytest.fixture(scope='module')
-
 def fixture():
 	Fixture = namedtuple('Fixture', [
 		'command',
 		'url'
 		])
 
-	lnk.command = lnk.googl.command.Command('link')
+	lnk.command = lnk.googl.command.Command('link', tests.paths.CREDENTIALS_PATH)
 	url = 'http://goo.gl/Euc5'
 
 	return Fixture(lnk.command, url)
@@ -48,11 +47,13 @@ def get(url, projection=None):
 def test_initializes_well(fixture):
 	assert hasattr(fixture.command, 'credentials')
 
+
 def test_get_api_works(fixture):
 	result = fixture.command.get_api()
 
 	assert isinstance(result, googleapiclient.discovery.Resource)
 	assert all(hasattr(result, i) for i in ['get', 'insert', 'list'])
+
 
 def test_execute_works_for_healthy_request(fixture):
 	request = API.get(shortUrl=fixture.url)
@@ -64,11 +65,13 @@ def test_execute_works_for_healthy_request(fixture):
 
 	assert isinstance(response, dict)
 
+
 def test_execute_fails_for_bad_request(fixture):
 	request = API.get(shortUrl='banana')
 
 	with pytest.raises(lnk.errors.HTTPError):
 		fixture.command.execute(request)
+
 
 def test_execute_throws_error_with_correct_message(fixture):
 	request = API.get(shortUrl='banana')
@@ -78,6 +81,7 @@ def test_execute_throws_error_with_correct_message(fixture):
 
 		assert error.value.what == 'badness'
 
+
 def test_get_works(fixture):
 	result = fixture.command.get(fixture.url)
 	expected = get(fixture.url)
@@ -85,20 +89,22 @@ def test_get_works(fixture):
 	assert isinstance(result, dict)
 	assert result == expected
 
+
 def test_authorize_works(fixture):
 	result = fixture.command.authorize()
 
 	assert isinstance(result, httplib2.Http)
 
+
 def test_authorize_refreshes_well():
-	storage = oauth2client.file.Storage(CREDENTIALS_PATH)
+	storage = oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH)
 	credentials = storage.get()
 	old = datetime.datetime.now() - datetime.timedelta(days=100)
 	credentials.token_expiry = old
 	storage.put(credentials)
 
-	lnk.command = lnk.googl.command.Command('link')
-	lnk.command.authorize()
+	command = lnk.googl.command.Command('link', tests.paths.CREDENTIALS_PATH)
+	command.authorize()
 
 	credentials = storage.get()
 
@@ -106,9 +112,9 @@ def test_authorize_refreshes_well():
 
 
 def test_authorize_throws_if_no_credentials(fixture):
-	storage = oauth2client.file.Storage(CREDENTIALS_PATH)
+	storage = oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH)
 	credentials = storage.get()
-	os.remove(CREDENTIALS_PATH)
+	os.remove(tests.paths.CREDENTIALS_PATH)
 
 	with pytest.raises(lnk.errors.AuthorizationError):
 		fixture.command.authorize()

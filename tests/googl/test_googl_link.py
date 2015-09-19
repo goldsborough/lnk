@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import ecstasy
+import oauth2client.file
 import pyperclip
 import pytest
 import Queue
@@ -69,6 +70,7 @@ def fixture():
 		])
 
 	link = lnk.googl.link.Link(raw=True)
+	link.credentials = oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH)
 	url = 'https://www.github.com/goldsborough/lnk'
 	short = shorten(url)
 	bold = ecstasy.beautify('<{0}>'.format(short), ecstasy.Style.Bold)

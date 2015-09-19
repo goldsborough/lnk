@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import oauth2client.file
 import pytest
 import requests
 
@@ -39,6 +40,7 @@ def fixture():
 	urls = ['http://goo.gl/9RJxHk', 'https://goo.gl/IpUmJn']
 	expanded = ['http://python.org/', 'http://github.com/']
 	info = lnk.googl.info.Info(raw=True)
+	info.credentials = oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH)
 	only = ['created', 'expanded']
 	hide = ['status']
 	sets = {

@@ -28,9 +28,20 @@ class Command(AbstractCommand):
 												 with the oauth2 credentials
 												 file.
 	"""
-	def __init__(self, which):
+	def __init__(self, which, credentials_path=None):
+		"""
+		Constructs a new Command.
+
+		Arguments:
+			which (str): The name of the command (e.g. link).
+			credentials_path (str): Optionally, the full path to a credentials
+									file. The one at lnk/config/credentials
+									will be chosen by default.
+		"""
 		super(Command, self).__init__('googl', which) 
-		credentials_path = os.path.join(lnk.config.CONFIG_PATH, 'credentials')
+		if not credentials_path:
+			credentials_path = os.path.join(lnk.config.CONFIG_PATH,
+											'credentials')
 		self.credentials = oauth2client.file.Storage(credentials_path)
 
 	def get_api(self):

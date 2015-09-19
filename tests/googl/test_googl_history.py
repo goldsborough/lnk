@@ -19,7 +19,6 @@ import lnk.googl.history
 
 VERSION = 1
 API = 'https://www.googleapis.com/urlshortener'
-CREDENTIALS_PATH = os.path.join(tests.paths.CONFIG_PATH, 'credentials')
 
 def timestamp(time_range, base=None):
 	delta = {
@@ -36,7 +35,7 @@ def timestamp(time_range, base=None):
 	return base - offset
 
 def get_token():
-	storage = oauth2client.file.Storage(CREDENTIALS_PATH)
+	storage = oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH)
 	credentials = storage.get()
 	if credentials.access_token_expired:
 		credentials.refresh(httplib2.Http())
@@ -103,6 +102,8 @@ def fixture():
 	urls = process(request())
 
 	history = lnk.googl.history.History(raw=True)
+
+	history.credentials = oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH)
 
 	last = [(4, 'week'), (5, 'month')]
 	last_urls = [filter_urls(urls, i) for i in last]

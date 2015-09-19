@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import copy
 import ecstasy
+import oauth2client.file
 import pytest
 import requests
 
@@ -65,7 +66,9 @@ def fixture(request):
 		old = settings['timespan']
 
 	stats = lnk.googl.stats.Stats(raw=True)
+	stats.credentials = oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH)
 	info = lnk.googl.info.Info(raw=True)
+	info.credentials = oauth2client.file.Storage(tests.paths.CREDENTIALS_PATH)
 
 	def finalize():
 		with lnk.config.Manager('googl', write=True) as manager:

@@ -3,60 +3,56 @@
 
 """setup.py script for setuptools."""
 
+import json
+import os.path
 import re
 
-from setuptools import setup, find_packages
+import setuptools
+import setuptools.command.install
 
-version = ''
+with open('lnk/__init__.py') as init:
+	INIT = init.read()
 
-def find(thing, where):
-	"""Finds __<thing>__ in <where>."""
-
+def get(thing):
+	"""Retrieves a setup value."""
+	if thing == 'readme':
+		with open('README.rst') as readme:
+			return readme.read()
 	pattern = r'^__{0}__\s*=\s*[\'"]([^\'"]*)[\'"]'.format(thing)
-	match = re.search(pattern, where, re.MULTILINE)
+	match = re.search(pattern, INIT, re.MULTILINE)
 
 	return match.group(1)
 
-with open('lnk/__init__.py') as init:
-	source = init.read()
-	name = find('title', source)
-	version = find('version', source)
-	author = find('author', source)
-	email = find('email', source)
-	license_name = find('license', source)
-	url = find('url', source)
+class Install(setuptools.command.install.install):
+	"""Subclass of setuptool's install class to have a post-install task."""
 
-with open('README.rst') as source:
-	readme = source.read()
+	def run(self):
+		setuptools.command.install.install.run(self)
+		self.execute(self.reset, [], msg='Running post-install task...')
 
-requirements = [
-	'click==4.1',
-	'coverage==3.7.1',
-	'ecstasy==0.1.3',
-	'google-api-python-client==1.4.2',
-	'overrides==0.5',
-	'pyperclip==1.5.11',
-	'requests==2.7.0',
-	'ordereddict==1.1',
-	'enum34==1.0.4'
-]
+	@staticmethod
+	def reset():
+		"""Resets any old authorization keys for a new user."""
+		for_bitly = os.path.join('config', 'bitly.json')
+		with open(for_bitly) as source:
+			config = json.load(source)
+		config['key'] = None
+		with open(for_bitly, 'w') as destination:
+			json.dump(config, destination, indent=4)
+		for_googl = os.path.join('config', 'credentials')
+		if os.path.exists(for_googl):
+			os.remove(for_googl)
 
-test_requirements = [
-	'pytest==2.7.2',
-	'pytest-cache==1.0',
-	'python-coveralls==2.5.0',
-	'tox==2.1.1'
-]
-
-setup(
-	name=name,
-	version=version,
+setuptools.setup(
+	cmdclass=dict(install=Install),
+	name=get('title'),
+	version=get('version'),
 	description='A command-line URL-shortening client.',
-	long_description=readme,
-	author=author,
-	author_email=email,
-	url=url,
-	license=license_name,
+	long_description=get('readme'),
+	author=get('author'),
+	author_email=get('email'),
+	url=get('url'),
+	license=get('license'),
 	classifiers=[
 		'Development Status :: 4 - Beta',
 
@@ -88,9 +84,24 @@ setup(
 		'../docs/source/conf.py',
 		'../docs/Makefile',
 		]),
-	packages=find_packages(),
-	install_requires=requirements,
+	packages=setuptools.find_packages(),
+	install_requires=[
+		'click==4.1',
+		'coverage==3.7.1',
+		'ecstasy==0.1.3',
+		'google-api-python-client==1.4.2',
+		'overrides==0.5',
+		'pyperclip==1.5.11',
+		'requests==2.7.0',
+		'ordereddict==1.1',
+		'enum34==1.0.4'
+	],
 	test_suite='tests',
-	tests_require=test_requirements,
+	tests_require=[
+		'pytest==2.7.2',
+		'pytest-cache==1.0',
+		'python-coveralls==2.5.0',
+		'tox==2.1.1'
+	],
 	entry_points=dict(console_scripts=['lnk = lnk.cli:main'])
 )

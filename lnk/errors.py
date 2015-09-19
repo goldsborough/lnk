@@ -162,9 +162,10 @@ class AuthorizationError(Error):
 		logo = ecstasy.beautify('<lnk>', ecstasy.Style.Bold)
 		details = 'You have not yet authorized {0} to '.format(logo)
 		details += 'access your private {0} information. '.format(service)
-		details += "Please run 'lnk {0} key --generate'.".format(service)
+		hint = "Run 'lnk {0} key --generate'.".format(service)
 		super(AuthorizationError, self).__init__(what,
 												 Details=details,
+												 Hint=hint,
 												 **additional)
 
 class InternalError(Error):
