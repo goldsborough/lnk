@@ -8,14 +8,14 @@ lnk
 .. image:: https://badge.fury.io/py/lnk.png?style=flat-square
     :target: http://badge.fury.io/py/lnk
 
+.. image:: https://coveralls.io/repos/goldsborough/lnk/badge.png?branch=master&service=github
+  :target: https://coveralls.io/github/goldsborough/lnk?branch=master
+
 .. image:: https://img.shields.io/github/license/mashape/apistatus.png?style=flat-square
  :target: http://goldsborough.mit-license.org
 
 .. image:: http://img.shields.io/gratipay/goldsborough.png?style=flat-square
  :target: https://gratipay.com/~goldsborough/
-
-.. image:: https://coveralls.io/repos/goldsborough/lnk/badge.png?branch=master&service=github
-  :target: https://coveralls.io/github/goldsborough/lnk?branch=master
 
 .. image:: https://badges.gitter.im/Join%20Chat.png
    :alt: Join the chat at https://gitter.im/goldsborough/lnk
