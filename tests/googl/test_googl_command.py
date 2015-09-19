@@ -24,6 +24,12 @@ API = apiclient.discovery.build('urlshortener',
 								developerKey=KEY).url()
 
 
+def get(url, projection=None):
+	request = API.get(shortUrl=url, projection=projection)
+	response = request.execute()
+
+	return response
+
 @pytest.fixture(scope='module')
 def fixture():
 	Fixture = namedtuple('Fixture', [
@@ -35,13 +41,6 @@ def fixture():
 	url = 'http://goo.gl/Euc5'
 
 	return Fixture(lnk.command, url)
-
-
-def get(url, projection=None):
-	request = API.get(shortUrl=url, projection=projection)
-	response = request.execute()
-
-	return response
 
 
 def test_initializes_well(fixture):

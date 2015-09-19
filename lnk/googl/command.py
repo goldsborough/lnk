@@ -39,9 +39,11 @@ class Command(AbstractCommand):
 									will be chosen by default.
 		"""
 		super(Command, self).__init__('googl', which) 
+		print(1, credentials_path)
 		if not credentials_path:
 			credentials_path = os.path.join(lnk.config.CONFIG_PATH,
 											'credentials')
+		print(2, credentials_path)
 		self.credentials = oauth2client.file.Storage(credentials_path)
 
 	def get_api(self):
@@ -52,6 +54,7 @@ class Command(AbstractCommand):
 			An API object from Google API-library, used to perform any
 			HTTP request for the url-shortening API.
 		"""
+		print(3, self.credentials)
 		http = self.authorize()
 		api = apiclient.discovery.build('urlshortener', 'v1', http=http)
 
@@ -69,7 +72,7 @@ class Command(AbstractCommand):
 								   statistics or information about a link).
 			what (str): A human-readable string representing what the request
 						was for, such that if there is an error in the response,
-						an errors.HTTPError is raised with the message 
+						an errors.HTTPError is raised with the message
 						'Could not <what>.' (NOT: 'even').
 
 		Return:
