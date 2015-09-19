@@ -8,6 +8,10 @@ lnk
 .. image:: https://badge.fury.io/py/lnk.png?style=flat-square
     :target: http://badge.fury.io/py/lnk
 
+.. image:: https://readthedocs.org/projects/lnk/badge/?version=latest
+	:target: http://lnk.readthedocs.org/en/latest/?badge=latest
+	:alt: Documentation Status
+
 .. image:: https://coveralls.io/repos/goldsborough/lnk/badge.png?branch=master&service=github
   :target: https://coveralls.io/github/goldsborough/lnk?branch=master
 
@@ -107,10 +111,10 @@ Whoop:
 
 dee-doo.
 
-`Documentation <http://lnk.rtfd.org/>`_
-=======================================
+`Documentation <lnk.rtfd.org>`_
+===============================
 
-Documentation for the project's source alongside a detailed description of how to effectively use **lnk** can be found `here <http://lnk.rtfd.org/>`_.
+Documentation for the project's source alongside a detailed description of how to effectively use **lnk** can be found `here <lnk.rtfd.org>`_.
 
 `License <http://goldsborough.mit-license.org>`_
 ================================================

@@ -6,7 +6,7 @@ python:
   - "3.4"
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq xclip
+  - sudo apt-get install xclip xsel
 install:
   - "pip install ."
   - "pip install -rrequirements.txt"
@@ -16,3 +16,4 @@ notifications:
     - petergoldsborough@hotmail.com
 after_success:
   - coveralls
+  - curl -X POST https://readthedocs.org/build/lnk
