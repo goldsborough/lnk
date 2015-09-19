@@ -187,8 +187,6 @@ class Link(Command):
 		"""
 		response = self.get(url, what="expand url '{0}'".format(url))
 
-		print(response)
-
 		if response['status'] in ['MALWARE', 'PHISHING']:
 			what = "Careful! goo.gl believes the url '{0}' is {1}!"
 			lnk.errors.warn(what.format(response['longUrl'],

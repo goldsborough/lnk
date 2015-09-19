@@ -54,11 +54,6 @@ class Command(AbstractCommand):
 			An API object from Google API-library, used to perform any
 			HTTP request for the url-shortening API.
 		"""
-		print(1, self.credentials_path)
-		print(2, self.credentials.get())
-		print(3, self.credentials)
-		print(4, os.getcwd())
-		print(5, os.listdir(os.path.dirname(self.credentials_path)))
 		http = self.authorize()
 		api = apiclient.discovery.build('urlshortener', 'v1', http=http)
 
