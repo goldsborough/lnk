@@ -346,10 +346,7 @@ def test_get_stats_works_for_many_timespans(fixture):
 	assert fixture.endpoint in result
 	assert isinstance(result[fixture.endpoint], list)
 
-	expected = sorted(fixture.timespans_data)
-	result = sorted(result[fixture.endpoint])
-
-	assert result == expected
+	assert all(i in fixture.timespans_data for i in result[fixture.endpoint])
 
 
 def test_get_stats_handles_plural_s_in_timespan_well(fixture):
@@ -359,21 +356,21 @@ def test_get_stats_handles_plural_s_in_timespan_well(fixture):
 	result = fixture.stats.get_stats(fixture.url,
 								  	   timespans,
 								       [fixture.endpoint])
-	data = copy.deepcopy(fixture.timespans_data)
-	data[0]['timespan'] = timespans[0]
+	expected = copy.deepcopy(fixture.timespans_data)
+	expected[0]['timespan'] = timespans[0]
 
 	assert isinstance(result, dict)
 	assert fixture.endpoint in result
-	assert isinstance(result[fixture.endpoint], list)
 
-	for i, j in zip(data, result[fixture.endpoint]):
+	result = result[fixture.endpoint]
+
+	assert isinstance(result, list)
+
+	for i, j in zip(expected, result):
 		i['data'].sort()
 		j['data'].sort()
 
-	result = sorted(result[fixture.endpoint])
-	expected = sorted(data)
-
-	assert result == expected
+	assert all(i in expected for i in result)
 
 
 def test_get_stats_works_for_many_endpoints(fixture):
@@ -439,7 +436,6 @@ def test_fetch_works_for_many_urls(fixture):
 								 False,
 								 False,
 								 urls)
-	print(fixture.forever_data)
 	first = ['URL: {0}'.format(fixture.url)]
 	data = {fixture.endpoint: [copy.deepcopy(fixture.forever_data)]}
 	first += fixture.stats.lineify(data, False)

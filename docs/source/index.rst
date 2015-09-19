@@ -31,7 +31,7 @@ The lnk command-line utility is structured into a set of sub-commands for each o
 
 .. note::
 	
-	This is true for all commands of *lnk*: typing the command alone does not execute anything, but is interpreted as a call for help and is thus equivalent to passing the *--help* flag.
+	This is true for all commands of *lnk*: typing the command alone does not execute anything, but is interpreted as a call for help and is equivalent to passing the *--help* flag.
 
 .. code-block:: bash
 
@@ -280,4 +280,4 @@ Now when you access :code:`link`, :code:`stats` or any other command without exp
 Source Code
 ===========
 
-You can find documentation for **lnk**'s source-code `here <modules.html>`_:
+You can find documentation for **lnk**'s source-code `here <modules.html>`_.
