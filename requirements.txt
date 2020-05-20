@@ -9,7 +9,7 @@ enum34==1.0.4
 execnet==1.4.1
 future==0.15.2
 google-api-python-client==1.4.2
-httplib2==0.9.1
+httplib2==0.18.0
 Jinja2==2.8
 MarkupSafe==0.23
 oauth2client==1.5.0
