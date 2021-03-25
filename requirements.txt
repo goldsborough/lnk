@@ -28,7 +28,7 @@ pytest-cov==2.0.0
 pytest-xdist==1.13.1
 python-coveralls==2.5.0
 pytz==2015.4
-PyYAML==3.11
+PyYAML==5.4
 requests==2.7.0
 rsa==3.2
 sh==1.11
