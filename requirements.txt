@@ -20,7 +20,7 @@ py==1.4.30
 pyasn1==0.1.8
 pyasn1-modules==0.0.7
 pycountry==1.14
-Pygments==2.0.2
+Pygments==2.7.4
 pyperclip==1.5.11
 pytest==2.7.2
 pytest-cache==1.0
